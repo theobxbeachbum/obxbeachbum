@@ -24,8 +24,16 @@ function AdminLogin({ onLogin }) {
   };
 
   return (
-    <div className="public-page">
-      <div className="public-container">
+    <div className="public-page" style={{
+      backgroundImage: 'url(https://customer-assets.emergentagent.com/job_photo-letter/artifacts/8umk2j0t_2024-OBXBB-2023-01-18_9706-Edit-Edit.jpg)',
+      backgroundSize: 'cover',
+      backgroundPosition: 'center',
+      backgroundRepeat: 'no-repeat'
+    }}>
+      <div className="public-container" style={{
+        backgroundColor: 'rgba(255, 255, 255, 0.95)',
+        backdropFilter: 'blur(10px)'
+      }}>
         <h1 data-testid="admin-login-title">Admin Login</h1>
         <p>Enter your password to access the admin panel</p>
 
