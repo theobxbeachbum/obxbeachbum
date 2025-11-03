@@ -11,7 +11,11 @@ function Settings({ onLogout }) {
     sender_email: '',
     stripe_enabled: false,
     stripe_price_id: '',
-    support_amount: 5.0
+    support_amount: 5.0,
+    bunny_configured: false,
+    bunny_storage_zone: '',
+    bunny_storage_region: 'ny',
+    bunny_pull_zone_url: ''
   });
   const [formData, setFormData] = useState({
     sendgrid_api_key: '',
@@ -19,7 +23,11 @@ function Settings({ onLogout }) {
     admin_password: '',
     stripe_enabled: false,
     stripe_price_id: '',
-    support_amount: 5.0
+    support_amount: 5.0,
+    bunny_storage_api_key: '',
+    bunny_storage_zone: '',
+    bunny_storage_region: 'ny',
+    bunny_pull_zone_url: ''
   });
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
