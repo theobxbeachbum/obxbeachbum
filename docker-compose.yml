@@ -1,0 +1,64 @@
+version: '3.8'
+
+services:
+  # MongoDB Database
+  mongodb:
+    image: mongo:7.0
+    container_name: newsletter-mongodb
+    restart: unless-stopped
+    environment:
+      MONGO_INITDB_DATABASE: newsletter_db
+    volumes:
+      - mongodb_data:/data/db
+    ports:
+      - "27017:27017"
+    networks:
+      - newsletter-network
+
+  # FastAPI Backend
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile.backend
+    container_name: newsletter-backend
+    restart: unless-stopped
+    environment:
+      - MONGO_URL=mongodb://mongodb:27017
+      - DB_NAME=newsletter_db
+      - CORS_ORIGINS=*
+      - STRIPE_API_KEY=${STRIPE_API_KEY:-sk_test_emergent}
+    ports:
+      - "8001:8001"
+    depends_on:
+      - mongodb
+    networks:
+      - newsletter-network
+    volumes:
+      - ./backend:/app
+
+  # React Frontend with Nginx
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile.frontend
+      args:
+        - REACT_APP_BACKEND_URL=${BACKEND_URL:-http://localhost:8001}
+    container_name: newsletter-frontend
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    depends_on:
+      - backend
+    networks:
+      - newsletter-network
+    volumes:
+      - ./ssl:/etc/nginx/ssl:ro
+
+networks:
+  newsletter-network:
+    driver: bridge
+
+volumes:
+  mongodb_data:
+    driver: local

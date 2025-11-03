@@ -1,0 +1,45 @@
+# Node modules
+node_modules
+frontend/node_modules
+frontend/build
+
+# Python
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+*.egg-info/
+
+# Environment files (will be set via docker-compose)
+backend/.env
+frontend/.env
+.env
+
+# Git
+.git
+.gitignore
+
+# IDE
+.vscode
+.idea
+*.swp
+*.swo
+
+# Logs
+*.log
+logs/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Testing
+.pytest_cache
+coverage/
+
+# Emergent specific
+.emergent/
+test_reports/
