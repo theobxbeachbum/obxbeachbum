@@ -196,6 +196,82 @@ function Settings({ onLogout }) {
           </div>
 
           <div className="card">
+            <h2>Image Storage (Bunny.net CDN)</h2>
+            <p style={{ color: '#666', marginBottom: '20px' }}>
+              {settings.bunny_configured ? (
+                <span style={{ color: '#28a745' }}>✓ Bunny.net is configured</span>
+              ) : (
+                <span style={{ color: '#dc3545' }}>Bunny.net not configured - add credentials below</span>
+              )}
+            </p>
+
+            <div className="form-group">
+              <label htmlFor="bunny_storage_api_key">Bunny Storage API Key (Password)</label>
+              <input
+                type="password"
+                id="bunny_storage_api_key"
+                data-testid="bunny-api-key-input"
+                className="form-input"
+                value={formData.bunny_storage_api_key}
+                onChange={(e) => setFormData({ ...formData, bunny_storage_api_key: e.target.value })}
+                placeholder="Your storage zone password"
+              />
+              <small style={{ color: '#666' }}>
+                Find in Bunny.net Dashboard → Storage → FTP & API Access (use full password, not read-only)
+              </small>
+            </div>
+
+            <div className="form-group">
+              <label htmlFor="bunny_storage_zone">Storage Zone Name</label>
+              <input
+                type="text"
+                id="bunny_storage_zone"
+                data-testid="bunny-zone-input"
+                className="form-input"
+                value={formData.bunny_storage_zone}
+                onChange={(e) => setFormData({ ...formData, bunny_storage_zone: e.target.value })}
+                placeholder="my-storage-zone"
+              />
+              <small style={{ color: '#666' }}>
+                Your storage zone name from Bunny.net
+              </small>
+            </div>
+
+            <div className="form-group">
+              <label htmlFor="bunny_storage_region">Storage Region</label>
+              <select
+                id="bunny_storage_region"
+                data-testid="bunny-region-select"
+                className="form-input"
+                value={formData.bunny_storage_region}
+                onChange={(e) => setFormData({ ...formData, bunny_storage_region: e.target.value })}
+              >
+                <option value="ny">New York</option>
+                <option value="de">Frankfurt (Default)</option>
+                <option value="uk">London</option>
+                <option value="la">Los Angeles</option>
+                <option value="sg">Singapore</option>
+              </select>
+            </div>
+
+            <div className="form-group">
+              <label htmlFor="bunny_pull_zone_url">Pull Zone URL</label>
+              <input
+                type="url"
+                id="bunny_pull_zone_url"
+                data-testid="bunny-pullzone-input"
+                className="form-input"
+                value={formData.bunny_pull_zone_url}
+                onChange={(e) => setFormData({ ...formData, bunny_pull_zone_url: e.target.value })}
+                placeholder="https://my-zone.b-cdn.net"
+              />
+              <small style={{ color: '#666' }}>
+                Your Pull Zone URL (e.g., https://yourzone.b-cdn.net)
+              </small>
+            </div>
+          </div>
+
+          <div className="card">
             <h2>Admin Password</h2>
             <div className="form-group">
               <label htmlFor="admin_password">New Password (leave blank to keep current)</label>
