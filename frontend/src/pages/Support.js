@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import axios from 'axios';
 import { toast } from 'sonner';
 import { Heart } from 'lucide-react';
+import { config } from '@/config';
 
 function Support() {
   const [email, setEmail] = useState('');
