@@ -88,6 +88,10 @@ class Settings(BaseModel):
     stripe_enabled: bool = False
     stripe_price_id: Optional[str] = None
     support_amount: Optional[float] = 5.0
+    bunny_storage_api_key: Optional[str] = None
+    bunny_storage_zone: Optional[str] = None
+    bunny_storage_region: Optional[str] = "ny"
+    bunny_pull_zone_url: Optional[str] = None
 
 class SupporterSubscription(BaseModel):
     model_config = ConfigDict(extra="ignore")
