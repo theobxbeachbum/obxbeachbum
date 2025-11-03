@@ -72,6 +72,10 @@ function Settings({ onLogout }) {
       updateData.stripe_enabled = formData.stripe_enabled;
       if (formData.stripe_price_id) updateData.stripe_price_id = formData.stripe_price_id;
       updateData.support_amount = formData.support_amount;
+      if (formData.bunny_storage_api_key) updateData.bunny_storage_api_key = formData.bunny_storage_api_key;
+      if (formData.bunny_storage_zone) updateData.bunny_storage_zone = formData.bunny_storage_zone;
+      if (formData.bunny_storage_region) updateData.bunny_storage_region = formData.bunny_storage_region;
+      if (formData.bunny_pull_zone_url) updateData.bunny_pull_zone_url = formData.bunny_pull_zone_url;
 
       await axios.post('/settings', updateData);
       toast.success('Settings saved successfully');
