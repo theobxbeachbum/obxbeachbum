@@ -166,15 +166,40 @@ function Posts({ onLogout }) {
 
                 <div className="form-group">
                   <label htmlFor="image_url">Image URL (optional)</label>
-                  <input
-                    type="url"
-                    id="image_url"
-                    data-testid="post-image-input"
-                    className="form-input"
-                    value={formData.image_url}
-                    onChange={(e) => setFormData({ ...formData, image_url: e.target.value })}
-                    placeholder="https://example.com/image.jpg"
-                  />
+                  <div style={{ display: 'flex', gap: '10px', alignItems: 'flex-end' }}>
+                    <div style={{ flex: 1 }}>
+                      <input
+                        type="url"
+                        id="image_url"
+                        data-testid="post-image-input"
+                        className="form-input"
+                        value={formData.image_url}
+                        onChange={(e) => setFormData({ ...formData, image_url: e.target.value })}
+                        placeholder="https://example.com/image.jpg"
+                      />
+                    </div>
+                    <div>
+                      <input
+                        type="file"
+                        id="image-upload"
+                        accept="image/*"
+                        style={{ display: 'none' }}
+                        onChange={handleImageUpload}
+                      />
+                      <Button
+                        type="button"
+                        variant="outline"
+                        onClick={() => document.getElementById('image-upload').click()}
+                        disabled={uploading}
+                        data-testid="upload-image-btn"
+                      >
+                        {uploading ? 'Uploading...' : 'Upload Image'}
+                      </Button>
+                    </div>
+                  </div>
+                  <small style={{ color: '#666', display: 'block', marginTop: '5px' }}>
+                    Paste URL or upload to Bunny.net CDN (configure in Settings)
+                  </small>
                 </div>
 
                 <div className="form-group">
