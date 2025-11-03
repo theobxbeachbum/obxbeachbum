@@ -572,6 +572,77 @@ async def list_supporters(authorization: Optional[str] = Header(None)):
             supporter['created_at'] = datetime.fromisoformat(supporter['created_at'])
     return supporters
 
+@api_router.post("/upload-image")
+async def upload_image(file: UploadFile = File(...), authorization: Optional[str] = Header(None)):
+    """Upload image to Bunny.net CDN storage."""
+    await verify_admin_token(authorization)
+    
+    # Get settings
+    settings = await get_settings()
+    if not settings.bunny_storage_api_key or not settings.bunny_storage_zone:
+        raise HTTPException(400, "Bunny.net CDN not configured. Please add credentials in Settings.")
+    
+    # Validate file type
+    if not file.content_type or not file.content_type.startswith("image/"):
+        raise HTTPException(415, "File must be an image")
+    
+    # Validate file size (max 10MB)
+    content = await file.read()
+    if len(content) > 10 * 1024 * 1024:
+        raise HTTPException(413, "File too large. Maximum size: 10MB")
+    
+    try:
+        # Generate unique filename
+        file_extension = file.filename.split('.')[-1] if '.' in file.filename else 'jpg'
+        unique_filename = f"{uuid.uuid4().hex}.{file_extension}"
+        
+        # Determine storage endpoint based on region
+        endpoints = {
+            "de": "storage.bunnycdn.com",
+            "uk": "uk.storage.bunnycdn.com",
+            "ny": "ny.storage.bunnycdn.com",
+            "la": "la.storage.bunnycdn.com",
+            "sg": "sg.storage.bunnycdn.com"
+        }
+        
+        region = settings.bunny_storage_region or "ny"
+        endpoint = endpoints.get(region, "ny.storage.bunnycdn.com")
+        
+        # Upload to Bunny.net
+        upload_url = f"https://{endpoint}/{settings.bunny_storage_zone}/newsletter-images/{unique_filename}"
+        
+        headers = {
+            "AccessKey": settings.bunny_storage_api_key,
+            "Content-Type": file.content_type
+        }
+        
+        async with httpx.AsyncClient() as client:
+            response = await client.put(
+                upload_url,
+                content=content,
+                headers=headers,
+                timeout=30.0
+            )
+        
+        if response.status_code not in (200, 201):
+            raise HTTPException(500, f"Upload failed: {response.status_code}")
+        
+        # Construct CDN URL
+        pull_zone_url = settings.bunny_pull_zone_url or f"https://{settings.bunny_storage_zone}.b-cdn.net"
+        cdn_url = f"{pull_zone_url}/newsletter-images/{unique_filename}"
+        
+        return {
+            "success": True,
+            "cdn_url": cdn_url,
+            "filename": unique_filename
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logging.error(f"Image upload error: {str(e)}")
+        raise HTTPException(500, "Upload failed. Please try again.")
+
 @api_router.post("/webhook/stripe")
 async def stripe_webhook(request: Request):
     body = await request.body()
