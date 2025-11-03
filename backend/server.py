@@ -74,6 +74,10 @@ class SettingsUpdate(BaseModel):
     stripe_enabled: Optional[bool] = None
     stripe_price_id: Optional[str] = None
     support_amount: Optional[float] = None
+    bunny_storage_api_key: Optional[str] = None
+    bunny_storage_zone: Optional[str] = None
+    bunny_storage_region: Optional[str] = None
+    bunny_pull_zone_url: Optional[str] = None
 
 class Settings(BaseModel):
     model_config = ConfigDict(extra="ignore")
