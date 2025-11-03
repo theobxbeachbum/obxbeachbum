@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import axios from 'axios';
 import { XCircle, CheckCircle } from 'lucide-react';
+import { config } from '@/config';
 
 function Unsubscribe() {
   const [searchParams] = useSearchParams();
