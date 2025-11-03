@@ -46,7 +46,11 @@ function Settings({ onLogout }) {
         admin_password: '',
         stripe_enabled: response.data.stripe_enabled || false,
         stripe_price_id: response.data.stripe_price_id || '',
-        support_amount: response.data.support_amount || 5.0
+        support_amount: response.data.support_amount || 5.0,
+        bunny_storage_api_key: '',
+        bunny_storage_zone: response.data.bunny_storage_zone || '',
+        bunny_storage_region: response.data.bunny_storage_region || 'ny',
+        bunny_pull_zone_url: response.data.bunny_pull_zone_url || ''
       });
     } catch (error) {
       toast.error('Failed to fetch settings');
