@@ -17,6 +17,7 @@ function Posts({ onLogout }) {
     image_url: ''
   });
   const [sending, setSending] = useState(null);
+  const [uploading, setUploading] = useState(false);
 
   useEffect(() => {
     fetchPosts();
