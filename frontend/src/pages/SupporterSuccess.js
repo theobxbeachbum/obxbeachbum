@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
 import axios from 'axios';
 import { CheckCircle, Loader } from 'lucide-react';
+import { config } from '@/config';
 
 function SupporterSuccess() {
   const [searchParams] = useSearchParams();
