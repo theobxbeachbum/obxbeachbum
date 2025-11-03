@@ -293,6 +293,14 @@ async def update_settings(update: SettingsUpdate, authorization: Optional[str] =
         update_dict["stripe_price_id"] = update.stripe_price_id
     if update.support_amount is not None:
         update_dict["support_amount"] = update.support_amount
+    if update.bunny_storage_api_key:
+        update_dict["bunny_storage_api_key"] = update.bunny_storage_api_key
+    if update.bunny_storage_zone:
+        update_dict["bunny_storage_zone"] = update.bunny_storage_zone
+    if update.bunny_storage_region:
+        update_dict["bunny_storage_region"] = update.bunny_storage_region
+    if update.bunny_pull_zone_url:
+        update_dict["bunny_pull_zone_url"] = update.bunny_pull_zone_url
     
     await db.settings.update_one({"id": "settings"}, {"$set": update_dict})
     return {"success": True}
