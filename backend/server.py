@@ -16,6 +16,8 @@ from sendgrid.helpers.mail import Mail
 import secrets
 import io
 import csv
+import httpx
+import mimetypes
 from emergentintegrations.payments.stripe.checkout import StripeCheckout, CheckoutSessionResponse, CheckoutStatusResponse, CheckoutSessionRequest
 
 ROOT_DIR = Path(__file__).parent
