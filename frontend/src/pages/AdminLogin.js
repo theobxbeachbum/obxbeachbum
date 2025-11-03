@@ -26,7 +26,7 @@ function AdminLogin({ onLogin }) {
 
   return (
     <div className="public-page" style={{
-      backgroundImage: 'url(https://customer-assets.emergentagent.com/job_photo-letter/artifacts/8umk2j0t_2024-OBXBB-2023-01-18_9706-Edit-Edit.jpg)',
+      backgroundImage: `url(${config.backgroundImage})`,
       backgroundSize: 'cover',
       backgroundPosition: 'center',
       backgroundRepeat: 'no-repeat'
