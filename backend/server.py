@@ -268,7 +268,11 @@ async def get_settings_endpoint(authorization: Optional[str] = Header(None)):
         "sender_email": settings.sender_email,
         "stripe_enabled": settings.stripe_enabled,
         "stripe_price_id": settings.stripe_price_id,
-        "support_amount": settings.support_amount
+        "support_amount": settings.support_amount,
+        "bunny_configured": bool(settings.bunny_storage_api_key and settings.bunny_storage_zone),
+        "bunny_storage_zone": settings.bunny_storage_zone,
+        "bunny_storage_region": settings.bunny_storage_region,
+        "bunny_pull_zone_url": settings.bunny_pull_zone_url
     }
 
 @api_router.post("/settings")
