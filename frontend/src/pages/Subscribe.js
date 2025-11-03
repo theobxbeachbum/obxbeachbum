@@ -2,6 +2,7 @@ import { useState } from 'react';
 import axios from 'axios';
 import { toast } from 'sonner';
 import { Mail, CheckCircle } from 'lucide-react';
+import { config } from '@/config';
 
 function Subscribe() {
   const [email, setEmail] = useState('');
