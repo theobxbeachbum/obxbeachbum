@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import axios from 'axios';
 import { toast } from 'sonner';
+import { config } from '@/config';
 
 function AdminLogin({ onLogin }) {
   const [password, setPassword] = useState('');
