@@ -242,9 +242,9 @@ async def admin_login(login_data: AdminLogin):
     raise HTTPException(401, "Invalid password")
 
 @api_router.get("/admin/verify")
-async def verify_admin(authorized: bool = Header(None, alias="Authorization")):
+async def verify_admin(authorization: Optional[str] = Header(None)):
     try:
-        await verify_admin_token(authorized)
+        await verify_admin_token(authorization)
         return {"success": True}
     except:
         raise HTTPException(401, "Not authenticated")
