@@ -21,6 +21,7 @@ function Posts({ onLogout }) {
   });
   const [sending, setSending] = useState(null);
   const [uploading, setUploading] = useState(false);
+  const quillRef = useRef(null);
 
   useEffect(() => {
     fetchPosts();
