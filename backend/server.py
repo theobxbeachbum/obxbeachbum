@@ -83,6 +83,10 @@ class SettingsUpdate(BaseModel):
     bunny_storage_zone: Optional[str] = None
     bunny_storage_region: Optional[str] = None
     bunny_pull_zone_url: Optional[str] = None
+    smtp_host: Optional[str] = None
+    smtp_port: Optional[int] = None
+    smtp_username: Optional[str] = None
+    smtp_password: Optional[str] = None
 
 class Settings(BaseModel):
     model_config = ConfigDict(extra="ignore")
