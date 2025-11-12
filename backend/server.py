@@ -11,8 +11,6 @@ from typing import List, Optional, Dict
 import uuid
 from datetime import datetime, timezone
 import bcrypt
-from sendgrid import SendGridAPIClient
-from sendgrid.helpers.mail import Mail
 import secrets
 import io
 import csv
