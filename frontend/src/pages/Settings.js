@@ -8,7 +8,10 @@ import { Save } from 'lucide-react';
 function Settings({ onLogout }) {
   const [settings, setSettings] = useState({
     sendgrid_configured: false,
+    smtp_configured: false,
     sender_email: '',
+    smtp_host: 'mail.smtp2go.com',
+    smtp_port: 587,
     stripe_enabled: false,
     stripe_price_id: '',
     support_amount: 5.0,
@@ -27,7 +30,11 @@ function Settings({ onLogout }) {
     bunny_storage_api_key: '',
     bunny_storage_zone: '',
     bunny_storage_region: 'ny',
-    bunny_pull_zone_url: ''
+    bunny_pull_zone_url: '',
+    smtp_host: 'mail.smtp2go.com',
+    smtp_port: 587,
+    smtp_username: '',
+    smtp_password: ''
   });
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
