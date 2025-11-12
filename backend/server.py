@@ -235,21 +235,36 @@ def create_email_html(post: Post, unsubscribe_token: str, base_url: str) -> str:
     return html
 
 async def send_email_to_subscriber(subscriber: Subscriber, post: Post, settings: Settings, base_url: str):
-    if not settings.sendgrid_api_key or not settings.sender_email:
-        raise Exception("SendGrid not configured")
+    if not settings.smtp_username or not settings.smtp_password or not settings.sender_email:
+        raise Exception("SMTP2GO not configured")
     
     html_content = create_email_html(post, subscriber.unsubscribe_token, base_url)
     
-    message = Mail(
-        from_email=settings.sender_email,
-        to_emails=subscriber.email,
-        subject=post.title,
-        html_content=html_content
-    )
+    # Create message
+    msg = MIMEMultipart('alternative')
+    msg['Subject'] = post.title
+    msg['From'] = settings.sender_email
+    msg['To'] = subscriber.email
     
-    sg = SendGridAPIClient(settings.sendgrid_api_key)
-    response = sg.send(message)
-    return response.status_code == 202
+    # Create plain text version
+    text_content = post.content[:500] + "..." if len(post.content) > 500 else post.content
+    
+    # Attach both versions
+    msg.attach(MIMEText(text_content, 'plain'))
+    msg.attach(MIMEText(html_content, 'html'))
+    
+    # Send via SMTP2GO
+    try:
+        with smtplib.SMTP(settings.smtp_host, settings.smtp_port) as server:
+            server.ehlo()
+            server.starttls()
+            server.ehlo()
+            server.login(settings.smtp_username, settings.smtp_password)
+            server.sendmail(settings.sender_email, [subscriber.email], msg.as_string())
+        return True
+    except Exception as e:
+        logging.error(f"Error sending email to {subscriber.email}: {str(e)}")
+        return False
 
 # Admin endpoints
 @api_router.post("/admin/login", response_model=AdminResponse)
