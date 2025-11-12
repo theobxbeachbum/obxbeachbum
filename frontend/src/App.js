@@ -75,6 +75,8 @@ function App() {
       <BrowserRouter>
         <Routes>
           {/* Public routes */}
+          <Route path="/" element={<PublicHome />} />
+          <Route path="/post/:slug" element={<PostView />} />
           <Route path="/subscribe" element={<Subscribe />} />
           <Route path="/unsubscribe" element={<Unsubscribe />} />
           <Route path="/support" element={<Support />} />
