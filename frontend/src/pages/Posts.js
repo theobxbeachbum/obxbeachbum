@@ -59,7 +59,8 @@ function Posts({ onLogout }) {
     setFormData({
       title: post.title,
       content: post.content,
-      image_url: post.image_url || ''
+      image_url: post.image_url || '',
+      image_urls: post.image_urls || []
     });
     setShowDialog(true);
   };
