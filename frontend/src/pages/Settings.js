@@ -57,7 +57,11 @@ function Settings({ onLogout }) {
         bunny_storage_api_key: '',
         bunny_storage_zone: response.data.bunny_storage_zone || '',
         bunny_storage_region: response.data.bunny_storage_region || 'ny',
-        bunny_pull_zone_url: response.data.bunny_pull_zone_url || ''
+        bunny_pull_zone_url: response.data.bunny_pull_zone_url || '',
+        smtp_host: response.data.smtp_host || 'mail.smtp2go.com',
+        smtp_port: response.data.smtp_port || 587,
+        smtp_username: '',
+        smtp_password: ''
       });
     } catch (error) {
       toast.error('Failed to fetch settings');
