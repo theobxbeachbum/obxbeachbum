@@ -56,6 +56,7 @@ class PostCreate(BaseModel):
     title: str
     content: str
     image_url: Optional[str] = None
+    image_urls: Optional[List[str]] = None  # Support multiple images
 
 class Post(BaseModel):
     model_config = ConfigDict(extra="ignore")
