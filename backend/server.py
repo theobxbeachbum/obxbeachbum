@@ -142,6 +142,14 @@ def hash_password(password: str) -> str:
 def verify_password(password: str, hashed: str) -> bool:
     return bcrypt.checkpw(password.encode('utf-8'), hashed.encode('utf-8'))
 
+def create_slug(title: str) -> str:
+    """Create URL-friendly slug from title."""
+    slug = title.lower()
+    slug = re.sub(r'[^\w\s-]', '', slug)
+    slug = re.sub(r'[-\s]+', '-', slug)
+    slug = slug.strip('-')
+    return slug[:100]  # Limit length
+
 async def get_settings() -> Settings:
     settings_doc = await db.settings.find_one({"id": "settings"}, {"_id": 0})
     if not settings_doc:
