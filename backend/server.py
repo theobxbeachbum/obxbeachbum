@@ -439,7 +439,16 @@ async def unsubscribe(token: str):
 @api_router.post("/posts", response_model=Post)
 async def create_post(post_data: PostCreate, authorization: Optional[str] = Header(None)):
     await verify_admin_token(authorization)
-    post = Post(**post_data.model_dump())
+    
+    # Auto-generate slug if not provided
+    slug = post_data.slug if post_data.slug else create_slug(post_data.title)
+    
+    # Ensure slug is unique
+    existing = await db.posts.find_one({"slug": slug}, {"_id": 0})
+    if existing:
+        slug = f"{slug}-{uuid.uuid4().hex[:6]}"
+    
+    post = Post(**post_data.model_dump(), slug=slug)
     doc = post.model_dump()
     doc['created_at'] = doc['created_at'].isoformat()
     await db.posts.insert_one(doc)
