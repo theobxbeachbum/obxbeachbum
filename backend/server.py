@@ -173,13 +173,8 @@ async def verify_admin_token(authorization: Optional[str] = Header(None)):
 def create_email_html(post: Post, unsubscribe_token: str, base_url: str) -> str:
     unsubscribe_link = f"{base_url}/unsubscribe?token={unsubscribe_token}"
     
-    # Build images HTML
-    images_html = ""
-    if post.image_url:
-        images_html = f'<img src="{post.image_url}" class="image" alt="{post.title}" />'
-    elif post.image_urls and len(post.image_urls) > 0:
-        for img_url in post.image_urls:
-            images_html += f'<img src="{img_url}" class="image" alt="{post.title}" />'
+    # Content is now HTML from rich text editor
+    html_content = post.content
     
     html = f"""
     <!DOCTYPE html>
@@ -214,10 +209,14 @@ def create_email_html(post: Post, unsubscribe_token: str, base_url: str) -> str:
                 padding: 40px 0;
                 font-size: 18px;
             }}
-            .image {{
+            .content img {{
                 width: 100%;
                 height: auto;
                 margin: 30px 0;
+                border-radius: 4px;
+            }}
+            .content p {{
+                margin: 0 0 15px 0;
             }}
             .footer {{
                 border-top: 1px solid #e0e0e0;
@@ -240,8 +239,7 @@ def create_email_html(post: Post, unsubscribe_token: str, base_url: str) -> str:
         </div>
         
         <div class="content">
-            {images_html}
-            <p>{post.content.replace(chr(10), '<br>')}</p>
+            {html_content}
         </div>
         
         <div class="footer">
