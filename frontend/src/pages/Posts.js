@@ -123,10 +123,17 @@ function Posts({ onLogout }) {
       });
 
       if (response.data.success) {
-        // Add to image_urls array
-        const newImageUrls = [...formData.image_urls, response.data.cdn_url];
-        setFormData({ ...formData, image_urls: newImageUrls });
-        toast.success('Image uploaded successfully!');
+        const imageUrl = response.data.cdn_url;
+        
+        // Insert image into the Quill editor at cursor position
+        const quill = quillRef.current?.getEditor();
+        if (quill) {
+          const range = quill.getSelection(true);
+          quill.insertEmbed(range.index, 'image', imageUrl);
+          quill.setSelection(range.index + 1);
+        }
+        
+        toast.success('Image uploaded and inserted!');
       }
     } catch (error) {
       toast.error(error.response?.data?.detail || 'Image upload failed');
@@ -141,6 +148,29 @@ function Posts({ onLogout }) {
     const newImageUrls = formData.image_urls.filter((_, i) => i !== index);
     setFormData({ ...formData, image_urls: newImageUrls });
   };
+
+  // Quill editor configuration
+  const quillModules = {
+    toolbar: [
+      [{ 'header': [1, 2, 3, false] }],
+      ['bold', 'italic', 'underline', 'strike'],
+      [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+      ['blockquote', 'code-block'],
+      [{ 'align': [] }],
+      ['link'],
+      ['clean']
+    ]
+  };
+
+  const quillFormats = [
+    'header',
+    'bold', 'italic', 'underline', 'strike',
+    'list', 'bullet',
+    'blockquote', 'code-block',
+    'align',
+    'link',
+    'image'
+  ];
 
   return (
     <AdminLayout onLogout={onLogout} currentPage="posts">
