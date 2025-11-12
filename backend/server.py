@@ -448,7 +448,11 @@ async def create_post(post_data: PostCreate, authorization: Optional[str] = Head
     if existing:
         slug = f"{slug}-{uuid.uuid4().hex[:6]}"
     
-    post = Post(**post_data.model_dump(), slug=slug)
+    # Create post dict and add slug
+    post_dict = post_data.model_dump()
+    post_dict['slug'] = slug
+    
+    post = Post(**post_dict)
     doc = post.model_dump()
     doc['created_at'] = doc['created_at'].isoformat()
     await db.posts.insert_one(doc)
