@@ -57,6 +57,7 @@ class PostCreate(BaseModel):
     content: str
     image_url: Optional[str] = None
     image_urls: Optional[List[str]] = None  # Support multiple images
+    slug: Optional[str] = None  # URL-friendly version of title
 
 class Post(BaseModel):
     model_config = ConfigDict(extra="ignore")
