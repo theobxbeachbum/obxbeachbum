@@ -185,43 +185,43 @@ function Posts({ onLogout }) {
                 </div>
 
                 <div className="form-group">
-                  <label>Content</label>
-                  <div style={{ marginBottom: '10px' }}>
-                    <input
-                      type="file"
-                      id="image-upload"
-                      accept="image/*"
-                      style={{ display: 'none' }}
-                      onChange={handleImageUpload}
-                    />
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      onClick={() => document.getElementById('image-upload').click()}
-                      disabled={uploading}
-                      data-testid="upload-image-btn"
-                    >
-                      {uploading ? 'Uploading...' : '📷 Insert Image'}
-                    </Button>
-                    <small style={{ marginLeft: '10px', color: '#666' }}>
-                      Upload and insert images directly into your story
-                    </small>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
+                    <label htmlFor="content">Content</label>
+                    <div>
+                      <input
+                        type="file"
+                        id="image-upload"
+                        accept="image/*"
+                        style={{ display: 'none' }}
+                        onChange={handleImageUpload}
+                      />
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => document.getElementById('image-upload').click()}
+                        disabled={uploading}
+                        data-testid="upload-image-btn"
+                      >
+                        <ImageIcon className="w-4 h-4 mr-2" />
+                        {uploading ? 'Uploading...' : 'Insert Image'}
+                      </Button>
+                    </div>
                   </div>
-                  <ReactQuill
-                    ref={quillRef}
-                    theme="snow"
+                  <textarea
+                    id="content"
+                    data-testid="post-content-input"
+                    className="form-textarea"
                     value={formData.content}
-                    onChange={(value) => setFormData({ ...formData, content: value })}
-                    modules={quillModules}
-                    formats={quillFormats}
-                    placeholder="Write your story here..."
-                    style={{ 
-                      height: '400px', 
-                      marginBottom: '50px',
-                      background: '#fff'
-                    }}
+                    onChange={handleContentChange}
+                    onSelect={(e) => setCursorPosition(e.target.selectionStart)}
+                    required
+                    rows={16}
+                    placeholder="Write your story here...&#10;&#10;To insert images: Click 'Insert Image' button. The image will appear at your cursor position as:&#10;&#10;![](https://your-image-url.jpg)&#10;&#10;Keep writing below the image!"
                   />
+                  <small style={{ color: '#666', display: 'block', marginTop: '5px' }}>
+                    💡 <strong>Tip:</strong> Click "Insert Image" to upload and insert photos anywhere in your text. Images appear as ![](url) and will display beautifully in emails and on your website.
+                  </small>
                 </div>
 
                 <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end' }}>
