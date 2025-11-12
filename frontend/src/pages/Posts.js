@@ -209,50 +209,8 @@ function Posts({ onLogout }) {
                 </div>
 
                 <div className="form-group">
-                  <label htmlFor="image_url">Images (optional)</label>
-                  
-                  {/* Show uploaded images */}
-                  {formData.image_urls && formData.image_urls.length > 0 && (
-                    <div style={{ marginBottom: '15px' }}>
-                      {formData.image_urls.map((url, index) => (
-                        <div key={index} style={{ 
-                          display: 'flex', 
-                          alignItems: 'center', 
-                          gap: '10px',
-                          marginBottom: '10px',
-                          padding: '10px',
-                          border: '1px solid #e0e0e0',
-                          borderRadius: '4px'
-                        }}>
-                          <img 
-                            src={url} 
-                            alt={`Upload ${index + 1}`}
-                            style={{ 
-                              width: '80px', 
-                              height: '80px', 
-                              objectFit: 'cover',
-                              borderRadius: '4px'
-                            }}
-                          />
-                          <div style={{ flex: 1, fontSize: '12px', color: '#666', wordBreak: 'break-all' }}>
-                            {url}
-                          </div>
-                          <Button
-                            type="button"
-                            variant="outline"
-                            size="sm"
-                            onClick={() => handleRemoveImage(index)}
-                            data-testid={`remove-image-${index}`}
-                          >
-                            Remove
-                          </Button>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                  
-                  {/* Upload button */}
-                  <div style={{ display: 'flex', gap: '10px' }}>
+                  <label>Content</label>
+                  <div style={{ marginBottom: '10px' }}>
                     <input
                       type="file"
                       id="image-upload"
@@ -263,43 +221,30 @@ function Posts({ onLogout }) {
                     <Button
                       type="button"
                       variant="outline"
+                      size="sm"
                       onClick={() => document.getElementById('image-upload').click()}
                       disabled={uploading}
                       data-testid="upload-image-btn"
                     >
-                      {uploading ? 'Uploading...' : 'Upload Image'}
+                      {uploading ? 'Uploading...' : '📷 Insert Image'}
                     </Button>
+                    <small style={{ marginLeft: '10px', color: '#666' }}>
+                      Upload and insert images directly into your story
+                    </small>
                   </div>
-                  <small style={{ color: '#666', display: 'block', marginTop: '5px' }}>
-                    Upload multiple images to Bunny.net CDN (configure in Settings)
-                  </small>
-                  
-                  {/* Legacy single image URL input for backward compatibility */}
-                  <div style={{ marginTop: '15px' }}>
-                    <label htmlFor="image_url" style={{ fontSize: '14px', color: '#666' }}>Or paste single image URL:</label>
-                    <input
-                      type="url"
-                      id="image_url"
-                      data-testid="post-image-input"
-                      className="form-input"
-                      value={formData.image_url}
-                      onChange={(e) => setFormData({ ...formData, image_url: e.target.value })}
-                      placeholder="https://example.com/image.jpg"
-                      style={{ marginTop: '5px' }}
-                    />
-                  </div>
-                </div>
-
-                <div className="form-group">
-                  <label htmlFor="content">Content</label>
-                  <textarea
-                    id="content"
-                    data-testid="post-content-input"
-                    className="form-textarea"
+                  <ReactQuill
+                    ref={quillRef}
+                    theme="snow"
                     value={formData.content}
-                    onChange={(e) => setFormData({ ...formData, content: e.target.value })}
-                    required
-                    rows={12}
+                    onChange={(value) => setFormData({ ...formData, content: value })}
+                    modules={quillModules}
+                    formats={quillFormats}
+                    placeholder="Write your story here..."
+                    style={{ 
+                      height: '400px', 
+                      marginBottom: '50px',
+                      background: '#fff'
+                    }}
                   />
                 </div>
 
