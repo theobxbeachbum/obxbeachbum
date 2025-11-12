@@ -64,6 +64,7 @@ class Post(BaseModel):
     title: str
     content: str
     image_url: Optional[str] = None
+    image_urls: Optional[List[str]] = None  # Support multiple images
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     published_at: Optional[datetime] = None
     status: str = "draft"  # draft, published
