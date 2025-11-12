@@ -492,6 +492,30 @@ async def delete_post(post_id: str, authorization: Optional[str] = Header(None))
     await db.posts.delete_one({"id": post_id})
     return {"success": True}
 
+# Public post endpoints (no authentication required)
+@api_router.get("/public/posts", response_model=List[Post])
+async def get_public_posts():
+    """Get all published posts for public viewing."""
+    posts = await db.posts.find({"status": "published"}, {"_id": 0}).sort("published_at", -1).to_list(1000)
+    for post in posts:
+        if isinstance(post['created_at'], str):
+            post['created_at'] = datetime.fromisoformat(post['created_at'])
+        if post.get('published_at') and isinstance(post['published_at'], str):
+            post['published_at'] = datetime.fromisoformat(post['published_at'])
+    return posts
+
+@api_router.get("/public/posts/{slug}", response_model=Post)
+async def get_public_post_by_slug(slug: str):
+    """Get a single published post by slug for public viewing."""
+    post = await db.posts.find_one({"slug": slug, "status": "published"}, {"_id": 0})
+    if not post:
+        raise HTTPException(404, "Post not found")
+    if isinstance(post['created_at'], str):
+        post['created_at'] = datetime.fromisoformat(post['created_at'])
+    if post.get('published_at') and isinstance(post['published_at'], str):
+        post['published_at'] = datetime.fromisoformat(post['published_at'])
+    return Post(**post)
+
 # Newsletter sending
 @api_router.post("/newsletter/send")
 async def send_newsletter(request: SendNewsletterRequest, http_request: Request, background_tasks: BackgroundTasks, authorization: Optional[str] = Header(None)):
