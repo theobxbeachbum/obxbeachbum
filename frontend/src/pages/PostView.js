@@ -93,30 +93,11 @@ function PostView() {
           </header>
 
           <div className="post-content" data-testid="post-content">
-            {/* Display all images */}
-            {post.image_url && (
-              <img 
-                src={post.image_url} 
-                alt={post.title}
-                className="post-image"
-              />
-            )}
-            
-            {post.image_urls && post.image_urls.length > 0 && post.image_urls.map((url, index) => (
-              <img 
-                key={index}
-                src={url} 
-                alt={`${post.title} - Image ${index + 1}`}
-                className="post-image"
-              />
-            ))}
-
-            {/* Content */}
-            <div className="post-body">
-              {post.content.split('\n').map((paragraph, index) => (
-                paragraph.trim() && <p key={index}>{paragraph}</p>
-              ))}
-            </div>
+            {/* Content is HTML from rich text editor */}
+            <div 
+              className="post-body rich-text-content"
+              dangerouslySetInnerHTML={{ __html: post.content }}
+            />
           </div>
 
           {/* Subscribe CTA */}
