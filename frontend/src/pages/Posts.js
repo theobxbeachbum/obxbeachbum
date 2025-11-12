@@ -120,14 +120,23 @@ function Posts({ onLogout }) {
       });
 
       if (response.data.success) {
-        setFormData({ ...formData, image_url: response.data.cdn_url });
+        // Add to image_urls array
+        const newImageUrls = [...formData.image_urls, response.data.cdn_url];
+        setFormData({ ...formData, image_urls: newImageUrls });
         toast.success('Image uploaded successfully!');
       }
     } catch (error) {
       toast.error(error.response?.data?.detail || 'Image upload failed');
     } finally {
       setUploading(false);
+      // Reset file input
+      event.target.value = '';
     }
+  };
+
+  const handleRemoveImage = (index) => {
+    const newImageUrls = formData.image_urls.filter((_, i) => i !== index);
+    setFormData({ ...formData, image_urls: newImageUrls });
   };
 
   return (
