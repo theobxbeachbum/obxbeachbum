@@ -478,8 +478,8 @@ async def send_newsletter(request: SendNewsletterRequest, http_request: Request,
     
     # Get settings
     settings = await get_settings()
-    if not settings.sendgrid_api_key or not settings.sender_email:
-        raise HTTPException(400, "SendGrid not configured. Please add API key and sender email in settings.")
+    if not settings.smtp_username or not settings.smtp_password or not settings.sender_email:
+        raise HTTPException(400, "SMTP2GO not configured. Please add SMTP credentials and sender email in settings.")
     
     # Get all active subscribers
     subscribers = await db.subscribers.find({"status": "active"}, {"_id": 0}).to_list(10000)
