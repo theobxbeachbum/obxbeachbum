@@ -145,7 +145,6 @@ function App() {
           />
           
           {/* Default redirect */}
-          <Route path="/" element={<Navigate to="/subscribe" replace />} />
           <Route path="/admin" element={<Navigate to="/admin/dashboard" replace />} />
         </Routes>
       </BrowserRouter>
