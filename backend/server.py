@@ -101,6 +101,10 @@ class Settings(BaseModel):
     bunny_storage_zone: Optional[str] = None
     bunny_storage_region: Optional[str] = "ny"
     bunny_pull_zone_url: Optional[str] = None
+    smtp_host: Optional[str] = "mail.smtp2go.com"
+    smtp_port: Optional[int] = 587
+    smtp_username: Optional[str] = None
+    smtp_password: Optional[str] = None
 
 class SupporterSubscription(BaseModel):
     model_config = ConfigDict(extra="ignore")
