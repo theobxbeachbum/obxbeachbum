@@ -291,7 +291,10 @@ async def get_settings_endpoint(authorization: Optional[str] = Header(None)):
     # Don't send password hash or API keys to frontend
     return {
         "sendgrid_configured": bool(settings.sendgrid_api_key),
+        "smtp_configured": bool(settings.smtp_username and settings.smtp_password),
         "sender_email": settings.sender_email,
+        "smtp_host": settings.smtp_host,
+        "smtp_port": settings.smtp_port,
         "stripe_enabled": settings.stripe_enabled,
         "stripe_price_id": settings.stripe_price_id,
         "support_amount": settings.support_amount,
