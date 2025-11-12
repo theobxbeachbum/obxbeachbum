@@ -127,31 +127,47 @@ function Settings({ onLogout }) {
 
         <form onSubmit={handleSubmit}>
           <div className="card">
-            <h2>Email Configuration (SendGrid)</h2>
+            <h2>Email Configuration (SMTP2GO)</h2>
             <p style={{ color: '#666', marginBottom: '20px' }}>
-              {settings.sendgrid_configured ? (
-                <span style={{ color: '#28a745' }}>✓ SendGrid is configured</span>
+              {settings.smtp_configured ? (
+                <span style={{ color: '#28a745' }}>✓ SMTP2GO is configured</span>
               ) : (
-                <span style={{ color: '#dc3545' }}>SendGrid not configured - add API key below</span>
+                <span style={{ color: '#dc3545' }}>SMTP2GO not configured - add credentials below</span>
               )}
             </p>
 
             <div className="form-group">
-              <label htmlFor="sendgrid_api_key">SendGrid API Key</label>
+              <label htmlFor="smtp_username">SMTP Username</label>
               <input
-                type="password"
-                id="sendgrid_api_key"
-                data-testid="sendgrid-api-key-input"
+                type="text"
+                id="smtp_username"
+                data-testid="smtp-username-input"
                 className="form-input"
-                value={formData.sendgrid_api_key}
-                onChange={(e) => setFormData({ ...formData, sendgrid_api_key: e.target.value })}
-                placeholder="SG.xxxxxxxxxxxxx"
+                value={formData.smtp_username}
+                onChange={(e) => setFormData({ ...formData, smtp_username: e.target.value })}
+                placeholder="your-smtp2go-username"
               />
               <small style={{ color: '#666' }}>
-                Get your API key from{' '}
-                <a href="https://app.sendgrid.com/settings/api_keys" target="_blank" rel="noopener noreferrer">
-                  SendGrid Dashboard
+                Your SMTP2GO username from{' '}
+                <a href="https://www.smtp2go.com/" target="_blank" rel="noopener noreferrer">
+                  SMTP2GO Dashboard
                 </a>
+              </small>
+            </div>
+
+            <div className="form-group">
+              <label htmlFor="smtp_password">SMTP Password / API Key</label>
+              <input
+                type="password"
+                id="smtp_password"
+                data-testid="smtp-password-input"
+                className="form-input"
+                value={formData.smtp_password}
+                onChange={(e) => setFormData({ ...formData, smtp_password: e.target.value })}
+                placeholder="Your SMTP2GO password or API key"
+              />
+              <small style={{ color: '#666' }}>
+                Use your SMTP2GO password or API key
               </small>
             </div>
 
@@ -167,8 +183,39 @@ function Settings({ onLogout }) {
                 placeholder="newsletter@yourdomain.com"
               />
               <small style={{ color: '#666' }}>
-                Must be verified in SendGrid
+                Must be verified in SMTP2GO (Sending → Verified Senders)
               </small>
+            </div>
+
+            <div style={{ display: 'flex', gap: '20px' }}>
+              <div className="form-group" style={{ flex: 1 }}>
+                <label htmlFor="smtp_host">SMTP Host</label>
+                <input
+                  type="text"
+                  id="smtp_host"
+                  data-testid="smtp-host-input"
+                  className="form-input"
+                  value={formData.smtp_host}
+                  onChange={(e) => setFormData({ ...formData, smtp_host: e.target.value })}
+                  placeholder="mail.smtp2go.com"
+                />
+              </div>
+
+              <div className="form-group" style={{ flex: 1 }}>
+                <label htmlFor="smtp_port">SMTP Port</label>
+                <input
+                  type="number"
+                  id="smtp_port"
+                  data-testid="smtp-port-input"
+                  className="form-input"
+                  value={formData.smtp_port}
+                  onChange={(e) => setFormData({ ...formData, smtp_port: parseInt(e.target.value) })}
+                  placeholder="587"
+                />
+                <small style={{ color: '#666' }}>
+                  Common ports: 587 (recommended), 2525, 8025
+                </small>
+              </div>
             </div>
           </div>
 
