@@ -123,13 +123,14 @@ function Posts({ onLogout }) {
       if (response.data.success) {
         const imageUrl = response.data.cdn_url;
         
-        // Insert image into the Quill editor at cursor position
-        const quill = quillRef.current?.getEditor();
-        if (quill) {
-          const range = quill.getSelection(true);
-          quill.insertEmbed(range.index, 'image', imageUrl);
-          quill.setSelection(range.index + 1);
-        }
+        // Insert image markdown at cursor position
+        const beforeCursor = formData.content.substring(0, cursorPosition);
+        const afterCursor = formData.content.substring(cursorPosition);
+        const imageMarkdown = `\n\n![](${imageUrl})\n\n`;
+        const newContent = beforeCursor + imageMarkdown + afterCursor;
+        
+        setFormData({ ...formData, content: newContent });
+        setCursorPosition(cursorPosition + imageMarkdown.length);
         
         toast.success('Image uploaded and inserted!');
       }
@@ -142,33 +143,10 @@ function Posts({ onLogout }) {
     }
   };
 
-  const handleRemoveImage = (index) => {
-    const newImageUrls = formData.image_urls.filter((_, i) => i !== index);
-    setFormData({ ...formData, image_urls: newImageUrls });
+  const handleContentChange = (e) => {
+    setFormData({ ...formData, content: e.target.value });
+    setCursorPosition(e.target.selectionStart);
   };
-
-  // Quill editor configuration
-  const quillModules = {
-    toolbar: [
-      [{ 'header': [1, 2, 3, false] }],
-      ['bold', 'italic', 'underline', 'strike'],
-      [{ 'list': 'ordered'}, { 'list': 'bullet' }],
-      ['blockquote', 'code-block'],
-      [{ 'align': [] }],
-      ['link'],
-      ['clean']
-    ]
-  };
-
-  const quillFormats = [
-    'header',
-    'bold', 'italic', 'underline', 'strike',
-    'list', 'bullet',
-    'blockquote', 'code-block',
-    'align',
-    'link',
-    'image'
-  ];
 
   return (
     <AdminLayout onLogout={onLogout} currentPage="posts">
