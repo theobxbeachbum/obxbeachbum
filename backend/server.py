@@ -330,6 +330,14 @@ async def update_settings(update: SettingsUpdate, authorization: Optional[str] =
         update_dict["bunny_storage_region"] = update.bunny_storage_region
     if update.bunny_pull_zone_url:
         update_dict["bunny_pull_zone_url"] = update.bunny_pull_zone_url
+    if update.smtp_host:
+        update_dict["smtp_host"] = update.smtp_host
+    if update.smtp_port:
+        update_dict["smtp_port"] = update.smtp_port
+    if update.smtp_username:
+        update_dict["smtp_username"] = update.smtp_username
+    if update.smtp_password:
+        update_dict["smtp_password"] = update.smtp_password
     
     await db.settings.update_one({"id": "settings"}, {"$set": update_dict})
     return {"success": True}
