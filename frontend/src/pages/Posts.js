@@ -14,7 +14,8 @@ function Posts({ onLogout }) {
   const [formData, setFormData] = useState({
     title: '',
     content: '',
-    image_url: ''
+    image_url: '',
+    image_urls: []
   });
   const [sending, setSending] = useState(null);
   const [uploading, setUploading] = useState(false);
