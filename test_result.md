@@ -101,3 +101,74 @@
 #====================================================================================================
 # Testing Data - Main Agent and testing sub agent both should log testing data below this section
 #====================================================================================================
+
+user_problem_statement: Build a self-hosted newsletter system similar to Substack with Markdown support for inline images.
+
+backend:
+  - task: "Markdown to HTML conversion for post content"
+    implemented: true
+    working: "NA"
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Implemented markdown library import, convert_markdown_to_html function, and strip_markdown_for_plain_text function. Updated create_email_html to convert Markdown to HTML before sending. Updated /api/public/posts/{slug} to return HTML content."
+
+  - task: "Public posts API endpoints"
+    implemented: true
+    working: "NA"
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "GET /api/public/posts returns list, GET /api/public/posts/{slug} returns single post with HTML-converted content"
+
+frontend:
+  - task: "Post view page with HTML rendering"
+    implemented: true
+    working: "NA"
+    file: "/app/frontend/src/pages/PostView.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "PostView.js uses dangerouslySetInnerHTML to render HTML content from backend. Verified with screenshot showing inline images and formatted text."
+
+  - task: "Homepage with clean Markdown excerpts"
+    implemented: true
+    working: "NA"
+    file: "/app/frontend/src/pages/PublicHome.js"
+    stuck_count: 0
+    priority: "medium"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Added stripMarkdown function to remove Markdown syntax from excerpts for clean display on homepage."
+
+metadata:
+  created_by: "main_agent"
+  version: "1.0"
+  test_sequence: 1
+  run_ui: true
+
+test_plan:
+  current_focus:
+    - "Markdown to HTML conversion for post content"
+    - "Post view page with HTML rendering"
+    - "Homepage with clean Markdown excerpts"
+  stuck_tasks: []
+  test_all: false
+  test_priority: "high_first"
+
+agent_communication:
+  - agent: "main"
+    message: "Implemented Markdown-to-HTML conversion feature. Created test post 'A Beautiful Beach Day' with slug 'a-beautiful-beach-day' containing Markdown with inline images, headers, bold, italic, and lists. Backend converts Markdown to HTML for public viewing. Frontend renders HTML correctly. Please test: 1) GET /api/public/posts/a-beautiful-beach-day returns HTML content, 2) UI at /post/a-beautiful-beach-day displays formatted content with images, 3) Homepage shows clean excerpts without Markdown syntax. Admin password: admin123"
