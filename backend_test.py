@@ -294,6 +294,127 @@ class NewsletterAPITester:
             data=checkout_data
         )
 
+    def test_markdown_conversion(self):
+        """Test Markdown to HTML conversion feature"""
+        print("\n📄 Testing Markdown to HTML Conversion...")
+        
+        # Create a test post with Markdown content including all required elements
+        markdown_content = """# A Beautiful Beach Day
+
+This is a **beautiful** day at the beach. The sun is shining and the waves are *gently* lapping at the shore.
+
+![Beach Scene](https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=800)
+
+Here are some things to do at the beach:
+
+1. Build sandcastles
+2. Go swimming
+3. Collect seashells
+4. Watch the sunset
+
+## Activities for Everyone
+
+Whether you're young or old, there's something for everyone at the beach.
+
+---
+
+Remember to bring sunscreen and stay hydrated!"""
+
+        post_data = {
+            "title": "A Beautiful Beach Day",
+            "content": markdown_content,
+            "slug": "a-beautiful-beach-day"
+        }
+        
+        # Create the test post
+        success, post = self.run_test(
+            "Create Markdown Test Post",
+            "POST",
+            "posts",
+            200,
+            data=post_data
+        )
+        
+        post_id = None
+        if success and 'id' in post:
+            post_id = post['id']
+            
+            # Publish the post by sending newsletter (this sets status to published)
+            self.run_test(
+                "Publish Test Post",
+                "POST",
+                "newsletter/send",
+                200,
+                data={"post_id": post_id}
+            )
+        
+        # Test public posts list endpoint
+        temp_token = self.token
+        self.token = None  # Remove auth for public test
+        
+        success, posts = self.run_test(
+            "Get Public Posts List",
+            "GET",
+            "public/posts",
+            200
+        )
+        
+        if success:
+            # Verify posts list returns data
+            if isinstance(posts, list) and len(posts) > 0:
+                self.log_test("Public Posts List Contains Data", True, f"Found {len(posts)} posts")
+            else:
+                self.log_test("Public Posts List Contains Data", False, "No posts found in list")
+        
+        # Test specific post by slug with HTML conversion
+        success, post_response = self.run_test(
+            "Get Public Post by Slug",
+            "GET",
+            "public/posts/a-beautiful-beach-day",
+            200
+        )
+        
+        if success and 'content' in post_response:
+            html_content = post_response['content']
+            
+            # Test for required HTML tags
+            required_tags = [
+                ('<h1>', 'H1 header tag'),
+                ('<h2>', 'H2 header tag'),
+                ('<strong>', 'Strong/bold tag'),
+                ('<em>', 'Em/italic tag'),
+                ('<img', 'Image tag'),
+                ('<ol>', 'Ordered list tag'),
+                ('<li>', 'List item tag'),
+                ('<hr', 'Horizontal rule tag'),
+                ('<p>', 'Paragraph tag')
+            ]
+            
+            for tag, description in required_tags:
+                if tag in html_content:
+                    self.log_test(f"HTML Conversion - {description}", True, f"Found {tag}")
+                else:
+                    self.log_test(f"HTML Conversion - {description}", False, f"Missing {tag}")
+            
+            # Verify image has proper src attribute
+            if '<img' in html_content and 'src=' in html_content:
+                self.log_test("HTML Conversion - Image src attribute", True, "Image has src attribute")
+            else:
+                self.log_test("HTML Conversion - Image src attribute", False, "Image missing src attribute")
+            
+            # Verify no raw Markdown syntax remains in HTML
+            markdown_syntax = ['**', '*', '#', '![', '](', '---']
+            has_markdown = any(syntax in html_content for syntax in markdown_syntax)
+            
+            if not has_markdown:
+                self.log_test("HTML Conversion - No Raw Markdown", True, "No Markdown syntax found in HTML")
+            else:
+                found_syntax = [syntax for syntax in markdown_syntax if syntax in html_content]
+                self.log_test("HTML Conversion - No Raw Markdown", False, f"Found Markdown syntax: {found_syntax}")
+        
+        # Restore auth token
+        self.token = temp_token
+
     def test_public_endpoints(self):
         """Test public endpoints that don't require authentication"""
         print("\n🌐 Testing Public Endpoints...")
