@@ -178,6 +178,23 @@ def convert_markdown_to_html(content: str) -> str:
     return md.convert(content)
 
 
+def strip_markdown_for_plain_text(content: str) -> str:
+    """Strip Markdown syntax to get plain text for email fallback."""
+    import re
+    # Remove image markdown: ![alt](url)
+    text = re.sub(r'!\[.*?\]\(.*?\)', '', content)
+    # Remove links but keep text: [text](url) -> text
+    text = re.sub(r'\[(.*?)\]\(.*?\)', r'\1', text)
+    # Remove bold/italic markers
+    text = re.sub(r'\*\*?(.*?)\*\*?', r'\1', text)
+    text = re.sub(r'__?(.*?)__?', r'\1', text)
+    # Remove headers
+    text = re.sub(r'^#{1,6}\s+', '', text, flags=re.MULTILINE)
+    # Clean up extra whitespace
+    text = re.sub(r'\n{3,}', '\n\n', text)
+    return text.strip()
+
+
 def create_email_html(post: Post, unsubscribe_token: str, base_url: str) -> str:
     unsubscribe_link = f"{base_url}/unsubscribe?token={unsubscribe_token}"
     
