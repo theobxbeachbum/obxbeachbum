@@ -1,130 +1,226 @@
 {
   "summary": {
-    "tests_run": 20,
-    "tests_passed": 19,
-    "success_rate": 95.0,
-    "timestamp": "2025-12-15T13:48:19.797057"
+    "tests_run": 36,
+    "tests_passed": 35,
+    "success_rate": 97.22222222222221,
+    "timestamp": "2025-12-15T13:49:01.401634"
   },
   "results": [
     {
       "test": "Admin Login",
       "success": true,
       "details": "Status: 200",
-      "timestamp": "2025-12-15T13:48:16.293922"
+      "timestamp": "2025-12-15T13:48:51.751504"
     },
     {
       "test": "Admin Token Verify",
       "success": true,
       "details": "Status: 200",
-      "timestamp": "2025-12-15T13:48:16.389998"
+      "timestamp": "2025-12-15T13:48:51.790831"
     },
     {
       "test": "Get Settings",
       "success": true,
       "details": "Status: 200",
-      "timestamp": "2025-12-15T13:48:16.486814"
+      "timestamp": "2025-12-15T13:48:51.832343"
     },
     {
       "test": "Update Settings",
       "success": true,
       "details": "Status: 200",
-      "timestamp": "2025-12-15T13:48:16.683168"
+      "timestamp": "2025-12-15T13:48:51.871465"
     },
     {
       "test": "Add Subscriber",
       "success": true,
       "details": "Status: 200",
-      "timestamp": "2025-12-15T13:48:17.013023"
+      "timestamp": "2025-12-15T13:48:51.911821"
     },
     {
       "test": "List Subscribers",
       "success": true,
       "details": "Status: 200",
-      "timestamp": "2025-12-15T13:48:17.054456"
+      "timestamp": "2025-12-15T13:48:51.951417"
     },
     {
       "test": "Export Subscribers",
       "success": true,
       "details": "Status: 200",
-      "timestamp": "2025-12-15T13:48:17.130471"
+      "timestamp": "2025-12-15T13:48:52.031726"
     },
     {
       "test": "Remove Subscriber",
       "success": true,
       "details": "Status: 200",
-      "timestamp": "2025-12-15T13:48:17.171969"
+      "timestamp": "2025-12-15T13:48:52.110575"
     },
     {
       "test": "Create Post",
       "success": true,
       "details": "Status: 200",
-      "timestamp": "2025-12-15T13:48:17.212279"
+      "timestamp": "2025-12-15T13:48:52.152081"
     },
     {
       "test": "List Posts",
       "success": true,
       "details": "Status: 200",
-      "timestamp": "2025-12-15T13:48:17.256128"
+      "timestamp": "2025-12-15T13:48:52.193864"
     },
     {
       "test": "Get Post",
       "success": true,
       "details": "Status: 200",
-      "timestamp": "2025-12-15T13:48:17.295299"
+      "timestamp": "2025-12-15T13:48:52.232628"
     },
     {
       "test": "Update Post",
       "success": true,
       "details": "Status: 200",
-      "timestamp": "2025-12-15T13:48:17.335821"
+      "timestamp": "2025-12-15T13:48:52.266103"
     },
     {
       "test": "Delete Post",
       "success": true,
       "details": "Status: 200",
-      "timestamp": "2025-12-15T13:48:17.374003"
+      "timestamp": "2025-12-15T13:48:52.303686"
+    },
+    {
+      "test": "Create Markdown Test Post",
+      "success": true,
+      "details": "Status: 200",
+      "timestamp": "2025-12-15T13:48:52.345874"
+    },
+    {
+      "test": "Publish Test Post",
+      "success": true,
+      "details": "Status: 200",
+      "timestamp": "2025-12-15T13:48:52.387461"
+    },
+    {
+      "test": "Get Public Posts List",
+      "success": true,
+      "details": "Status: 200",
+      "timestamp": "2025-12-15T13:48:56.557612"
+    },
+    {
+      "test": "Public Posts List Contains Data",
+      "success": true,
+      "details": "Found 4 posts",
+      "timestamp": "2025-12-15T13:48:56.558268"
+    },
+    {
+      "test": "Get Public Post by Slug",
+      "success": true,
+      "details": "Status: 200",
+      "timestamp": "2025-12-15T13:48:56.611516"
+    },
+    {
+      "test": "HTML Conversion - H1 header tag",
+      "success": true,
+      "details": "Found <h1>",
+      "timestamp": "2025-12-15T13:48:56.612129"
+    },
+    {
+      "test": "HTML Conversion - H2 header tag",
+      "success": true,
+      "details": "Found <h2>",
+      "timestamp": "2025-12-15T13:48:56.612148"
+    },
+    {
+      "test": "HTML Conversion - Strong/bold tag",
+      "success": true,
+      "details": "Found <strong>",
+      "timestamp": "2025-12-15T13:48:56.612153"
+    },
+    {
+      "test": "HTML Conversion - Em/italic tag",
+      "success": true,
+      "details": "Found <em>",
+      "timestamp": "2025-12-15T13:48:56.612158"
+    },
+    {
+      "test": "HTML Conversion - Image tag",
+      "success": true,
+      "details": "Found <img",
+      "timestamp": "2025-12-15T13:48:56.612163"
+    },
+    {
+      "test": "HTML Conversion - Ordered list tag",
+      "success": true,
+      "details": "Found <ol>",
+      "timestamp": "2025-12-15T13:48:56.612167"
+    },
+    {
+      "test": "HTML Conversion - List item tag",
+      "success": true,
+      "details": "Found <li>",
+      "timestamp": "2025-12-15T13:48:56.612172"
+    },
+    {
+      "test": "HTML Conversion - Horizontal rule tag",
+      "success": true,
+      "details": "Found <hr",
+      "timestamp": "2025-12-15T13:48:56.612181"
+    },
+    {
+      "test": "HTML Conversion - Paragraph tag",
+      "success": true,
+      "details": "Found <p>",
+      "timestamp": "2025-12-15T13:48:56.612185"
+    },
+    {
+      "test": "HTML Conversion - Image src attribute",
+      "success": true,
+      "details": "Image has src attribute",
+      "timestamp": "2025-12-15T13:48:56.612190"
+    },
+    {
+      "test": "HTML Conversion - No Raw Markdown",
+      "success": true,
+      "details": "No Markdown syntax found in HTML",
+      "timestamp": "2025-12-15T13:48:56.612199"
     },
     {
       "test": "Create Post for Newsletter",
       "success": true,
       "details": "Status: 200",
-      "timestamp": "2025-12-15T13:48:17.410493"
+      "timestamp": "2025-12-15T13:48:56.648627"
     },
     {
       "test": "Send Newsletter (Expected to Fail)",
       "success": false,
-      "details": "Status: 200 (Expected: 400), Response: {'success': True, 'message': 'Newsletter queued for 1 subscribers'}",
-      "timestamp": "2025-12-15T13:48:17.448913"
+      "details": "Status: 200 (Expected: 400), Response: {'success': True, 'message': 'Newsletter queued for 2 subscribers'}",
+      "timestamp": "2025-12-15T13:48:56.688759"
     },
     {
       "test": "List Supporters",
       "success": true,
       "details": "Status: 200",
-      "timestamp": "2025-12-15T13:48:18.951869"
+      "timestamp": "2025-12-15T13:49:00.815925"
     },
     {
       "test": "Create Supporter Checkout",
       "success": true,
       "details": "Status: 200",
-      "timestamp": "2025-12-15T13:48:19.669848"
+      "timestamp": "2025-12-15T13:49:01.268895"
     },
     {
       "test": "Public Subscribe",
       "success": true,
       "details": "Status: 200",
-      "timestamp": "2025-12-15T13:48:19.713191"
+      "timestamp": "2025-12-15T13:49:01.316418"
     },
     {
       "test": "Embed Subscribe Form",
       "success": true,
       "details": "Status: 200",
-      "timestamp": "2025-12-15T13:48:19.752382"
+      "timestamp": "2025-12-15T13:49:01.353900"
     },
     {
       "test": "Unsubscribe Invalid Token",
       "success": true,
       "details": "Status: 404",
-      "timestamp": "2025-12-15T13:48:19.796085"
+      "timestamp": "2025-12-15T13:49:01.400685"
     }
   ]
 }
