@@ -107,27 +107,33 @@ user_problem_statement: Build a self-hosted newsletter system similar to Substac
 backend:
   - task: "Markdown to HTML conversion for post content"
     implemented: true
-    working: "NA"
+    working: true
     file: "/app/backend/server.py"
     stuck_count: 0
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
       - working: "NA"
         agent: "main"
         comment: "Implemented markdown library import, convert_markdown_to_html function, and strip_markdown_for_plain_text function. Updated create_email_html to convert Markdown to HTML before sending. Updated /api/public/posts/{slug} to return HTML content."
+      - working: true
+        agent: "testing"
+        comment: "✅ VERIFIED: GET /api/public/posts/a-beautiful-beach-day successfully returns HTML content with all required tags: <h1>, <h2>, <strong>, <em>, <img>, <ol>, <li>, <hr>, <p>. Images have proper src attributes. No raw Markdown syntax remains in HTML output. Conversion working perfectly."
 
   - task: "Public posts API endpoints"
     implemented: true
-    working: "NA"
+    working: true
     file: "/app/backend/server.py"
     stuck_count: 0
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
       - working: "NA"
         agent: "main"
         comment: "GET /api/public/posts returns list, GET /api/public/posts/{slug} returns single post with HTML-converted content"
+      - working: true
+        agent: "testing"
+        comment: "✅ VERIFIED: GET /api/public/posts returns list of published posts (found 4 posts). GET /api/public/posts/{slug} returns individual posts with HTML conversion applied. Both endpoints working correctly."
 
 frontend:
   - task: "Post view page with HTML rendering"
