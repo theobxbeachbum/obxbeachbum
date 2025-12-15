@@ -472,6 +472,7 @@ Remember to bring sunscreen and stay hydrated!"""
         self.test_settings_endpoints()
         self.test_subscriber_endpoints()
         self.test_post_endpoints()
+        self.test_markdown_conversion()  # Add Markdown conversion tests
         self.test_newsletter_sending()
         self.test_supporter_endpoints()
         self.test_public_endpoints()
