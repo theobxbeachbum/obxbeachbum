@@ -31,9 +31,27 @@ function PublicHome() {
     });
   };
 
+  const stripMarkdown = (content) => {
+    // Remove image markdown: ![alt](url)
+    let text = content.replace(/!\[.*?\]\(.*?\)/g, '');
+    // Remove links but keep text: [text](url) -> text
+    text = text.replace(/\[(.*?)\]\(.*?\)/g, '$1');
+    // Remove bold/italic markers
+    text = text.replace(/\*\*?(.*?)\*\*?/g, '$1');
+    text = text.replace(/__?(.*?)__?/g, '$1');
+    // Remove headers
+    text = text.replace(/^#{1,6}\s+/gm, '');
+    // Remove horizontal rules
+    text = text.replace(/^-{3,}$/gm, '');
+    // Clean up extra whitespace
+    text = text.replace(/\n{3,}/g, '\n\n');
+    return text.trim();
+  };
+
   const getExcerpt = (content, length = 200) => {
-    if (content.length <= length) return content;
-    return content.substring(0, length).trim() + '...';
+    const plainText = stripMarkdown(content);
+    if (plainText.length <= length) return plainText;
+    return plainText.substring(0, length).trim() + '...';
   };
 
   const getMainImage = (post) => {
