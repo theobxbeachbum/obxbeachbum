@@ -36,7 +36,7 @@ Go to https://www.smtp2go.com/ and login to your account.
 ### Step 5: Configure in Your Newsletter Admin
 
 Login to your newsletter admin panel:
-https://photo-letter.preview.emergentagent.com/admin/login
+https://photo-news.preview.emergentagent.com/admin/login
 
 Go to **Settings** and enter:
 
