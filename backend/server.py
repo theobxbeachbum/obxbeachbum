@@ -171,11 +171,18 @@ async def verify_admin_token(authorization: Optional[str] = Header(None)):
         raise HTTPException(401, "Invalid token")
     return True
 
+def convert_markdown_to_html(content: str) -> str:
+    """Convert Markdown content to HTML with image and text formatting support."""
+    # Use markdown library with common extensions
+    md = markdown.Markdown(extensions=['nl2br', 'fenced_code', 'tables'])
+    return md.convert(content)
+
+
 def create_email_html(post: Post, unsubscribe_token: str, base_url: str) -> str:
     unsubscribe_link = f"{base_url}/unsubscribe?token={unsubscribe_token}"
     
-    # Content is now HTML from rich text editor
-    html_content = post.content
+    # Convert Markdown content to HTML
+    html_content = convert_markdown_to_html(post.content)
     
     html = f"""
     <!DOCTYPE html>
