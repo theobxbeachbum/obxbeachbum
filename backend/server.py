@@ -524,6 +524,10 @@ async def get_public_post_by_slug(slug: str):
         post['created_at'] = datetime.fromisoformat(post['created_at'])
     if post.get('published_at') and isinstance(post['published_at'], str):
         post['published_at'] = datetime.fromisoformat(post['published_at'])
+    
+    # Convert Markdown content to HTML for public viewing
+    post['content'] = convert_markdown_to_html(post['content'])
+    
     return Post(**post)
 
 # Newsletter sending
