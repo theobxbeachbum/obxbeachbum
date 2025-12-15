@@ -1,130 +1,130 @@
 {
   "summary": {
     "tests_run": 20,
-    "tests_passed": 20,
-    "success_rate": 100.0,
-    "timestamp": "2025-11-03T12:57:51.683571"
+    "tests_passed": 19,
+    "success_rate": 95.0,
+    "timestamp": "2025-12-15T13:48:19.797057"
   },
   "results": [
     {
       "test": "Admin Login",
       "success": true,
       "details": "Status: 200",
-      "timestamp": "2025-11-03T12:57:50.411058"
+      "timestamp": "2025-12-15T13:48:16.293922"
     },
     {
       "test": "Admin Token Verify",
       "success": true,
       "details": "Status: 200",
-      "timestamp": "2025-11-03T12:57:50.451764"
+      "timestamp": "2025-12-15T13:48:16.389998"
     },
     {
       "test": "Get Settings",
       "success": true,
       "details": "Status: 200",
-      "timestamp": "2025-11-03T12:57:50.488802"
+      "timestamp": "2025-12-15T13:48:16.486814"
     },
     {
       "test": "Update Settings",
       "success": true,
       "details": "Status: 200",
-      "timestamp": "2025-11-03T12:57:50.528567"
+      "timestamp": "2025-12-15T13:48:16.683168"
     },
     {
       "test": "Add Subscriber",
       "success": true,
       "details": "Status: 200",
-      "timestamp": "2025-11-03T12:57:50.571644"
+      "timestamp": "2025-12-15T13:48:17.013023"
     },
     {
       "test": "List Subscribers",
       "success": true,
       "details": "Status: 200",
-      "timestamp": "2025-11-03T12:57:50.609472"
+      "timestamp": "2025-12-15T13:48:17.054456"
     },
     {
       "test": "Export Subscribers",
       "success": true,
       "details": "Status: 200",
-      "timestamp": "2025-11-03T12:57:50.649752"
+      "timestamp": "2025-12-15T13:48:17.130471"
     },
     {
       "test": "Remove Subscriber",
       "success": true,
       "details": "Status: 200",
-      "timestamp": "2025-11-03T12:57:50.686711"
+      "timestamp": "2025-12-15T13:48:17.171969"
     },
     {
       "test": "Create Post",
       "success": true,
       "details": "Status: 200",
-      "timestamp": "2025-11-03T12:57:50.724763"
+      "timestamp": "2025-12-15T13:48:17.212279"
     },
     {
       "test": "List Posts",
       "success": true,
       "details": "Status: 200",
-      "timestamp": "2025-11-03T12:57:50.761738"
+      "timestamp": "2025-12-15T13:48:17.256128"
     },
     {
       "test": "Get Post",
       "success": true,
       "details": "Status: 200",
-      "timestamp": "2025-11-03T12:57:50.797887"
+      "timestamp": "2025-12-15T13:48:17.295299"
     },
     {
       "test": "Update Post",
       "success": true,
       "details": "Status: 200",
-      "timestamp": "2025-11-03T12:57:50.834510"
+      "timestamp": "2025-12-15T13:48:17.335821"
     },
     {
       "test": "Delete Post",
       "success": true,
       "details": "Status: 200",
-      "timestamp": "2025-11-03T12:57:50.882659"
+      "timestamp": "2025-12-15T13:48:17.374003"
     },
     {
       "test": "Create Post for Newsletter",
       "success": true,
       "details": "Status: 200",
-      "timestamp": "2025-11-03T12:57:50.923445"
+      "timestamp": "2025-12-15T13:48:17.410493"
     },
     {
       "test": "Send Newsletter (Expected to Fail)",
-      "success": true,
-      "details": "Status: 400",
-      "timestamp": "2025-11-03T12:57:50.986248"
+      "success": false,
+      "details": "Status: 200 (Expected: 400), Response: {'success': True, 'message': 'Newsletter queued for 1 subscribers'}",
+      "timestamp": "2025-12-15T13:48:17.448913"
     },
     {
       "test": "List Supporters",
       "success": true,
       "details": "Status: 200",
-      "timestamp": "2025-11-03T12:57:51.023370"
+      "timestamp": "2025-12-15T13:48:18.951869"
     },
     {
       "test": "Create Supporter Checkout",
       "success": true,
       "details": "Status: 200",
-      "timestamp": "2025-11-03T12:57:51.564747"
+      "timestamp": "2025-12-15T13:48:19.669848"
     },
     {
       "test": "Public Subscribe",
       "success": true,
       "details": "Status: 200",
-      "timestamp": "2025-11-03T12:57:51.605225"
+      "timestamp": "2025-12-15T13:48:19.713191"
     },
     {
       "test": "Embed Subscribe Form",
       "success": true,
       "details": "Status: 200",
-      "timestamp": "2025-11-03T12:57:51.643924"
+      "timestamp": "2025-12-15T13:48:19.752382"
     },
     {
       "test": "Unsubscribe Invalid Token",
       "success": true,
       "details": "Status: 404",
-      "timestamp": "2025-11-03T12:57:51.682612"
+      "timestamp": "2025-12-15T13:48:19.796085"
     }
   ]
 }
