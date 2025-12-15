@@ -288,8 +288,9 @@ async def send_email_to_subscriber(subscriber: Subscriber, post: Post, settings:
     msg['From'] = settings.sender_email
     msg['To'] = subscriber.email
     
-    # Create plain text version
-    text_content = post.content[:500] + "..." if len(post.content) > 500 else post.content
+    # Create plain text version (strip markdown for email clients that don't support HTML)
+    plain_content = strip_markdown_for_plain_text(post.content)
+    text_content = plain_content[:500] + "..." if len(plain_content) > 500 else plain_content
     
     # Attach both versions
     msg.attach(MIMEText(text_content, 'plain'))
