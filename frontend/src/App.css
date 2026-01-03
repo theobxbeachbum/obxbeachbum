@@ -407,6 +407,11 @@ h1, h2, h3, h4, h5, h6 {
   font-family: 'Playfair Display', Georgia, serif;
 }
 
+.site-logo .logo-image {
+  height: 50px;
+  width: auto;
+}
+
 .public-nav {
   display: flex;
   gap: 30px;
