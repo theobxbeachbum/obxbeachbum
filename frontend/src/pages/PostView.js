@@ -61,7 +61,7 @@ function PostView() {
       <header className="public-header">
         <div className="public-container">
           <Link to="/" className="site-logo">
-            <h1>Daily OBX</h1>
+            <img src="https://customer-assets.emergentagent.com/job_photo-news/artifacts/cuzl8frm_obxbb-logo.jpg" alt="the OBX Beach Bum" className="logo-image" />
           </Link>
           <nav className="public-nav">
             <Link to="/" className="nav-link">Stories</Link>
@@ -115,7 +115,7 @@ function PostView() {
       <footer className="public-footer">
         <div className="public-container">
           <div className="footer-content">
-            <p>&copy; 2025 Daily OBX. All rights reserved.</p>
+            <p>&copy; {new Date().getFullYear()} the OBX Beach Bum. All rights reserved.</p>
             <div className="footer-links">
               <Link to="/subscribe">Subscribe</Link>
               <Link to="/support">Support</Link>
