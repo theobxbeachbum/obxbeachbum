@@ -105,7 +105,7 @@ function PostView() {
             <h3>Enjoy this story?</h3>
             <p>Subscribe to get OBX photography stories delivered to your inbox.</p>
             <Link to="/subscribe" className="btn btn-primary" data-testid="subscribe-cta-btn">
-              Subscribe to Daily OBX
+              Subscribe to the OBX Beach Bum
             </Link>
           </div>
         </div>
