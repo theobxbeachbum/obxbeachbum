@@ -1206,6 +1206,254 @@ h1, h2, h3, h4, h5, h6 {
 .subscription-text {
   font-size: 14px;
   color: #666;
+
+
+/* ============================================
+   ADD TO HOME SCREEN PAGE
+   ============================================ */
+
+.homescreen-page {
+  flex: 1;
+  padding: 60px 20px;
+  background: #f9f9f9;
+}
+
+.homescreen-container {
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.homescreen-header {
+  text-align: center;
+  margin-bottom: 50px;
+}
+
+.homescreen-icon {
+  width: 60px;
+  height: 60px;
+  color: #1a1a1a;
+  margin-bottom: 20px;
+}
+
+.homescreen-header h1 {
+  font-family: 'Playfair Display', Georgia, serif;
+  font-size: 42px;
+  margin: 0 0 20px 0;
+  color: #1a1a1a;
+}
+
+.homescreen-intro {
+  font-size: 18px;
+  color: #666;
+  line-height: 1.7;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.instructions-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 30px;
+  margin-bottom: 50px;
+}
+
+.instruction-card {
+  background: #fff;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+}
+
+.card-header {
+  padding: 25px 30px;
+  text-align: center;
+}
+
+.card-header.iphone {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: #fff;
+}
+
+.card-header.android {
+  background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+  color: #fff;
+}
+
+.device-icon {
+  font-size: 36px;
+  display: block;
+  margin-bottom: 10px;
+}
+
+.card-header h2 {
+  font-family: 'Playfair Display', Georgia, serif;
+  font-size: 28px;
+  margin: 0 0 5px 0;
+}
+
+.browser-note {
+  font-size: 14px;
+  opacity: 0.9;
+  margin: 0;
+}
+
+.steps-list {
+  list-style: none;
+  padding: 30px;
+  margin: 0;
+  counter-reset: step-counter;
+}
+
+.steps-list li {
+  display: flex;
+  gap: 15px;
+  margin-bottom: 25px;
+  position: relative;
+  counter-increment: step-counter;
+}
+
+.steps-list li:last-child {
+  margin-bottom: 0;
+}
+
+.steps-list li::before {
+  content: counter(step-counter);
+  position: absolute;
+  left: -10px;
+  top: -8px;
+  background: #1a1a1a;
+  color: #fff;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  font-size: 12px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.step-icon {
+  width: 44px;
+  height: 44px;
+  background: #f5f5f5;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  color: #555;
+}
+
+.step-content {
+  flex: 1;
+}
+
+.step-content strong {
+  display: block;
+  font-size: 16px;
+  color: #1a1a1a;
+  margin-bottom: 4px;
+}
+
+.step-content p {
+  font-size: 14px;
+  color: #666;
+  margin: 0;
+  line-height: 1.5;
+}
+
+.card-footer {
+  background: #f9f9f9;
+  padding: 20px 30px;
+  border-top: 1px solid #eee;
+}
+
+.card-footer p {
+  margin: 0;
+  font-size: 15px;
+  color: #555;
+}
+
+.homescreen-benefits {
+  background: #fff;
+  border-radius: 12px;
+  padding: 35px 40px;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+  margin-bottom: 40px;
+}
+
+.homescreen-benefits h3 {
+  font-family: 'Playfair Display', Georgia, serif;
+  font-size: 24px;
+  margin: 0 0 20px 0;
+  color: #1a1a1a;
+}
+
+.homescreen-benefits ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 15px;
+}
+
+.homescreen-benefits li {
+  font-size: 16px;
+  color: #555;
+  padding-left: 28px;
+  position: relative;
+}
+
+.homescreen-benefits li::before {
+  content: '✓';
+  position: absolute;
+  left: 0;
+  color: #38ef7d;
+  font-weight: bold;
+}
+
+.homescreen-benefits li strong {
+  color: #1a1a1a;
+}
+
+.back-home {
+  text-align: center;
+}
+
+.back-home-btn {
+  display: inline-block;
+  padding: 14px 30px;
+  background: #1a1a1a;
+  color: #fff;
+  text-decoration: none;
+  border-radius: 25px;
+  font-size: 16px;
+  transition: background 0.2s;
+}
+
+.back-home-btn:hover {
+  background: #333;
+}
+
+@media (max-width: 768px) {
+  .instructions-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .homescreen-header h1 {
+    font-size: 32px;
+  }
+  
+  .homescreen-benefits ul {
+    grid-template-columns: 1fr;
+  }
+  
+  .steps-list {
+    padding: 25px 20px;
+  }
+}
   line-height: 1.6;
   margin: 0 0 15px 0;
 }
