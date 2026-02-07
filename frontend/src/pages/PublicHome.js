@@ -210,6 +210,7 @@ function PublicHome() {
             <nav className="footer-nav">
               <Link to="/about">About</Link>
               <Link to="/archive">Archive</Link>
+              <Link to="/add-to-homescreen">Add to Home Screen</Link>
               <Link to="/admin/login">Admin</Link>
             </nav>
           </div>
