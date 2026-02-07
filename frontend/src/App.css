@@ -1457,22 +1457,6 @@ h1, h2, h3, h4, h5, h6 {
     padding: 25px 20px;
   }
 }
-  line-height: 1.6;
-  margin: 0 0 15px 0;
-}
-
-.sidebar-subscribe-btn {
-  display: block;
-  width: 100%;
-  padding: 12px;
-  background: #1a1a1a;
-  color: #fff;
-  text-decoration: none;
-  text-align: center;
-  border-radius: 4px;
-  font-size: 15px;
-  transition: background 0.2s;
-}
 
 .sidebar-subscribe-btn:hover {
   background: #333;
