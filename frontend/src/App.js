@@ -14,6 +14,7 @@ import Support from '@/pages/Support';
 import SupporterSuccess from '@/pages/SupporterSuccess';
 import PublicHome from '@/pages/PublicHome';
 import PostView from '@/pages/PostView';
+import AddToHomeScreen from '@/pages/AddToHomeScreen';
 import { Toaster } from 'sonner';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
