@@ -82,6 +82,7 @@ function App() {
           <Route path="/unsubscribe" element={<Unsubscribe />} />
           <Route path="/support" element={<Support />} />
           <Route path="/supporter-success" element={<SupporterSuccess />} />
+          <Route path="/add-to-homescreen" element={<AddToHomeScreen />} />
           
           {/* Admin routes */}
           <Route
