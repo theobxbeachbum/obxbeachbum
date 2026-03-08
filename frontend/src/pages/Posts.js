@@ -224,6 +224,76 @@ function Posts({ onLogout }) {
                   />
                 </div>
 
+                {/* Featured Image Section */}
+                <div className="form-group">
+                  <label>Featured Image</label>
+                  <p style={{ fontSize: '13px', color: '#666', margin: '4px 0 10px' }}>
+                    This image will be shown as the thumbnail on the homepage and in email previews.
+                  </p>
+                  
+                  {formData.image_url ? (
+                    <div style={{ 
+                      position: 'relative', 
+                      display: 'inline-block',
+                      borderRadius: '8px',
+                      overflow: 'hidden',
+                      border: '1px solid #ddd'
+                    }}>
+                      <img 
+                        src={formData.image_url} 
+                        alt="Featured" 
+                        style={{ 
+                          maxWidth: '300px', 
+                          maxHeight: '200px', 
+                          display: 'block',
+                          objectFit: 'cover'
+                        }} 
+                      />
+                      <button
+                        type="button"
+                        onClick={removeFeaturedImage}
+                        style={{
+                          position: 'absolute',
+                          top: '8px',
+                          right: '8px',
+                          background: 'rgba(0,0,0,0.7)',
+                          color: '#fff',
+                          border: 'none',
+                          borderRadius: '50%',
+                          width: '28px',
+                          height: '28px',
+                          cursor: 'pointer',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center'
+                        }}
+                      >
+                        <X size={16} />
+                      </button>
+                    </div>
+                  ) : (
+                    <div>
+                      <input
+                        type="file"
+                        id="featured-image-upload"
+                        accept="image/*"
+                        style={{ display: 'none' }}
+                        onChange={handleFeaturedImageUpload}
+                      />
+                      <Button
+                        type="button"
+                        variant="outline"
+                        onClick={() => document.getElementById('featured-image-upload').click()}
+                        disabled={uploadingFeatured}
+                        data-testid="upload-featured-image-btn"
+                      >
+                        <ImageIcon className="w-4 h-4 mr-2" />
+                        {uploadingFeatured ? 'Uploading...' : 'Upload Featured Image'}
+                      </Button>
+                    </div>
+                  )}
+                </div>
+
                 <div className="form-group">
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
                     <label htmlFor="content">Content</label>
