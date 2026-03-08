@@ -92,6 +92,13 @@ function PostView() {
             </time>
           </header>
 
+          {/* Featured Image */}
+          {post.image_url && (
+            <div className="post-featured-image">
+              <img src={post.image_url} alt={post.title} />
+            </div>
+          )}
+
           <div className="post-content" data-testid="post-content">
             {/* Content is HTML from rich text editor */}
             <div 
