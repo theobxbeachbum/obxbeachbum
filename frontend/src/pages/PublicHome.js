@@ -179,13 +179,13 @@ function PublicHome() {
             {/* Sidebar */}
             <aside className="sidebar">
               <div className="sidebar-card">
-                <h3 className="sidebar-title">Beach Bum Chronicles</h3>
+                <h3 className="sidebar-title">the OBX Beach Bum</h3>
                 <p className="sidebar-description">
-                  I travel the Outer Banks with my girlfriend and photograph some of the most beautiful and stunning beachscapes and scenery in the country. I share photos of the week, location guides, regular features on how to get the most from your photography, and inspirational photo narratives.
+                  I wander around the Outer Banks with my girlfriend and pair of cameras to photograph some of the most beautiful and stunning beachscapes and scenery anywhere. I'll share my photos, inspirational beach bum philosophy, location guides, and maybe even tutorials on how to get the most from your photography.
                 </p>
                 <div className="sidebar-subscription">
                   <p className="subscription-text">
-                    Beach Bum Chronicles is a reader-supported publication. To receive new posts and support my work, consider becoming a free or paid subscriber.
+                    the OBX Beach Bum is a reader-supported publication. To receive new posts and support my work, consider becoming a free or paid subscriber.
                   </p>
                   <Link to="/subscribe" className="sidebar-subscribe-btn">
                     Subscribe
