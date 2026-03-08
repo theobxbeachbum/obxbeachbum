@@ -203,8 +203,8 @@ function PublicHome() {
           <div className="footer-top">
             <div className="footer-logo">
               <img 
-                src="https://customer-assets.emergentagent.com/job_photo-news/artifacts/ds3e93fb_logo-ish.jpg" 
-                alt="Beach Bum Chronicles" 
+                src="https://customer-assets.emergentagent.com/job_photo-news/artifacts/fndpshgx_whitelogo-obxbb.png" 
+                alt="the OBX Beach Bum" 
               />
             </div>
             <nav className="footer-nav">
