@@ -320,7 +320,7 @@ REACT_APP_BACKEND_URL=https://your-domain.com
 
 ## Branding Assets
 
-**Logo:** https://customer-assets.emergentagent.com/job_photo-news/artifacts/cuzl8frm_obxbb-logo.jpg
+**Logo:** https://customer-assets.emergentagent.com/job_photo-news/artifacts/ds3e93fb_logo-ish.jpg
 
 **Site Name:** the OBX Beach Bum
 
