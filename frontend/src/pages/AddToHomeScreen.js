@@ -75,7 +75,7 @@ function AddToHomeScreen() {
               </ol>
 
               <div className="card-footer">
-                <p>✨ That's it! Look for the Beach Bum Chronicles icon on your home screen.</p>
+                <p>✨ That's it! Look for the OBX Beach Bum icon on your home screen.</p>
               </div>
             </div>
 
