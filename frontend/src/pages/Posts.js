@@ -149,6 +149,45 @@ function Posts({ onLogout }) {
     setCursorPosition(e.target.selectionStart);
   };
 
+  const handleFeaturedImageUpload = async (event) => {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    if (!file.type.startsWith('image/')) {
+      toast.error('Please select an image file');
+      return;
+    }
+
+    if (file.size > 10 * 1024 * 1024) {
+      toast.error('Image too large. Maximum size: 10MB');
+      return;
+    }
+
+    setUploadingFeatured(true);
+    try {
+      const formDataUpload = new FormData();
+      formDataUpload.append('file', file);
+
+      const response = await axios.post('/upload-image', formDataUpload, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      });
+
+      if (response.data.success) {
+        setFormData({ ...formData, image_url: response.data.cdn_url });
+        toast.success('Featured image uploaded!');
+      }
+    } catch (error) {
+      toast.error(error.response?.data?.detail || 'Image upload failed');
+    } finally {
+      setUploadingFeatured(false);
+      event.target.value = '';
+    }
+  };
+
+  const removeFeaturedImage = () => {
+    setFormData({ ...formData, image_url: '' });
+  };
+
   return (
     <AdminLayout onLogout={onLogout} currentPage="posts">
       <div data-testid="posts-page">
