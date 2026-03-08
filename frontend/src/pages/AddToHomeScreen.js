@@ -10,7 +10,7 @@ function AddToHomeScreen() {
           <Link to="/">
             <img 
               src="https://customer-assets.emergentagent.com/job_photo-news/artifacts/ds3e93fb_logo-ish.jpg" 
-              alt="Beach Bum Chronicles" 
+              alt="the OBX Beach Bum" 
               className="main-logo"
             />
           </Link>
