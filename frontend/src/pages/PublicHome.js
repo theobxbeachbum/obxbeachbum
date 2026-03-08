@@ -215,7 +215,7 @@ function PublicHome() {
             </nav>
           </div>
           <div className="footer-bottom">
-            <p className="copyright">© {new Date().getFullYear()} Beach Bum Chronicles</p>
+            <p className="copyright">© {new Date().getFullYear()} the OBX Beach Bum</p>
             <div className="footer-legal">
               <Link to="/privacy">Privacy</Link>
               <Link to="/terms">Terms</Link>
