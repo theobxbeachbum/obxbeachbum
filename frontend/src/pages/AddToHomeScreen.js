@@ -9,7 +9,7 @@ function AddToHomeScreen() {
         <div className="header-logo">
           <Link to="/">
             <img 
-              src="https://customer-assets.emergentagent.com/job_photo-news/artifacts/cuzl8frm_obxbb-logo.jpg" 
+              src="https://customer-assets.emergentagent.com/job_photo-news/artifacts/ds3e93fb_logo-ish.jpg" 
               alt="Beach Bum Chronicles" 
               className="main-logo"
             />
@@ -145,7 +145,7 @@ function AddToHomeScreen() {
           <div className="footer-top">
             <div className="footer-logo">
               <img 
-                src="https://customer-assets.emergentagent.com/job_photo-news/artifacts/cuzl8frm_obxbb-logo.jpg" 
+                src="https://customer-assets.emergentagent.com/job_photo-news/artifacts/ds3e93fb_logo-ish.jpg" 
                 alt="Beach Bum Chronicles" 
               />
             </div>

@@ -61,7 +61,7 @@ function PostView() {
       <header className="public-header">
         <div className="public-container">
           <Link to="/" className="site-logo">
-            <img src="https://customer-assets.emergentagent.com/job_photo-news/artifacts/cuzl8frm_obxbb-logo.jpg" alt="the OBX Beach Bum" className="logo-image" />
+            <img src="https://customer-assets.emergentagent.com/job_photo-news/artifacts/ds3e93fb_logo-ish.jpg" alt="the OBX Beach Bum" className="logo-image" />
           </Link>
           <nav className="public-nav">
             <Link to="/" className="nav-link">Stories</Link>
