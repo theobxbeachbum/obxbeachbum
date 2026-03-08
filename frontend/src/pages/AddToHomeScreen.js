@@ -30,7 +30,7 @@ function AddToHomeScreen() {
             <Smartphone className="homescreen-icon" />
             <h1>Add to Home Screen</h1>
             <p className="homescreen-intro">
-              Get quick access to Beach Bum Chronicles right from your phone's home screen — 
+              Get quick access to the OBX Beach Bum right from your phone's home screen — 
               just like an app, but without downloading anything!
             </p>
           </div>
