@@ -19,6 +19,7 @@ function Posts({ onLogout }) {
   });
   const [sending, setSending] = useState(null);
   const [uploading, setUploading] = useState(false);
+  const [uploadingFeatured, setUploadingFeatured] = useState(false);
   const [cursorPosition, setCursorPosition] = useState(0);
 
   useEffect(() => {
