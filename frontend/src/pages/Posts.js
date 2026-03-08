@@ -4,7 +4,7 @@ import AdminLayout from '@/components/AdminLayout';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { toast } from 'sonner';
-import { Plus, Send, Trash2, Edit, Image as ImageIcon } from 'lucide-react';
+import { Plus, Send, Trash2, Edit, Image as ImageIcon, X } from 'lucide-react';
 
 function Posts({ onLogout }) {
   const [posts, setPosts] = useState([]);
