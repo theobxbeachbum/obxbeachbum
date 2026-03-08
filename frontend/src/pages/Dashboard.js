@@ -66,7 +66,7 @@ function Dashboard({ onLogout }) {
         <div className="card">
           <h2>Quick Start Guide</h2>
           <ol style={{ paddingLeft: '20px', fontSize: '16px', lineHeight: '2' }}>
-            <li>Go to <strong>Settings</strong> to configure SendGrid API key and sender email</li>
+            <li>Go to <strong>Settings</strong> to configure SMTP2GO credentials and sender email</li>
             <li>Add subscriber emails in <strong>Subscribers</strong> or share the subscribe form</li>
             <li>Create a newsletter post in <strong>Posts</strong></li>
             <li>Send the newsletter to all subscribers from the Posts page</li>
