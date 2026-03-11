@@ -21,6 +21,8 @@ import OrderSuccess from '@/pages/OrderSuccess';
 import ShopPlaceholder from '@/pages/ShopPlaceholder';
 import Muggs from '@/pages/Muggs';
 import MuggsSuccess from '@/pages/MuggsSuccess';
+import Notecards from '@/pages/Notecards';
+import NotecardsSuccess from '@/pages/NotecardsSuccess';
 import { Toaster } from 'sonner';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
