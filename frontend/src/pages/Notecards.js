@@ -1,44 +1,10 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
 import { Mail, ShoppingCart } from 'lucide-react';
 import { Button } from '../components/ui/button';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
-
-// Notecard products - placeholder images to be replaced with actual notecard designs
-const NOTECARDS = [
-  {
-    id: 'notecard-sunrise-dunes',
-    title: 'Sunrise Over the Dunes',
-    image: 'https://customer-assets.emergentagent.com/job_photo-news/artifacts/ds3e93fb_logo-ish.jpg',
-  },
-  {
-    id: 'notecard-cape-hatteras',
-    title: 'Cape Hatteras Lighthouse',
-    image: 'https://customer-assets.emergentagent.com/job_photo-news/artifacts/ds3e93fb_logo-ish.jpg',
-  },
-  {
-    id: 'notecard-wild-horses',
-    title: 'Wild Horses of Corolla',
-    image: 'https://customer-assets.emergentagent.com/job_photo-news/artifacts/ds3e93fb_logo-ish.jpg',
-  },
-  {
-    id: 'notecard-pelican-flight',
-    title: 'Pelican in Flight',
-    image: 'https://customer-assets.emergentagent.com/job_photo-news/artifacts/ds3e93fb_logo-ish.jpg',
-  },
-  {
-    id: 'notecard-pier-sunset',
-    title: 'Pier at Sunset',
-    image: 'https://customer-assets.emergentagent.com/job_photo-news/artifacts/ds3e93fb_logo-ish.jpg',
-  },
-  {
-    id: 'notecard-sea-oats',
-    title: 'Sea Oats at Golden Hour',
-    image: 'https://customer-assets.emergentagent.com/job_photo-news/artifacts/ds3e93fb_logo-ish.jpg',
-  }
-];
 
 // Pricing variants for all notecards
 const NOTECARD_VARIANTS = [
@@ -81,7 +47,7 @@ function NotecardCard({ notecard }) {
   return (
     <div className="notecard-product-card" data-testid={`notecard-${notecard.id}`}>
       <div className="notecard-image-container">
-        <img src={notecard.image} alt={notecard.title} className="notecard-image" />
+        <img src={notecard.image_url} alt={notecard.title} className="notecard-image" />
       </div>
       <div className="notecard-details">
         <h3 className="notecard-title">{notecard.title}</h3>
@@ -139,6 +105,24 @@ function NotecardCard({ notecard }) {
 }
 
 function Notecards() {
+  const [notecards, setNotecards] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchNotecards();
+  }, []);
+
+  const fetchNotecards = async () => {
+    try {
+      const response = await axios.get(`${BACKEND_URL}/api/notecards-products`);
+      setNotecards(response.data);
+    } catch (error) {
+      console.error('Failed to fetch notecards:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="substack-site">
       {/* Header */}
@@ -184,11 +168,23 @@ function Notecards() {
 
       {/* Products Grid */}
       <main className="notecards-main">
-        <div className="notecards-grid">
-          {NOTECARDS.map(notecard => (
-            <NotecardCard key={notecard.id} notecard={notecard} />
-          ))}
-        </div>
+        {loading ? (
+          <div style={{ textAlign: 'center', padding: '60px 20px' }}>
+            <p>Loading notecards...</p>
+          </div>
+        ) : notecards.length === 0 ? (
+          <div style={{ textAlign: 'center', padding: '60px 20px' }}>
+            <Mail size={64} style={{ color: '#ccc', marginBottom: '20px' }} />
+            <h3 style={{ margin: '0 0 10px' }}>Coming Soon!</h3>
+            <p style={{ color: '#666' }}>Our notecard collection is being prepared. Check back soon!</p>
+          </div>
+        ) : (
+          <div className="notecards-grid">
+            {notecards.map(notecard => (
+              <NotecardCard key={notecard.id} notecard={notecard} />
+            ))}
+          </div>
+        )}
 
         <div className="product-info-banner">
           <div className="info-item">
