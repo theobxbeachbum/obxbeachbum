@@ -237,10 +237,7 @@ metadata:
 
 test_plan:
   current_focus:
-    - "Print Gallery pricing API endpoint"
-    - "Public gallery API endpoint"
-    - "Gallery tags API endpoint"
-    - "Print management admin endpoints"
+    - "Print Gallery modal with dark overlay"
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
