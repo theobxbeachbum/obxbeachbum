@@ -1162,6 +1162,117 @@ async def delete_print(print_id: str, authorization: str = Header(None)):
         raise HTTPException(404, "Print not found")
     return {"success": True}
 
+
+# ============================================
+# MUGGS PRODUCTS - Admin CRUD
+# ============================================
+
+# Admin: Get all muggs products
+@api_router.get("/admin/muggs-products")
+async def get_admin_muggs_products(authorization: str = Header(None)):
+    await verify_admin_token(authorization)
+    products = await db.muggs_products.find({}, {"_id": 0}).sort("sort_order", 1).to_list(1000)
+    return products
+
+# Admin: Create muggs product
+@api_router.post("/admin/muggs-products")
+async def create_muggs_product(product: MuggsProductCreate, authorization: str = Header(None)):
+    await verify_admin_token(authorization)
+    new_product = MuggsProduct(**product.model_dump())
+    await db.muggs_products.insert_one(new_product.model_dump())
+    return {"success": True, "id": new_product.id}
+
+# Admin: Update muggs product
+@api_router.put("/admin/muggs-products/{product_id}")
+async def update_muggs_product(product_id: str, product: MuggsProductCreate, authorization: str = Header(None)):
+    await verify_admin_token(authorization)
+    result = await db.muggs_products.update_one(
+        {"id": product_id},
+        {"$set": product.model_dump()}
+    )
+    if result.matched_count == 0:
+        raise HTTPException(404, "Product not found")
+    return {"success": True}
+
+# Admin: Delete muggs product
+@api_router.delete("/admin/muggs-products/{product_id}")
+async def delete_muggs_product(product_id: str, authorization: str = Header(None)):
+    await verify_admin_token(authorization)
+    result = await db.muggs_products.delete_one({"id": product_id})
+    if result.deleted_count == 0:
+        raise HTTPException(404, "Product not found")
+    return {"success": True}
+
+# Admin: Reorder muggs products
+@api_router.post("/admin/muggs-products/reorder")
+async def reorder_muggs_products(order: List[str], authorization: str = Header(None)):
+    await verify_admin_token(authorization)
+    for i, product_id in enumerate(order):
+        await db.muggs_products.update_one({"id": product_id}, {"$set": {"sort_order": i}})
+    return {"success": True}
+
+# Public: Get active muggs products
+@api_router.get("/muggs-products")
+async def get_muggs_products():
+    products = await db.muggs_products.find({"active": True}, {"_id": 0}).sort("sort_order", 1).to_list(1000)
+    return products
+
+
+# ============================================
+# NOTECARDS PRODUCTS - Admin CRUD
+# ============================================
+
+# Admin: Get all notecards products
+@api_router.get("/admin/notecards-products")
+async def get_admin_notecards_products(authorization: str = Header(None)):
+    await verify_admin_token(authorization)
+    products = await db.notecards_products.find({}, {"_id": 0}).sort("sort_order", 1).to_list(1000)
+    return products
+
+# Admin: Create notecards product
+@api_router.post("/admin/notecards-products")
+async def create_notecards_product(product: NotecardsProductCreate, authorization: str = Header(None)):
+    await verify_admin_token(authorization)
+    new_product = NotecardsProduct(**product.model_dump())
+    await db.notecards_products.insert_one(new_product.model_dump())
+    return {"success": True, "id": new_product.id}
+
+# Admin: Update notecards product
+@api_router.put("/admin/notecards-products/{product_id}")
+async def update_notecards_product(product_id: str, product: NotecardsProductCreate, authorization: str = Header(None)):
+    await verify_admin_token(authorization)
+    result = await db.notecards_products.update_one(
+        {"id": product_id},
+        {"$set": product.model_dump()}
+    )
+    if result.matched_count == 0:
+        raise HTTPException(404, "Product not found")
+    return {"success": True}
+
+# Admin: Delete notecards product
+@api_router.delete("/admin/notecards-products/{product_id}")
+async def delete_notecards_product(product_id: str, authorization: str = Header(None)):
+    await verify_admin_token(authorization)
+    result = await db.notecards_products.delete_one({"id": product_id})
+    if result.deleted_count == 0:
+        raise HTTPException(404, "Product not found")
+    return {"success": True}
+
+# Admin: Reorder notecards products
+@api_router.post("/admin/notecards-products/reorder")
+async def reorder_notecards_products(order: List[str], authorization: str = Header(None)):
+    await verify_admin_token(authorization)
+    for i, product_id in enumerate(order):
+        await db.notecards_products.update_one({"id": product_id}, {"$set": {"sort_order": i}})
+    return {"success": True}
+
+# Public: Get active notecards products
+@api_router.get("/notecards-products")
+async def get_notecards_products():
+    products = await db.notecards_products.find({"active": True}, {"_id": 0}).sort("sort_order", 1).to_list(1000)
+    return products
+
+
 # Public: Get gallery (curated prints + purchasable posts)
 @api_router.get("/public/gallery")
 async def get_public_gallery(tag: Optional[str] = None):
