@@ -2651,6 +2651,153 @@ h1, h2, h3, h4, h5, h6 {
   transform: none;
 }
 
+
+/* ============================================
+   Notecards Page Styles
+   ============================================ */
+
+.notecards-hero {
+  background: linear-gradient(135deg, #fef9f3 0%, #f5ebe0 100%);
+  padding: 60px 20px;
+  text-align: center;
+}
+
+.notecards-hero .hero-content {
+  max-width: 700px;
+  margin: 0 auto;
+}
+
+.notecards-hero .hero-icon {
+  color: #1a1a1a;
+  margin-bottom: 20px;
+}
+
+.notecards-hero h1 {
+  font-family: 'Playfair Display', Georgia, serif;
+  font-size: 42px;
+  margin: 0 0 10px;
+  color: #1a1a1a;
+}
+
+.notecards-hero .hero-subtitle {
+  font-size: 18px;
+  color: #666;
+  margin: 0 0 20px;
+  font-weight: 500;
+}
+
+.notecards-hero .hero-description {
+  font-size: 16px;
+  color: #666;
+  line-height: 1.6;
+  margin: 0;
+}
+
+.notecards-main {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 60px 20px;
+}
+
+.notecards-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 30px;
+}
+
+.notecard-product-card {
+  background: #fff;
+  border: 1px solid #e0e0e0;
+  border-radius: 12px;
+  overflow: hidden;
+  transition: box-shadow 0.3s ease;
+}
+
+.notecard-product-card:hover {
+  box-shadow: 0 8px 30px rgba(0,0,0,0.1);
+}
+
+.notecard-image-container {
+  width: 100%;
+  aspect-ratio: 5/7;
+  overflow: hidden;
+  background: #f8f9fa;
+}
+
+.notecard-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.3s ease;
+}
+
+.notecard-product-card:hover .notecard-image {
+  transform: scale(1.05);
+}
+
+.notecard-details {
+  padding: 20px;
+}
+
+.notecard-title {
+  font-family: 'Playfair Display', Georgia, serif;
+  font-size: 18px;
+  margin: 0 0 15px;
+  color: #1a1a1a;
+  line-height: 1.3;
+}
+
+/* Product Info Banner */
+.product-info-banner {
+  display: flex;
+  justify-content: center;
+  gap: 40px;
+  padding: 30px;
+  background: #f8f9fa;
+  border-radius: 12px;
+  margin-top: 40px;
+  flex-wrap: wrap;
+}
+
+.info-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 14px;
+  color: #666;
+}
+
+.info-icon {
+  font-size: 20px;
+}
+
+/* Responsive Notecards */
+@media (max-width: 1000px) {
+  .notecards-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 650px) {
+  .notecards-grid {
+    grid-template-columns: 1fr;
+    gap: 25px;
+  }
+  
+  .notecards-hero h1 {
+    font-size: 32px;
+  }
+  
+  .product-info-banner {
+    gap: 20px;
+    padding: 20px;
+  }
+  
+  .info-item {
+    font-size: 13px;
+  }
+}
+
 .shipping-info {
   text-align: center;
   margin-top: 40px;
