@@ -635,6 +635,30 @@ h1, h2, h3, h4, h5, h6 {
   display: block;
 }
 
+.buy-print-cta {
+  margin: 20px 0 30px;
+  text-align: center;
+}
+
+.buy-print-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 28px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: #fff;
+  text-decoration: none;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 500;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.buy-print-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+}
+
 .post-image {
   width: 100%;
   height: auto;
