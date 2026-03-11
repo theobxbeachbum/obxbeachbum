@@ -99,6 +99,16 @@ function PostView() {
             </div>
           )}
 
+          {/* Buy a Print Button */}
+          {post.available_for_purchase && post.image_url && (
+            <div className="buy-print-cta">
+              <Link to={`/gallery?print=${post.id}`} className="buy-print-btn">
+                <ShoppingBag size={20} />
+                Buy a Print of This Photo
+              </Link>
+            </div>
+          )}
+
           <div className="post-content" data-testid="post-content">
             {/* Content is HTML from rich text editor */}
             <div 
