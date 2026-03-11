@@ -1974,7 +1974,7 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .size-btn {
-  padding: 12px;
+  padding: 14px;
   border: 2px solid #ddd;
   background: #fff;
   border-radius: 8px;
@@ -1996,12 +1996,12 @@ h1, h2, h3, h4, h5, h6 {
 .size-label {
   display: block;
   font-weight: 600;
-  font-size: 14px;
+  font-size: 16px;
 }
 
 .size-price {
   display: block;
-  font-size: 13px;
+  font-size: 15px;
   margin-top: 4px;
   opacity: 0.8;
 }
