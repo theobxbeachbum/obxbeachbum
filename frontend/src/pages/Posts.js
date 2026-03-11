@@ -296,6 +296,26 @@ function Posts({ onLogout }) {
                   )}
                 </div>
 
+                {/* Available for Purchase Toggle */}
+                {formData.image_url && (
+                  <div className="form-group">
+                    <label style={{ display: 'flex', alignItems: 'center', gap: '12px', cursor: 'pointer' }}>
+                      <input
+                        type="checkbox"
+                        checked={formData.available_for_purchase}
+                        onChange={(e) => setFormData({ ...formData, available_for_purchase: e.target.checked })}
+                        style={{ width: '20px', height: '20px', cursor: 'pointer' }}
+                      />
+                      <span>
+                        <strong>Available for Purchase</strong>
+                        <p style={{ fontSize: '13px', color: '#666', margin: '4px 0 0' }}>
+                          When enabled, a "Buy a Print" button will appear on this post and the photo will show in the Gallery.
+                        </p>
+                      </span>
+                    </label>
+                  </div>
+                )}
+
                 <div className="form-group">
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
                     <label htmlFor="content">Content</label>
