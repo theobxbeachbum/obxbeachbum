@@ -68,16 +68,16 @@ function OrderSuccess() {
       </header>
 
       {/* Success Content */}
-      <main className="order-success-page">
+      <main className="order-success-page" style={{ display: 'flex', justifyContent: 'center', padding: '60px 20px', minHeight: '60vh' }}>
         {status === 'loading' && (
-          <div className="success-content">
+          <div className="success-content" style={{ textAlign: 'center', maxWidth: '700px', width: '100%' }}>
             <div className="loading-spinner"></div>
             <h2>Processing your order...</h2>
           </div>
         )}
 
         {status === 'success' && orderData && (
-          <div className="success-content">
+          <div className="success-content" style={{ textAlign: 'center', maxWidth: '700px', width: '100%' }}>
             <div className="success-icon">
               <CheckCircle size={80} color="#28a745" />
             </div>
