@@ -1832,6 +1832,272 @@ async def send_muggs_order_notification(session_id: str):
             logging.error(f"Failed to send muggs order notification: {e}")
 
 
+# ============================================
+# NOTECARDS Checkout Endpoints
+# ============================================
+
+# Notecards pricing
+NOTECARDS_PRICING = {
+    'single': 6,
+    'six-pak': 30,
+    'ten-pak': 40
+}
+
+@api_router.post("/notecards/checkout")
+async def create_notecards_checkout(order: NotecardsOrderCreate):
+    """Create Stripe checkout for notecards purchase."""
+    
+    # Validate variant and price
+    if order.variant not in NOTECARDS_PRICING:
+        raise HTTPException(400, "Invalid quantity selection")
+    
+    expected_price = NOTECARDS_PRICING[order.variant]
+    if abs(order.price - expected_price) > 0.01:
+        raise HTTPException(400, "Price mismatch")
+    
+    # Create order record
+    notecards_order = NotecardsOrder(
+        product_id=order.product_id,
+        product_title=order.product_title,
+        variant=order.variant,
+        variant_label=order.variant_label,
+        price=order.price,
+        special_instructions=order.special_instructions
+    )
+    await db.notecards_orders.insert_one(notecards_order.model_dump())
+    
+    # Create Stripe checkout
+    stripe_api_key = os.environ.get('STRIPE_API_KEY')
+    if not stripe_api_key:
+        raise HTTPException(500, "Stripe not configured")
+    
+    stripe.api_key = stripe_api_key
+    if "sk_test_emergent" in stripe_api_key:
+        stripe.api_base = "https://integrations.emergentagent.com/stripe"
+    
+    # Build product name
+    product_name = f"{order.product_title} ({order.variant_label})"
+    
+    try:
+        session = stripe.checkout.Session.create(
+            payment_method_types=['card'],
+            line_items=[{
+                "price_data": {
+                    "currency": "usd",
+                    "product_data": {
+                        "name": product_name,
+                        "description": "Mostly Good Notecards - 5x7, blank inside, with envelope"
+                    },
+                    "unit_amount": int(order.price * 100)
+                },
+                "quantity": 1
+            }],
+            mode="payment",
+            success_url=f"{order.origin_url}/notecards-success?session_id={{CHECKOUT_SESSION_ID}}",
+            cancel_url=f"{order.origin_url}/shop/notecards",
+            shipping_address_collection={"allowed_countries": ["US"]},
+            metadata={
+                "order_id": notecards_order.id,
+                "product_title": order.product_title,
+                "variant": order.variant,
+                "variant_label": order.variant_label,
+                "special_instructions": order.special_instructions or ""
+            }
+        )
+        
+        # Update order with session ID
+        await db.notecards_orders.update_one(
+            {"id": notecards_order.id},
+            {"$set": {"stripe_session_id": session.id}}
+        )
+        
+        return {"checkout_url": session.url, "session_id": session.id}
+    except Exception as e:
+        error_msg = str(e)
+        logging.error(f"Notecards checkout error: {error_msg}")
+        raise HTTPException(500, f"Payment error: {error_msg}")
+
+
+@api_router.get("/notecards/checkout/status/{session_id}")
+async def get_notecards_checkout_status(session_id: str, background_tasks: BackgroundTasks):
+    """Check notecards order payment status and return order details."""
+    stripe_api_key = os.environ.get('STRIPE_API_KEY')
+    if not stripe_api_key:
+        raise HTTPException(500, "Stripe not configured")
+    
+    stripe.api_key = stripe_api_key
+    if "sk_test_emergent" in stripe_api_key:
+        stripe.api_base = "https://integrations.emergentagent.com/stripe"
+    
+    # Get order from database
+    order = await db.notecards_orders.find_one({"stripe_session_id": session_id}, {"_id": 0})
+    if not order:
+        raise HTTPException(404, "Order not found")
+    
+    # If order is already marked as paid, return the stored data
+    if order.get("payment_status") == "paid":
+        return {
+            "payment_status": "paid",
+            "order_number": order.get("order_number"),
+            "product_title": order.get("product_title"),
+            "variant": order.get("variant"),
+            "variant_label": order.get("variant_label"),
+            "price": order.get("price"),
+            "special_instructions": order.get("special_instructions"),
+            "customer_email": order.get("customer_email"),
+            "customer_name": order.get("customer_name"),
+            "shipping_address": order.get("shipping_address"),
+            "created_at": order.get("created_at").isoformat() if order.get("created_at") else None
+        }
+    
+    try:
+        # Get session details from Stripe
+        session = stripe.checkout.Session.retrieve(session_id)
+        payment_status = session.payment_status
+        
+        if payment_status == "paid":
+            # Update order with customer details
+            customer_email = session.customer_details.email if session.customer_details else None
+            customer_name = session.customer_details.name if session.customer_details else None
+            shipping = None
+            if session.shipping_details:
+                shipping = {
+                    "name": session.shipping_details.name,
+                    "address": {
+                        "line1": session.shipping_details.address.line1,
+                        "line2": session.shipping_details.address.line2,
+                        "city": session.shipping_details.address.city,
+                        "state": session.shipping_details.address.state,
+                        "postal_code": session.shipping_details.address.postal_code,
+                        "country": session.shipping_details.address.country
+                    }
+                }
+            
+            await db.notecards_orders.update_one(
+                {"stripe_session_id": session_id},
+                {"$set": {
+                    "payment_status": "paid",
+                    "customer_email": customer_email,
+                    "customer_name": customer_name,
+                    "shipping_address": shipping
+                }}
+            )
+            
+            # Refresh order data
+            order = await db.notecards_orders.find_one({"stripe_session_id": session_id}, {"_id": 0})
+            
+            # Send order notification email
+            background_tasks.add_task(send_notecards_order_notification, session_id)
+        
+        return {
+            "payment_status": payment_status,
+            "order_number": order.get("order_number"),
+            "product_title": order.get("product_title"),
+            "variant": order.get("variant"),
+            "variant_label": order.get("variant_label"),
+            "price": order.get("price"),
+            "special_instructions": order.get("special_instructions"),
+            "customer_email": order.get("customer_email"),
+            "customer_name": order.get("customer_name"),
+            "shipping_address": order.get("shipping_address"),
+            "created_at": order.get("created_at").isoformat() if order.get("created_at") else None
+        }
+    except Exception as e:
+        logging.error(f"Error getting notecards checkout status: {str(e)}")
+        return {
+            "payment_status": order.get("payment_status", "unknown"),
+            "order_number": order.get("order_number"),
+            "product_title": order.get("product_title"),
+            "variant": order.get("variant"),
+            "variant_label": order.get("variant_label"),
+            "price": order.get("price"),
+            "special_instructions": order.get("special_instructions"),
+            "customer_email": order.get("customer_email"),
+            "customer_name": order.get("customer_name"),
+            "shipping_address": order.get("shipping_address"),
+            "created_at": order.get("created_at").isoformat() if order.get("created_at") else None
+        }
+
+
+async def send_notecards_order_notification(session_id: str):
+    """Send notecards order notification email to Roy."""
+    settings = await get_settings()
+    order = await db.notecards_orders.find_one({"stripe_session_id": session_id}, {"_id": 0})
+    
+    if not order:
+        return
+    
+    shipping = order.get('shipping_address', {})
+    shipping_address = shipping.get('address', {}) if shipping else {}
+    shipping_name = shipping.get('name', 'N/A') if shipping else 'N/A'
+    
+    subject = f"📬 New Notecards Order: {order['order_number']}"
+    
+    html_content = f"""
+    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+        <h1 style="color: #333; border-bottom: 2px solid #1a1a1a; padding-bottom: 10px;">
+            ✉️ New Notecards Order!
+        </h1>
+        
+        <p style="background: #e8f4ff; padding: 15px; border-radius: 4px;">
+            <strong>Order Number:</strong> {order['order_number']}<br>
+            <strong>Customer:</strong> {order.get('customer_name', 'N/A')}<br>
+            <strong>Email:</strong> {order.get('customer_email', 'N/A')}
+        </p>
+        
+        <h3 style="color: #333; margin-top: 30px;">Shipping Address</h3>
+        <p style="background: #f9f9f9; padding: 15px; border-radius: 4px;">
+            {shipping_name}<br>
+            {shipping_address.get('line1', 'N/A')}<br>
+            {shipping_address.get('line2', '') + '<br>' if shipping_address.get('line2') else ''}
+            {shipping_address.get('city', '')}, {shipping_address.get('state', '')} {shipping_address.get('postal_code', '')}
+        </p>
+        
+        <h3 style="color: #333; margin-top: 30px;">Order Details</h3>
+        <table style="width: 100%; border-collapse: collapse;">
+            <tr style="background: #f5f5f5;">
+                <td style="padding: 10px; border: 1px solid #ddd;"><strong>Notecard Design</strong></td>
+                <td style="padding: 10px; border: 1px solid #ddd;">{order['product_title']}</td>
+            </tr>
+            <tr>
+                <td style="padding: 10px; border: 1px solid #ddd;"><strong>Quantity</strong></td>
+                <td style="padding: 10px; border: 1px solid #ddd;">{order['variant_label']}</td>
+            </tr>
+            <tr style="background: #f5f5f5;">
+                <td style="padding: 10px; border: 1px solid #ddd;"><strong>Price</strong></td>
+                <td style="padding: 10px; border: 1px solid #ddd;">${order['price']:.2f}</td>
+            </tr>
+        </table>
+        
+        {"<h3 style='color: #333; margin-top: 30px;'>Special Instructions</h3><p style='background: #fff9e6; padding: 15px; border-left: 4px solid #f0ad4e;'>" + order['special_instructions'] + "</p>" if order.get('special_instructions') else ""}
+        
+        <p style="margin-top: 30px; padding: 15px; background: #d4edda; border-radius: 4px;">
+            <strong>Stripe Payment ID:</strong> {session_id}
+        </p>
+    </div>
+    """
+    
+    # Send to Roy
+    roy_email = "roye@theobxbeachbum.com"
+    
+    if settings.smtp_host and settings.smtp_username:
+        try:
+            msg = MIMEMultipart('alternative')
+            msg['Subject'] = subject
+            msg['From'] = settings.sender_email or settings.smtp_username
+            msg['To'] = roy_email
+            msg.attach(MIMEText(html_content, 'html'))
+            
+            with smtplib.SMTP(settings.smtp_host, settings.smtp_port) as server:
+                server.starttls()
+                server.login(settings.smtp_username, settings.smtp_password)
+                server.sendmail(msg['From'], [roy_email], msg.as_string())
+            
+            logging.info(f"Notecards order notification sent for {order['order_number']}")
+        except Exception as e:
+            logging.error(f"Failed to send notecards order notification: {e}")
+
+
 # Include router
 app.include_router(api_router)
 
