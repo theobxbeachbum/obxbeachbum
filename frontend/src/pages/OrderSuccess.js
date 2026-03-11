@@ -1,14 +1,14 @@
 import { useState, useEffect } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import axios from 'axios';
-import { CheckCircle, Package, Mail } from 'lucide-react';
+import { CheckCircle, Package, Mail, Printer, MapPin, FileText } from 'lucide-react';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 
 function OrderSuccess() {
   const [searchParams] = useSearchParams();
   const [status, setStatus] = useState('loading');
-  const [customerEmail, setCustomerEmail] = useState('');
+  const [orderData, setOrderData] = useState(null);
 
   useEffect(() => {
     const sessionId = searchParams.get('session_id');
@@ -24,7 +24,7 @@ function OrderSuccess() {
       const response = await axios.get(`${BACKEND_URL}/api/prints/checkout/status/${sessionId}`);
       if (response.data.payment_status === 'paid') {
         setStatus('success');
-        setCustomerEmail(response.data.customer_email);
+        setOrderData(response.data);
       } else {
         setStatus('pending');
       }
@@ -32,6 +32,19 @@ function OrderSuccess() {
       console.error('Failed to check status:', error);
       setStatus('error');
     }
+  };
+
+  const formatAddress = (shipping) => {
+    if (!shipping || !shipping.address) return null;
+    const addr = shipping.address;
+    return (
+      <>
+        <p>{shipping.name}</p>
+        <p>{addr.line1}</p>
+        {addr.line2 && <p>{addr.line2}</p>}
+        <p>{addr.city}, {addr.state} {addr.postal_code}</p>
+      </>
+    );
   };
 
   return (
@@ -63,21 +76,58 @@ function OrderSuccess() {
           </div>
         )}
 
-        {status === 'success' && (
+        {status === 'success' && orderData && (
           <div className="success-content">
             <div className="success-icon">
               <CheckCircle size={80} color="#28a745" />
             </div>
             <h1>Thank You for Your Order!</h1>
-            <p className="success-message">
-              Your print order has been successfully placed.
-            </p>
+            <p className="order-number">Order #{orderData.order_number}</p>
             
+            {/* Order Details Card */}
+            <div className="order-details-card" data-testid="order-details-card">
+              <h2>Order Details</h2>
+              
+              <div className="order-item">
+                <div className="order-item-icon">
+                  <Printer size={24} />
+                </div>
+                <div className="order-item-details">
+                  <h3>{orderData.print_title}</h3>
+                  <p className="item-specs">{orderData.print_type} - {orderData.size}</p>
+                  <p className="item-price">${orderData.price?.toFixed(2)}</p>
+                </div>
+              </div>
+
+              {orderData.special_instructions && (
+                <div className="order-section">
+                  <div className="section-header">
+                    <FileText size={18} />
+                    <span>Special Instructions</span>
+                  </div>
+                  <p className="special-instructions">{orderData.special_instructions}</p>
+                </div>
+              )}
+
+              {orderData.shipping_address && (
+                <div className="order-section">
+                  <div className="section-header">
+                    <MapPin size={18} />
+                    <span>Shipping Address</span>
+                  </div>
+                  <div className="shipping-address">
+                    {formatAddress(orderData.shipping_address)}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Info Cards */}
             <div className="order-info-cards">
               <div className="info-card">
                 <Mail size={32} />
                 <h3>Confirmation Email</h3>
-                <p>A confirmation email has been sent to <strong>{customerEmail}</strong></p>
+                <p>A confirmation has been sent to <strong>{orderData.customer_email}</strong></p>
               </div>
               
               <div className="info-card">
@@ -88,7 +138,9 @@ function OrderSuccess() {
             </div>
 
             <div className="success-actions">
-              <Link to="/gallery" className="btn-primary">Continue Shopping</Link>
+              <Link to="/gallery" className="btn-primary" data-testid="continue-shopping-btn">
+                Continue Shopping
+              </Link>
               <Link to="/" className="btn-secondary">Back to Home</Link>
             </div>
           </div>
