@@ -1903,10 +1903,13 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .modal-details {
+  flex: 0 0 50%;
+  width: 50%;
   padding: 30px;
   background: #fff;
   overflow-y: auto;
   font-size: 16px;
+  box-sizing: border-box;
 }
 
 .modal-details h2 {
