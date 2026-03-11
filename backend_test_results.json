@@ -1,16 +1,382 @@
 {
   "summary": {
-    "tests_run": 1,
-    "tests_passed": 0,
-    "success_rate": 0.0,
-    "timestamp": "2026-03-11T13:40:58.623387"
+    "tests_run": 62,
+    "tests_passed": 58,
+    "success_rate": 93.54838709677419,
+    "timestamp": "2026-03-11T13:42:14.914533"
   },
   "results": [
     {
       "test": "Admin Login",
+      "success": true,
+      "details": "Status: 200",
+      "timestamp": "2026-03-11T13:42:07.890677"
+    },
+    {
+      "test": "Admin Token Verify",
+      "success": true,
+      "details": "Status: 200",
+      "timestamp": "2026-03-11T13:42:08.070547"
+    },
+    {
+      "test": "Get Settings",
+      "success": true,
+      "details": "Status: 200",
+      "timestamp": "2026-03-11T13:42:08.183472"
+    },
+    {
+      "test": "Update Settings",
+      "success": true,
+      "details": "Status: 200",
+      "timestamp": "2026-03-11T13:42:08.308646"
+    },
+    {
+      "test": "Add Subscriber",
+      "success": true,
+      "details": "Status: 200",
+      "timestamp": "2026-03-11T13:42:08.438492"
+    },
+    {
+      "test": "List Subscribers",
+      "success": true,
+      "details": "Status: 200",
+      "timestamp": "2026-03-11T13:42:08.544642"
+    },
+    {
+      "test": "Export Subscribers",
+      "success": true,
+      "details": "Status: 200",
+      "timestamp": "2026-03-11T13:42:08.672575"
+    },
+    {
+      "test": "Remove Subscriber",
+      "success": true,
+      "details": "Status: 200",
+      "timestamp": "2026-03-11T13:42:08.778049"
+    },
+    {
+      "test": "Create Post",
+      "success": true,
+      "details": "Status: 200",
+      "timestamp": "2026-03-11T13:42:08.900819"
+    },
+    {
+      "test": "List Posts",
       "success": false,
-      "details": "Status: 401 (Expected: 200), Response: {'detail': 'Invalid password'}",
-      "timestamp": "2026-03-11T13:40:58.622507"
+      "details": "Status: 500 (Expected: 200), Response: Internal Server Error",
+      "timestamp": "2026-03-11T13:42:09.020761"
+    },
+    {
+      "test": "Get Post",
+      "success": true,
+      "details": "Status: 200",
+      "timestamp": "2026-03-11T13:42:09.131604"
+    },
+    {
+      "test": "Update Post",
+      "success": true,
+      "details": "Status: 200",
+      "timestamp": "2026-03-11T13:42:09.261657"
+    },
+    {
+      "test": "Delete Post",
+      "success": true,
+      "details": "Status: 200",
+      "timestamp": "2026-03-11T13:42:09.403422"
+    },
+    {
+      "test": "Create Markdown Test Post",
+      "success": true,
+      "details": "Status: 200",
+      "timestamp": "2026-03-11T13:42:09.511360"
+    },
+    {
+      "test": "Publish Test Post",
+      "success": true,
+      "details": "Status: 200",
+      "timestamp": "2026-03-11T13:42:09.617784"
+    },
+    {
+      "test": "Get Public Posts List",
+      "success": false,
+      "details": "Status: 500 (Expected: 200), Response: Internal Server Error",
+      "timestamp": "2026-03-11T13:42:11.184594"
+    },
+    {
+      "test": "Get Public Post by Slug",
+      "success": true,
+      "details": "Status: 200",
+      "timestamp": "2026-03-11T13:42:11.320525"
+    },
+    {
+      "test": "HTML Conversion - H1 header tag",
+      "success": true,
+      "details": "Found <h1>",
+      "timestamp": "2026-03-11T13:42:11.321185"
+    },
+    {
+      "test": "HTML Conversion - H2 header tag",
+      "success": true,
+      "details": "Found <h2>",
+      "timestamp": "2026-03-11T13:42:11.321202"
+    },
+    {
+      "test": "HTML Conversion - Strong/bold tag",
+      "success": true,
+      "details": "Found <strong>",
+      "timestamp": "2026-03-11T13:42:11.321208"
+    },
+    {
+      "test": "HTML Conversion - Em/italic tag",
+      "success": true,
+      "details": "Found <em>",
+      "timestamp": "2026-03-11T13:42:11.321212"
+    },
+    {
+      "test": "HTML Conversion - Image tag",
+      "success": true,
+      "details": "Found <img",
+      "timestamp": "2026-03-11T13:42:11.321217"
+    },
+    {
+      "test": "HTML Conversion - Ordered list tag",
+      "success": true,
+      "details": "Found <ol>",
+      "timestamp": "2026-03-11T13:42:11.321222"
+    },
+    {
+      "test": "HTML Conversion - List item tag",
+      "success": true,
+      "details": "Found <li>",
+      "timestamp": "2026-03-11T13:42:11.321226"
+    },
+    {
+      "test": "HTML Conversion - Horizontal rule tag",
+      "success": true,
+      "details": "Found <hr",
+      "timestamp": "2026-03-11T13:42:11.321234"
+    },
+    {
+      "test": "HTML Conversion - Paragraph tag",
+      "success": true,
+      "details": "Found <p>",
+      "timestamp": "2026-03-11T13:42:11.321239"
+    },
+    {
+      "test": "HTML Conversion - Image src attribute",
+      "success": true,
+      "details": "Image has src attribute",
+      "timestamp": "2026-03-11T13:42:11.321243"
+    },
+    {
+      "test": "HTML Conversion - No Raw Markdown",
+      "success": true,
+      "details": "No Markdown syntax found in HTML",
+      "timestamp": "2026-03-11T13:42:11.321252"
+    },
+    {
+      "test": "Create Post for Newsletter",
+      "success": true,
+      "details": "Status: 200",
+      "timestamp": "2026-03-11T13:42:11.427791"
+    },
+    {
+      "test": "Send Newsletter (Expected to Fail)",
+      "success": false,
+      "details": "Status: 200 (Expected: 400), Response: {'success': True, 'message': 'Newsletter queued for 1 subscribers'}",
+      "timestamp": "2026-03-11T13:42:11.538576"
+    },
+    {
+      "test": "List Supporters",
+      "success": true,
+      "details": "Status: 200",
+      "timestamp": "2026-03-11T13:42:12.394317"
+    },
+    {
+      "test": "Create Supporter Checkout",
+      "success": true,
+      "details": "Status: 200",
+      "timestamp": "2026-03-11T13:42:13.163165"
+    },
+    {
+      "test": "Public Subscribe",
+      "success": true,
+      "details": "Status: 200",
+      "timestamp": "2026-03-11T13:42:13.301471"
+    },
+    {
+      "test": "Embed Subscribe Form",
+      "success": true,
+      "details": "Status: 200",
+      "timestamp": "2026-03-11T13:42:13.469414"
+    },
+    {
+      "test": "Get Print Pricing",
+      "success": true,
+      "details": "Status: 200",
+      "timestamp": "2026-03-11T13:42:13.590457"
+    },
+    {
+      "test": "Print Pricing Structure",
+      "success": true,
+      "details": "Contains pricing and type_names",
+      "timestamp": "2026-03-11T13:42:13.591150"
+    },
+    {
+      "test": "Print Pricing - paper type",
+      "success": true,
+      "details": "Found paper pricing",
+      "timestamp": "2026-03-11T13:42:13.591170"
+    },
+    {
+      "test": "Print Pricing - paper sizes",
+      "success": true,
+      "details": "Found 6 sizes",
+      "timestamp": "2026-03-11T13:42:13.591179"
+    },
+    {
+      "test": "Print Pricing - canvas type",
+      "success": true,
+      "details": "Found canvas pricing",
+      "timestamp": "2026-03-11T13:42:13.591184"
+    },
+    {
+      "test": "Print Pricing - canvas sizes",
+      "success": true,
+      "details": "Found 7 sizes",
+      "timestamp": "2026-03-11T13:42:13.591189"
+    },
+    {
+      "test": "Print Pricing - metal type",
+      "success": true,
+      "details": "Found metal pricing",
+      "timestamp": "2026-03-11T13:42:13.591193"
+    },
+    {
+      "test": "Print Pricing - metal sizes",
+      "success": true,
+      "details": "Found 9 sizes",
+      "timestamp": "2026-03-11T13:42:13.591198"
+    },
+    {
+      "test": "Get Public Gallery",
+      "success": true,
+      "details": "Status: 200",
+      "timestamp": "2026-03-11T13:42:13.701608"
+    },
+    {
+      "test": "Public Gallery Format",
+      "success": true,
+      "details": "Returns list with 1 items",
+      "timestamp": "2026-03-11T13:42:13.702304"
+    },
+    {
+      "test": "Gallery Item - id field",
+      "success": true,
+      "details": "Found id",
+      "timestamp": "2026-03-11T13:42:13.702325"
+    },
+    {
+      "test": "Gallery Item - title field",
+      "success": true,
+      "details": "Found title",
+      "timestamp": "2026-03-11T13:42:13.702331"
+    },
+    {
+      "test": "Gallery Item - image_url field",
+      "success": true,
+      "details": "Found image_url",
+      "timestamp": "2026-03-11T13:42:13.702337"
+    },
+    {
+      "test": "Gallery Item - tags field",
+      "success": true,
+      "details": "Found tags",
+      "timestamp": "2026-03-11T13:42:13.702341"
+    },
+    {
+      "test": "Gallery Item - available_types field",
+      "success": true,
+      "details": "Found available_types",
+      "timestamp": "2026-03-11T13:42:13.702351"
+    },
+    {
+      "test": "Get Gallery Tags",
+      "success": true,
+      "details": "Status: 200",
+      "timestamp": "2026-03-11T13:42:13.810973"
+    },
+    {
+      "test": "Gallery Tags Format",
+      "success": true,
+      "details": "Returns list with 0 tags",
+      "timestamp": "2026-03-11T13:42:13.811623"
+    },
+    {
+      "test": "Get Gallery with Tag Filter",
+      "success": true,
+      "details": "Status: 200",
+      "timestamp": "2026-03-11T13:42:13.943186"
+    },
+    {
+      "test": "Gallery Tag Filter",
+      "success": true,
+      "details": "Tag filter works, returns 0 items",
+      "timestamp": "2026-03-11T13:42:13.943874"
+    },
+    {
+      "test": "Get Admin Prints List",
+      "success": true,
+      "details": "Status: 200",
+      "timestamp": "2026-03-11T13:42:14.048691"
+    },
+    {
+      "test": "Admin Prints Format",
+      "success": true,
+      "details": "Returns list with 0 prints",
+      "timestamp": "2026-03-11T13:42:14.049373"
+    },
+    {
+      "test": "Create Print",
+      "success": true,
+      "details": "Status: 200",
+      "timestamp": "2026-03-11T13:42:14.234578"
+    },
+    {
+      "test": "Print Creation",
+      "success": true,
+      "details": "Created print with ID: cd56c22e-991c-400b-ab8d-1288440bc883",
+      "timestamp": "2026-03-11T13:42:14.235258"
+    },
+    {
+      "test": "Update Print",
+      "success": true,
+      "details": "Status: 200",
+      "timestamp": "2026-03-11T13:42:14.370306"
+    },
+    {
+      "test": "Print Update Verification",
+      "success": true,
+      "details": "Title updated correctly",
+      "timestamp": "2026-03-11T13:42:14.370974"
+    },
+    {
+      "test": "Delete Print",
+      "success": true,
+      "details": "Status: 200",
+      "timestamp": "2026-03-11T13:42:14.474557"
+    },
+    {
+      "test": "Create Print Checkout",
+      "success": false,
+      "details": "Status: 500 (Expected: 200), Response: Internal Server Error",
+      "timestamp": "2026-03-11T13:42:14.805324"
+    },
+    {
+      "test": "Unsubscribe Invalid Token",
+      "success": true,
+      "details": "Status: 404",
+      "timestamp": "2026-03-11T13:42:14.913455"
     }
   ]
 }
