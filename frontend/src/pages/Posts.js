@@ -201,7 +201,7 @@ function Posts({ onLogout }) {
                 data-testid="create-post-btn"
                 onClick={() => {
                   setEditingPost(null);
-                  setFormData({ title: '', content: '', image_url: '', image_urls: [] });
+                  setFormData({ title: '', content: '', image_url: '', image_urls: [], available_for_purchase: false });
                 }}
               >
                 <Plus className="w-4 h-4 mr-2" />
