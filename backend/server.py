@@ -138,6 +138,35 @@ class PrintOrder(BaseModel):
     order_number: str = Field(default_factory=lambda: f"OBX-{datetime.now().strftime('%Y%m%d')}-{secrets.token_hex(3).upper()}")
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
+# Muggs (drinkware) order models
+class MuggsOrderCreate(BaseModel):
+    product_id: str
+    product_title: str
+    product_type: str  # mug, tumbler, sippy, coaster
+    variant: Optional[str] = None  # For coasters: single, set-2, set-4
+    variant_label: Optional[str] = None
+    price: float
+    special_instructions: Optional[str] = None
+    origin_url: str
+
+class MuggsOrder(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    product_id: str
+    product_title: str
+    product_type: str
+    variant: Optional[str] = None
+    variant_label: Optional[str] = None
+    price: float
+    special_instructions: Optional[str] = None
+    stripe_session_id: Optional[str] = None
+    customer_email: Optional[str] = None
+    customer_name: Optional[str] = None
+    shipping_address: Optional[Dict] = None
+    payment_status: str = "pending"
+    order_number: str = Field(default_factory=lambda: f"MUG-{datetime.now().strftime('%Y%m%d')}-{secrets.token_hex(3).upper()}")
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
 class SendNewsletterRequest(BaseModel):
     post_id: str
 
