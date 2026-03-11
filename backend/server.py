@@ -138,6 +138,29 @@ class PrintOrder(BaseModel):
     order_number: str = Field(default_factory=lambda: f"OBX-{datetime.now().strftime('%Y%m%d')}-{secrets.token_hex(3).upper()}")
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
+# Muggs (drinkware) product models
+class MuggsProductCreate(BaseModel):
+    title: str
+    description: Optional[str] = None
+    image_url: str
+    product_type: str  # mug, tumbler, sippy, coaster
+    price: float  # Base price for non-variant products
+    has_variants: bool = False  # True for coasters
+    active: bool = True
+
+class MuggsProduct(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    title: str
+    description: Optional[str] = None
+    image_url: str
+    product_type: str
+    price: float
+    has_variants: bool = False
+    active: bool = True
+    sort_order: int = 0
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
 # Muggs (drinkware) order models
 class MuggsOrderCreate(BaseModel):
     product_id: str
