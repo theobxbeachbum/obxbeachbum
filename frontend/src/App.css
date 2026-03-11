@@ -1637,17 +1637,12 @@ h1, h2, h3, h4, h5, h6 {
   border-radius: 8px;
   box-shadow: 0 4px 20px rgba(0,0,0,0.15);
   min-width: 180px;
-  opacity: 0;
-  visibility: hidden;
-  pointer-events: none;
-  transition: all 0.2s;
+  display: none;
   z-index: 100;
 }
 
 .nav-dropdown:hover .dropdown-menu {
-  opacity: 1;
-  visibility: visible;
-  pointer-events: auto;
+  display: block;
 }
 
 .dropdown-item {
