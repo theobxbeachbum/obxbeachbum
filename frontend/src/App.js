@@ -23,6 +23,8 @@ import Muggs from '@/pages/Muggs';
 import MuggsSuccess from '@/pages/MuggsSuccess';
 import Notecards from '@/pages/Notecards';
 import NotecardsSuccess from '@/pages/NotecardsSuccess';
+import AdminMuggs from '@/pages/AdminMuggs';
+import AdminNotecards from '@/pages/AdminNotecards';
 import { Toaster } from 'sonner';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
