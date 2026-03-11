@@ -315,18 +315,40 @@ function Gallery() {
                 
                 {/* Print Type Selector */}
                 <div className="option-group">
-                  <label>Print Type</label>
-                  <div className="type-buttons">
+                  <label style={{ fontSize: '18px', fontWeight: '600', marginBottom: '12px', display: 'block' }}>Print Type</label>
+                  <div className="type-buttons" style={{ display: 'flex', flexWrap: 'wrap', gap: '10px' }}>
                     {(selectedPrint.available_types || ['paper', 'canvas', 'metal']).map(type => (
                       <button
                         key={type}
                         className={`type-btn ${selectedType === type ? 'active' : ''}`}
                         onClick={() => handleTypeChange(type)}
+                        style={{
+                          padding: '12px 20px',
+                          border: '2px solid',
+                          borderColor: selectedType === type ? '#1a1a1a' : '#ddd',
+                          background: selectedType === type ? '#1a1a1a' : '#fff',
+                          color: selectedType === type ? '#fff' : '#333',
+                          borderRadius: '8px',
+                          fontSize: '16px',
+                          cursor: 'pointer'
+                        }}
                       >
                         {typeNames[type] || type}
                       </button>
                     ))}
-                    <button className="type-btn disabled" disabled>
+                    <button 
+                      className="type-btn disabled" 
+                      disabled
+                      style={{
+                        padding: '12px 20px',
+                        border: '2px solid #eee',
+                        background: '#f5f5f5',
+                        color: '#999',
+                        borderRadius: '8px',
+                        fontSize: '16px',
+                        cursor: 'not-allowed'
+                      }}
+                    >
                       Framed Prints - Coming Soon
                     </button>
                   </div>
