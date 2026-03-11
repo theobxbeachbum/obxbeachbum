@@ -15,7 +15,8 @@ function Posts({ onLogout }) {
     title: '',
     content: '',
     image_url: '',
-    image_urls: []
+    image_urls: [],
+    available_for_purchase: false
   });
   const [sending, setSending] = useState(null);
   const [uploading, setUploading] = useState(false);
