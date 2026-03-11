@@ -246,7 +246,21 @@ function Gallery() {
 
       {/* Print Modal - rendered via portal to document.body */}
       {selectedPrint && createPortal(
-        <div className="print-modal-overlay" onClick={closePrintModal}>
+        <div 
+          className="print-modal-overlay" 
+          onClick={closePrintModal}
+          style={{
+            position: 'fixed',
+            inset: 0,
+            background: 'rgba(0,0,0,0.85)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 99999,
+            padding: '20px',
+            boxSizing: 'border-box'
+          }}
+        >
           <div className="print-modal" onClick={e => e.stopPropagation()}>
             <button className="modal-close" onClick={closePrintModal}>
               <X size={24} />
