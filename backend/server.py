@@ -1192,12 +1192,10 @@ async def create_print_checkout(order: PrintOrderCreate, authorization: str = He
         )
         
         return {"checkout_url": session.url, "session_id": session.id}
-    except stripe.error.StripeError as e:
-        logging.error(f"Stripe error: {str(e)}")
-        raise HTTPException(500, f"Payment error: {str(e)}")
     except Exception as e:
-        logging.error(f"Checkout error: {str(e)}")
-        raise HTTPException(500, "Failed to create checkout session")
+        error_msg = str(e)
+        logging.error(f"Stripe checkout error: {error_msg}")
+        raise HTTPException(500, f"Payment error: {error_msg}")
 
 # Print checkout status & order completion
 @api_router.get("/prints/checkout/status/{session_id}")
