@@ -147,7 +147,7 @@ function OrderSuccess() {
         )}
 
         {status === 'pending' && (
-          <div className="success-content">
+          <div className="success-content" style={{ textAlign: 'center', maxWidth: '700px', width: '100%' }}>
             <h2>Payment Processing</h2>
             <p>Your payment is still being processed. Please check your email for confirmation.</p>
             <Link to="/" className="btn-primary">Back to Home</Link>
@@ -155,7 +155,7 @@ function OrderSuccess() {
         )}
 
         {status === 'error' && (
-          <div className="success-content">
+          <div className="success-content" style={{ textAlign: 'center', maxWidth: '700px', width: '100%' }}>
             <h2>Something went wrong</h2>
             <p>We couldn't verify your order. Please contact us if you have any questions.</p>
             <Link to="/" className="btn-primary">Back to Home</Link>
