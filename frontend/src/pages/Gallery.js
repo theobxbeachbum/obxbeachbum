@@ -261,17 +261,53 @@ function Gallery() {
             boxSizing: 'border-box'
           }}
         >
-          <div className="print-modal" onClick={e => e.stopPropagation()}>
+          <div className="print-modal" onClick={e => e.stopPropagation()} style={{
+            background: '#fff',
+            borderRadius: '16px',
+            width: '95%',
+            maxWidth: '1000px',
+            height: '600px',
+            overflow: 'hidden',
+            position: 'relative',
+            boxShadow: '0 25px 50px rgba(0,0,0,0.3)'
+          }}>
             <button className="modal-close" onClick={closePrintModal}>
               <X size={24} />
             </button>
             
-            <div className="modal-content">
-              <div className="modal-image">
-                <img src={selectedPrint.image_url} alt={selectedPrint.title} />
+            <div className="modal-content" style={{
+              display: 'flex',
+              flexDirection: 'row',
+              height: '100%'
+            }}>
+              <div className="modal-image" style={{
+                flex: '0 0 50%',
+                width: '50%',
+                background: '#f5f5f5',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                padding: '24px',
+                boxSizing: 'border-box',
+                overflow: 'hidden'
+              }}>
+                <img src={selectedPrint.image_url} alt={selectedPrint.title} style={{
+                  maxWidth: '100%',
+                  maxHeight: '100%',
+                  objectFit: 'contain',
+                  borderRadius: '8px'
+                }} />
               </div>
               
-              <div className="modal-details">
+              <div className="modal-details" style={{
+                flex: '0 0 50%',
+                width: '50%',
+                padding: '30px',
+                background: '#fff',
+                overflowY: 'auto',
+                fontSize: '16px',
+                boxSizing: 'border-box'
+              }}>
                 <h2>{selectedPrint.title}</h2>
                 {selectedPrint.description && (
                   <p className="print-description">{selectedPrint.description}</p>
