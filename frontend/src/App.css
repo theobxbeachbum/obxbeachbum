@@ -1900,6 +1900,8 @@ h1, h2, h3, h4, h5, h6 {
 
 .modal-details {
   padding: 30px;
+  background: #fff;
+  overflow-y: auto;
 }
 
 .modal-details h2 {
