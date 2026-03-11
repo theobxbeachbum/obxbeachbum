@@ -60,6 +60,7 @@ class PostCreate(BaseModel):
     image_url: Optional[str] = None
     image_urls: Optional[List[str]] = None  # Support multiple images
     slug: Optional[str] = None  # URL-friendly version of title
+    available_for_purchase: Optional[bool] = False  # Toggle for print sales
 
 class Post(BaseModel):
     model_config = ConfigDict(extra="ignore")
@@ -72,6 +73,69 @@ class Post(BaseModel):
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     published_at: Optional[datetime] = None
     status: str = "draft"  # draft, published
+    available_for_purchase: bool = False  # Toggle for print sales
+
+# Print models for Gallery
+class PrintCreate(BaseModel):
+    title: str
+    description: Optional[str] = None
+    image_url: str
+    tags: Optional[List[str]] = []
+    available_types: Optional[List[str]] = ["paper", "canvas", "metal"]
+    featured: Optional[bool] = False
+    active: Optional[bool] = True
+
+class Print(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    title: str
+    description: Optional[str] = None
+    image_url: str
+    tags: List[str] = []
+    available_types: List[str] = ["paper", "canvas", "metal"]
+    featured: bool = False
+    active: bool = True
+    sort_order: int = 0
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+class PrintUpdate(BaseModel):
+    title: Optional[str] = None
+    description: Optional[str] = None
+    image_url: Optional[str] = None
+    tags: Optional[List[str]] = None
+    available_types: Optional[List[str]] = None
+    featured: Optional[bool] = None
+    active: Optional[bool] = None
+    sort_order: Optional[int] = None
+
+# Print order models
+class PrintOrderCreate(BaseModel):
+    print_id: str
+    print_title: str
+    print_type: str  # paper, canvas, metal
+    size: str
+    price: float
+    special_instructions: Optional[str] = None
+    origin_url: str
+    source: str = "gallery"  # gallery or post
+
+class PrintOrder(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    print_id: str
+    print_title: str
+    print_type: str
+    size: str
+    price: float
+    special_instructions: Optional[str] = None
+    source: str = "gallery"
+    stripe_session_id: Optional[str] = None
+    customer_email: Optional[str] = None
+    customer_name: Optional[str] = None
+    shipping_address: Optional[Dict] = None
+    payment_status: str = "pending"
+    order_number: str = Field(default_factory=lambda: f"OBX-{datetime.now().strftime('%Y%m%d')}-{secrets.token_hex(3).upper()}")
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
 class SendNewsletterRequest(BaseModel):
     post_id: str
