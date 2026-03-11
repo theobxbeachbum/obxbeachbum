@@ -91,7 +91,8 @@ function App() {
           <Route path="/add-to-homescreen" element={<AddToHomeScreen />} />
           <Route path="/gallery" element={<Gallery />} />
           <Route path="/order-success" element={<OrderSuccess />} />
-          <Route path="/shop/muggs" element={<ShopPlaceholder type="muggs" />} />
+          <Route path="/shop/muggs" element={<Muggs />} />
+          <Route path="/muggs-success" element={<MuggsSuccess />} />
           <Route path="/shop/tees" element={<ShopPlaceholder type="tees" />} />
           <Route path="/shop/notecards" element={<ShopPlaceholder type="notecards" />} />
           
