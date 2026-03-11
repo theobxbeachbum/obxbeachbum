@@ -143,6 +143,26 @@ function App() {
             }
           />
           <Route
+            path="/admin/muggs"
+            element={
+              isAuthenticated ? (
+                <AdminMuggs onLogout={handleLogout} />
+              ) : (
+                <Navigate to="/admin/login" replace />
+              )
+            }
+          />
+          <Route
+            path="/admin/notecards"
+            element={
+              isAuthenticated ? (
+                <AdminNotecards onLogout={handleLogout} />
+              ) : (
+                <Navigate to="/admin/login" replace />
+              )
+            }
+          />
+          <Route
             path="/admin/subscribers"
             element={
               isAuthenticated ? (
