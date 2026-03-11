@@ -2261,11 +2261,18 @@ h1, h2, h3, h4, h5, h6 {
 /* Mobile Responsive for Gallery */
 @media (max-width: 768px) {
   .modal-content {
-    grid-template-columns: 1fr;
+    flex-direction: column;
   }
   
   .modal-image {
+    flex: none;
+    width: 100%;
     max-height: 300px;
+  }
+  
+  .modal-details {
+    flex: none;
+    width: 100%;
   }
   
   .gallery-item.featured {
