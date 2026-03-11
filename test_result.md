@@ -135,6 +135,54 @@ backend:
         agent: "testing"
         comment: "✅ VERIFIED: GET /api/public/posts returns list of published posts (found 4 posts). GET /api/public/posts/{slug} returns individual posts with HTML conversion applied. Both endpoints working correctly."
 
+  - task: "Print Gallery pricing API endpoint"
+    implemented: true
+    working: true
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "testing"
+        comment: "✅ VERIFIED: GET /api/prints/pricing returns complete pricing structure with paper (6 sizes), canvas (7 sizes), and metal (9 sizes) pricing tables. Includes type_names mapping. All required print types and sizes available with correct pricing data."
+
+  - task: "Public gallery API endpoint"
+    implemented: true
+    working: true
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "testing"
+        comment: "✅ VERIFIED: GET /api/public/gallery returns list of prints including posts marked available_for_purchase. Found 1 item with proper structure (id, title, image_url, tags, available_types). Tag filtering works correctly. Combines curated prints and purchasable posts as expected."
+
+  - task: "Gallery tags API endpoint"
+    implemented: true
+    working: true
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "testing"
+        comment: "✅ VERIFIED: GET /api/public/gallery/tags returns list of unique tags from active prints. Currently returns empty array as no prints have tags configured, but endpoint structure is correct and functional."
+
+  - task: "Print management admin endpoints"
+    implemented: true
+    working: true
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "medium"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "testing"
+        comment: "✅ VERIFIED: Admin print management endpoints working correctly. GET /api/prints lists prints, POST /api/prints creates prints, PUT /api/prints/{id} updates prints, DELETE /api/prints/{id} deletes prints. All CRUD operations tested successfully with proper authentication."
+
 frontend:
   - task: "Post view page with HTML rendering"
     implemented: true
