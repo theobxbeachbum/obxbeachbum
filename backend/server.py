@@ -1144,50 +1144,59 @@ async def create_print_checkout(order: PrintOrderCreate, authorization: str = He
     )
     await db.print_orders.insert_one(print_order.model_dump())
     
-    # Create Stripe checkout
+    # Create Stripe checkout using Stripe SDK directly (for custom line items with shipping)
     stripe_api_key = os.environ.get('STRIPE_API_KEY')
     if not stripe_api_key:
         raise HTTPException(500, "Stripe not configured")
     
+    stripe.api_key = stripe_api_key
+    # Use Emergent proxy if using test key
+    if "sk_test_emergent" in stripe_api_key:
+        stripe.api_base = "https://integrations.emergentagent.com/stripe"
+    
     type_name = PRINT_TYPE_NAMES.get(order.print_type, order.print_type)
     product_name = f"{order.print_title} - {type_name} ({order.size})"
     
-    stripe_checkout = StripeCheckout(api_key=stripe_api_key)
-    
-    checkout_request = CheckoutSessionRequest(
-        line_items=[{
-            "price_data": {
-                "currency": "usd",
-                "product_data": {
-                    "name": product_name,
-                    "description": f"Fine art print by the OBX Beach Bum"
+    try:
+        session = stripe.checkout.Session.create(
+            payment_method_types=['card'],
+            line_items=[{
+                "price_data": {
+                    "currency": "usd",
+                    "product_data": {
+                        "name": product_name,
+                        "description": "Fine art print by the OBX Beach Bum"
+                    },
+                    "unit_amount": int(order.price * 100)
                 },
-                "unit_amount": int(order.price * 100)
-            },
-            "quantity": 1
-        }],
-        mode="payment",
-        success_url=f"{order.origin_url}/order-success?session_id={{CHECKOUT_SESSION_ID}}",
-        cancel_url=f"{order.origin_url}/gallery",
-        shipping_address_collection={"allowed_countries": ["US"]},
-        metadata={
-            "order_id": print_order.id,
-            "print_title": order.print_title,
-            "print_type": order.print_type,
-            "size": order.size,
-            "special_instructions": order.special_instructions or ""
-        }
-    )
-    
-    session = await stripe_checkout.create_checkout_session(checkout_request)
-    
-    # Update order with session ID
-    await db.print_orders.update_one(
-        {"id": print_order.id},
-        {"$set": {"stripe_session_id": session.session_id}}
-    )
-    
-    return {"checkout_url": session.checkout_url, "session_id": session.session_id}
+                "quantity": 1
+            }],
+            mode="payment",
+            success_url=f"{order.origin_url}/order-success?session_id={{CHECKOUT_SESSION_ID}}",
+            cancel_url=f"{order.origin_url}/gallery",
+            shipping_address_collection={"allowed_countries": ["US"]},
+            metadata={
+                "order_id": print_order.id,
+                "print_title": order.print_title,
+                "print_type": order.print_type,
+                "size": order.size,
+                "special_instructions": order.special_instructions or ""
+            }
+        )
+        
+        # Update order with session ID
+        await db.print_orders.update_one(
+            {"id": print_order.id},
+            {"$set": {"stripe_session_id": session.id}}
+        )
+        
+        return {"checkout_url": session.url, "session_id": session.id}
+    except stripe.error.StripeError as e:
+        logging.error(f"Stripe error: {str(e)}")
+        raise HTTPException(500, f"Payment error: {str(e)}")
+    except Exception as e:
+        logging.error(f"Checkout error: {str(e)}")
+        raise HTTPException(500, "Failed to create checkout session")
 
 # Print checkout status & order completion
 @api_router.get("/prints/checkout/status/{session_id}")
