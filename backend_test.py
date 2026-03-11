@@ -664,6 +664,7 @@ Remember to bring sunscreen and stay hydrated!"""
         self.test_newsletter_sending()
         self.test_supporter_endpoints()
         self.test_public_endpoints()
+        self.test_print_gallery_endpoints()  # Add Print Gallery tests
         self.test_unsubscribe_endpoint()
         
         # Print summary
