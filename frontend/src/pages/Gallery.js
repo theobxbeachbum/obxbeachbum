@@ -214,7 +214,7 @@ function Gallery() {
       </div>
 
       {/* Gallery Grid */}
-      <main className="gallery-main">
+      <main className="gallery-main" style={{ maxWidth: '1400px', margin: '0 auto', padding: '0 20px 60px' }}>
         {loading ? (
           <div className="loading-spinner"></div>
         ) : prints.length === 0 ? (
@@ -223,20 +223,54 @@ function Gallery() {
             <p>Try a different search term or check back soon for new additions.</p>
           </div>
         ) : (
-          <div className="gallery-grid">
+          <div className="gallery-grid" style={{ 
+            display: 'grid', 
+            gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', 
+            gap: '20px' 
+          }}>
             {prints.map((print) => (
               <div 
                 key={print.id} 
                 id={`print-${print.id}`}
                 className={`gallery-item ${print.featured ? 'featured' : ''}`}
                 onClick={() => openPrintModal(print)}
+                style={{
+                  background: '#fff',
+                  borderRadius: '8px',
+                  overflow: 'hidden',
+                  boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
+                  cursor: 'pointer',
+                  position: 'relative'
+                }}
               >
-                {print.featured && <span className="featured-badge">★ Featured</span>}
-                <img src={print.image_url} alt={print.title} />
-                <div className="gallery-item-info">
-                  <h3>{print.title}</h3>
-                  {print.description && <p>{print.description}</p>}
-                  <span className="buy-prompt">Click to buy print →</span>
+                {print.featured && <span className="featured-badge" style={{
+                  position: 'absolute',
+                  top: '8px',
+                  left: '8px',
+                  background: '#ffd700',
+                  color: '#333',
+                  padding: '3px 8px',
+                  borderRadius: '10px',
+                  fontSize: '11px',
+                  fontWeight: '600',
+                  zIndex: 1
+                }}>★ Featured</span>}
+                <img 
+                  src={print.image_url} 
+                  alt={print.title} 
+                  style={{ width: '100%', height: '180px', objectFit: 'cover', display: 'block' }}
+                />
+                <div className="gallery-item-info" style={{ padding: '12px 14px' }}>
+                  <h3 style={{ 
+                    fontFamily: "'Playfair Display', Georgia, serif",
+                    fontSize: '15px',
+                    margin: '0 0 4px',
+                    color: '#1a1a1a',
+                    whiteSpace: 'nowrap',
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis'
+                  }}>{print.title}</h3>
+                  <span className="buy-prompt" style={{ fontSize: '12px', color: '#666' }}>Click to buy print →</span>
                 </div>
               </div>
             ))}
