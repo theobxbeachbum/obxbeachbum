@@ -456,6 +456,194 @@ Remember to bring sunscreen and stay hydrated!"""
             404
         )
 
+    def test_print_gallery_endpoints(self):
+        """Test Print Gallery endpoints"""
+        print("\n🖼️ Testing Print Gallery...")
+        
+        # Remove auth for public endpoints
+        temp_token = self.token
+        self.token = None
+        
+        # Test GET /api/prints/pricing
+        success, pricing_data = self.run_test(
+            "Get Print Pricing",
+            "GET",
+            "prints/pricing",
+            200
+        )
+        
+        if success:
+            # Verify pricing structure
+            if 'pricing' in pricing_data and 'type_names' in pricing_data:
+                self.log_test("Print Pricing Structure", True, "Contains pricing and type_names")
+                
+                # Check for required print types
+                pricing = pricing_data.get('pricing', {})
+                required_types = ['paper', 'canvas', 'metal']
+                for print_type in required_types:
+                    if print_type in pricing:
+                        self.log_test(f"Print Pricing - {print_type} type", True, f"Found {print_type} pricing")
+                        
+                        # Check if pricing has size/price pairs
+                        type_pricing = pricing[print_type]
+                        if isinstance(type_pricing, dict) and len(type_pricing) > 0:
+                            self.log_test(f"Print Pricing - {print_type} sizes", True, f"Found {len(type_pricing)} sizes")
+                        else:
+                            self.log_test(f"Print Pricing - {print_type} sizes", False, "No sizes found")
+                    else:
+                        self.log_test(f"Print Pricing - {print_type} type", False, f"Missing {print_type} pricing")
+            else:
+                self.log_test("Print Pricing Structure", False, "Missing pricing or type_names")
+        
+        # Test GET /api/public/gallery
+        success, gallery_data = self.run_test(
+            "Get Public Gallery",
+            "GET",
+            "public/gallery",
+            200
+        )
+        
+        if success:
+            if isinstance(gallery_data, list):
+                self.log_test("Public Gallery Format", True, f"Returns list with {len(gallery_data)} items")
+                
+                # If there are items, check structure
+                if len(gallery_data) > 0:
+                    first_item = gallery_data[0]
+                    required_fields = ['id', 'title', 'image_url', 'tags', 'available_types']
+                    for field in required_fields:
+                        if field in first_item:
+                            self.log_test(f"Gallery Item - {field} field", True, f"Found {field}")
+                        else:
+                            self.log_test(f"Gallery Item - {field} field", False, f"Missing {field}")
+                else:
+                    self.log_test("Public Gallery Content", True, "Gallery is empty (no prints configured)")
+            else:
+                self.log_test("Public Gallery Format", False, "Does not return a list")
+        
+        # Test GET /api/public/gallery/tags
+        success, tags_data = self.run_test(
+            "Get Gallery Tags",
+            "GET",
+            "public/gallery/tags",
+            200
+        )
+        
+        if success:
+            if isinstance(tags_data, list):
+                self.log_test("Gallery Tags Format", True, f"Returns list with {len(tags_data)} tags")
+            else:
+                self.log_test("Gallery Tags Format", False, "Does not return a list")
+        
+        # Test gallery with tag filter
+        success, filtered_gallery = self.run_test(
+            "Get Gallery with Tag Filter",
+            "GET",
+            "public/gallery?tag=beach",
+            200
+        )
+        
+        if success:
+            if isinstance(filtered_gallery, list):
+                self.log_test("Gallery Tag Filter", True, f"Tag filter works, returns {len(filtered_gallery)} items")
+            else:
+                self.log_test("Gallery Tag Filter", False, "Tag filter does not return a list")
+        
+        # Restore auth token
+        self.token = temp_token
+        
+        # Test admin print endpoints (with auth)
+        print("\n🔐 Testing Admin Print Management...")
+        
+        # Test GET /api/prints (admin)
+        success, admin_prints = self.run_test(
+            "Get Admin Prints List",
+            "GET",
+            "prints",
+            200
+        )
+        
+        if success:
+            if isinstance(admin_prints, list):
+                self.log_test("Admin Prints Format", True, f"Returns list with {len(admin_prints)} prints")
+            else:
+                self.log_test("Admin Prints Format", False, "Does not return a list")
+        
+        # Test creating a print
+        test_print_data = {
+            "title": "Test Beach Print",
+            "description": "A beautiful test beach scene",
+            "image_url": "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=800",
+            "tags": ["beach", "sunset", "test"],
+            "available_types": ["paper", "canvas", "metal"],
+            "featured": False,
+            "active": True
+        }
+        
+        success, created_print = self.run_test(
+            "Create Print",
+            "POST",
+            "prints",
+            200,
+            data=test_print_data
+        )
+        
+        print_id = None
+        if success and 'id' in created_print:
+            print_id = created_print['id']
+            self.log_test("Print Creation", True, f"Created print with ID: {print_id}")
+            
+            # Test updating the print
+            update_data = {
+                "title": "Updated Test Beach Print",
+                "featured": True
+            }
+            
+            success, updated_print = self.run_test(
+                "Update Print",
+                "PUT",
+                f"prints/{print_id}",
+                200,
+                data=update_data
+            )
+            
+            if success:
+                if updated_print.get('title') == "Updated Test Beach Print":
+                    self.log_test("Print Update Verification", True, "Title updated correctly")
+                else:
+                    self.log_test("Print Update Verification", False, "Title not updated")
+            
+            # Test deleting the print
+            success, _ = self.run_test(
+                "Delete Print",
+                "DELETE",
+                f"prints/{print_id}",
+                200
+            )
+        
+        # Test print checkout (will likely fail without proper Stripe setup)
+        print("\n💳 Testing Print Checkout...")
+        
+        checkout_data = {
+            "print_id": "test-print-id",
+            "print_title": "Test Print",
+            "print_type": "paper",
+            "size": "8x12",
+            "price": 35.0,
+            "special_instructions": "Handle with care",
+            "origin_url": "https://example.com",
+            "source": "gallery"
+        }
+        
+        # This will likely fail due to Stripe configuration, but we test the endpoint
+        success, checkout_response = self.run_test(
+            "Create Print Checkout",
+            "POST",
+            "prints/checkout",
+            200,
+            data=checkout_data
+        )
+
     def run_all_tests(self):
         """Run all API tests"""
         print("🚀 Starting Newsletter API Tests...")
