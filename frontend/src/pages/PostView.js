@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import { ArrowLeft, Mail } from 'lucide-react';
+import { ArrowLeft, Mail, ShoppingBag } from 'lucide-react';
 
 function PostView() {
   const { slug } = useParams();
