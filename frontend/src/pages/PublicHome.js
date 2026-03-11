@@ -73,6 +73,15 @@ function PublicHome() {
         </div>
         <nav className="header-nav">
           <Link to="/" className="nav-item active">Home</Link>
+          <div className="nav-dropdown">
+            <span className="nav-item dropdown-trigger">Shop ▾</span>
+            <div className="dropdown-menu">
+              <Link to="/gallery" className="dropdown-item">Beach Bum Gallery</Link>
+              <Link to="/shop/muggs" className="dropdown-item">B.B. Muggs</Link>
+              <Link to="/shop/tees" className="dropdown-item">Beach Bum Tees</Link>
+              <Link to="/shop/notecards" className="dropdown-item">Notecards</Link>
+            </div>
+          </div>
           <Link to="/archive" className="nav-item">Archive</Link>
           <Link to="/about" className="nav-item">About</Link>
           <Link to="/subscribe" className="nav-item subscribe-btn">Subscribe</Link>
