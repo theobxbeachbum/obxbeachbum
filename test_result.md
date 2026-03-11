@@ -222,9 +222,10 @@ metadata:
 
 test_plan:
   current_focus:
-    - "Markdown to HTML conversion for post content"
-    - "Post view page with HTML rendering"
-    - "Homepage with clean Markdown excerpts"
+    - "Print Gallery pricing API endpoint"
+    - "Public gallery API endpoint"
+    - "Gallery tags API endpoint"
+    - "Print management admin endpoints"
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
