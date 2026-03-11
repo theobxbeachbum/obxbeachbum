@@ -356,16 +356,26 @@ function Gallery() {
 
                 {/* Size Selector */}
                 <div className="option-group">
-                  <label>Size</label>
-                  <div className="size-grid">
+                  <label style={{ fontSize: '18px', fontWeight: '600', marginBottom: '12px', display: 'block' }}>Size</label>
+                  <div className="size-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '10px' }}>
                     {pricing[selectedType] && Object.entries(pricing[selectedType]).map(([size, price]) => (
                       <button
                         key={size}
                         className={`size-btn ${selectedSize === size ? 'active' : ''}`}
                         onClick={() => setSelectedSize(size)}
+                        style={{
+                          padding: '14px',
+                          border: '2px solid',
+                          borderColor: selectedSize === size ? '#1a1a1a' : '#ddd',
+                          background: selectedSize === size ? '#1a1a1a' : '#fff',
+                          color: selectedSize === size ? '#fff' : '#333',
+                          borderRadius: '8px',
+                          cursor: 'pointer',
+                          textAlign: 'center'
+                        }}
                       >
-                        <span className="size-label">{size}</span>
-                        <span className="size-price">${price}</span>
+                        <span style={{ display: 'block', fontWeight: '600', fontSize: '16px' }}>{size}</span>
+                        <span style={{ display: 'block', fontSize: '15px', marginTop: '4px', opacity: 0.8 }}>${price}</span>
                       </button>
                     ))}
                   </div>
@@ -373,12 +383,13 @@ function Gallery() {
 
                 {/* Special Instructions */}
                 <div className="option-group">
-                  <label>Special Instructions or Personal Note (optional)</label>
+                  <label style={{ fontSize: '18px', fontWeight: '600', marginBottom: '12px', display: 'block' }}>Special Instructions or Personal Note (optional)</label>
                   <textarea
                     value={specialInstructions}
                     onChange={(e) => setSpecialInstructions(e.target.value)}
                     placeholder="Gift message, special requests, etc."
                     rows={3}
+                    style={{ width: '100%', padding: '14px', border: '1px solid #ddd', borderRadius: '8px', fontSize: '16px', fontFamily: 'inherit', resize: 'vertical' }}
                   />
                 </div>
 
