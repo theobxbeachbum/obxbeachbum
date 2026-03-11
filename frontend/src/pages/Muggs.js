@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
 import { Coffee, ShoppingCart } from 'lucide-react';
@@ -6,55 +6,21 @@ import { Button } from '../components/ui/button';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 
-// Product data with placeholder images (to be replaced with actual product images)
-const PRODUCTS = [
-  {
-    id: 'ceramic-mug-15oz',
-    title: '15oz Ceramic Coffee Mugg',
-    description: 'Start your morning right with our premium ceramic mug featuring stunning OBX photography.',
-    price: 18,
-    image: 'https://customer-assets.emergentagent.com/job_photo-news/artifacts/ds3e93fb_logo-ish.jpg',
-    type: 'mug'
-  },
-  {
-    id: 'tumbler-20oz',
-    title: '20oz Stainless Steel Tumbler',
-    description: 'Keep your drinks hot or cold with our durable stainless steel tumbler.',
-    price: 28,
-    image: 'https://customer-assets.emergentagent.com/job_photo-news/artifacts/ds3e93fb_logo-ish.jpg',
-    type: 'tumbler'
-  },
-  {
-    id: 'sippy-cup-12oz',
-    title: '12oz Sippy Cup',
-    description: 'Perfect for little beach bums! Spill-proof design with beach-themed artwork.',
-    price: 20,
-    image: 'https://customer-assets.emergentagent.com/job_photo-news/artifacts/ds3e93fb_logo-ish.jpg',
-    type: 'sippy'
-  },
-  {
-    id: 'ceramic-coaster',
-    title: '4x4 Ceramic Coaster',
-    description: 'Protect your surfaces in style with our ceramic coasters featuring OBX photography.',
-    basePrice: 7,
-    image: 'https://customer-assets.emergentagent.com/job_photo-news/artifacts/ds3e93fb_logo-ish.jpg',
-    type: 'coaster',
-    variants: [
-      { id: 'single', label: 'Single', price: 7 },
-      { id: 'set-2', label: 'Set of 2', price: 12 },
-      { id: 'set-4', label: 'Set of 4', price: 21 }
-    ]
-  }
+// Coaster variants pricing
+const COASTER_VARIANTS = [
+  { id: 'single', label: 'Single', price: 7 },
+  { id: 'set-2', label: 'Set of 2', price: 12 },
+  { id: 'set-4', label: 'Set of 4', price: 21 }
 ];
 
-function ProductCard({ product, onCheckout }) {
+function ProductCard({ product }) {
   const [selectedVariant, setSelectedVariant] = useState(
-    product.variants ? product.variants[0] : null
+    product.has_variants ? COASTER_VARIANTS[0] : null
   );
   const [specialInstructions, setSpecialInstructions] = useState('');
   const [isCheckingOut, setIsCheckingOut] = useState(false);
 
-  const currentPrice = product.variants 
+  const currentPrice = product.has_variants 
     ? selectedVariant?.price 
     : product.price;
 
@@ -64,7 +30,7 @@ function ProductCard({ product, onCheckout }) {
       const orderData = {
         product_id: product.id,
         product_title: product.title,
-        product_type: product.type,
+        product_type: product.product_type,
         variant: selectedVariant?.id || null,
         variant_label: selectedVariant?.label || null,
         price: currentPrice,
@@ -88,26 +54,28 @@ function ProductCard({ product, onCheckout }) {
   return (
     <div className="muggs-product-card" data-testid={`product-${product.id}`}>
       <div className="product-image-container">
-        <img src={product.image} alt={product.title} className="product-image" />
+        <img src={product.image_url} alt={product.title} className="product-image" />
       </div>
       <div className="product-details">
         <h3 className="product-title">{product.title}</h3>
-        <p className="product-description">{product.description}</p>
+        {product.description && (
+          <p className="product-description">{product.description}</p>
+        )}
         
-        {product.variants && (
+        {product.has_variants && (
           <div className="variant-selector">
             <label htmlFor={`variant-${product.id}`}>Quantity:</label>
             <select
               id={`variant-${product.id}`}
               value={selectedVariant?.id}
               onChange={(e) => {
-                const variant = product.variants.find(v => v.id === e.target.value);
+                const variant = COASTER_VARIANTS.find(v => v.id === e.target.value);
                 setSelectedVariant(variant);
               }}
               className="variant-dropdown"
               data-testid={`variant-select-${product.id}`}
             >
-              {product.variants.map(variant => (
+              {COASTER_VARIANTS.map(variant => (
                 <option key={variant.id} value={variant.id}>
                   {variant.label} — ${variant.price}
                 </option>
@@ -149,6 +117,24 @@ function ProductCard({ product, onCheckout }) {
 }
 
 function Muggs() {
+  const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchProducts();
+  }, []);
+
+  const fetchProducts = async () => {
+    try {
+      const response = await axios.get(`${BACKEND_URL}/api/muggs-products`);
+      setProducts(response.data);
+    } catch (error) {
+      console.error('Failed to fetch products:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="substack-site">
       {/* Header */}
@@ -194,11 +180,23 @@ function Muggs() {
 
       {/* Products Grid */}
       <main className="muggs-main">
-        <div className="products-grid">
-          {PRODUCTS.map(product => (
-            <ProductCard key={product.id} product={product} />
-          ))}
-        </div>
+        {loading ? (
+          <div style={{ textAlign: 'center', padding: '60px 20px' }}>
+            <p>Loading products...</p>
+          </div>
+        ) : products.length === 0 ? (
+          <div style={{ textAlign: 'center', padding: '60px 20px' }}>
+            <Coffee size={64} style={{ color: '#ccc', marginBottom: '20px' }} />
+            <h3 style={{ margin: '0 0 10px' }}>Coming Soon!</h3>
+            <p style={{ color: '#666' }}>Our B.B. Muggs collection is being prepared. Check back soon!</p>
+          </div>
+        ) : (
+          <div className="products-grid">
+            {products.map(product => (
+              <ProductCard key={product.id} product={product} />
+            ))}
+          </div>
+        )}
 
         <div className="shipping-info">
           <p>🚚 Free shipping on orders over $50 • US shipping only</p>
