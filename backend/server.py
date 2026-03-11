@@ -1214,12 +1214,31 @@ async def get_print_checkout_status(session_id: str, background_tasks: Backgroun
     if not order:
         raise HTTPException(404, "Order not found")
     
+    # Get type display name
+    type_name = PRINT_TYPE_NAMES.get(order.get("print_type"), order.get("print_type"))
+    
+    # If order is already marked as paid, return the stored data
+    if order.get("payment_status") == "paid":
+        return {
+            "payment_status": "paid",
+            "order_number": order.get("order_number"),
+            "print_title": order.get("print_title"),
+            "print_type": type_name,
+            "size": order.get("size"),
+            "price": order.get("price"),
+            "special_instructions": order.get("special_instructions"),
+            "customer_email": order.get("customer_email"),
+            "customer_name": order.get("customer_name"),
+            "shipping_address": order.get("shipping_address"),
+            "created_at": order.get("created_at").isoformat() if order.get("created_at") else None
+        }
+    
     try:
         # Get session details from Stripe
         session = stripe.checkout.Session.retrieve(session_id)
         payment_status = session.payment_status
         
-        if payment_status == "paid" and order.get("payment_status") != "paid":
+        if payment_status == "paid":
             # Update order with customer details
             customer_email = session.customer_details.email if session.customer_details else None
             customer_name = session.customer_details.name if session.customer_details else None
@@ -1253,9 +1272,6 @@ async def get_print_checkout_status(session_id: str, background_tasks: Backgroun
             # Send order notification email
             background_tasks.add_task(send_print_order_notification, session_id)
         
-        # Get type display name
-        type_name = PRINT_TYPE_NAMES.get(order.get("print_type"), order.get("print_type"))
-        
         return {
             "payment_status": payment_status,
             "order_number": order.get("order_number"),
@@ -1271,7 +1287,20 @@ async def get_print_checkout_status(session_id: str, background_tasks: Backgroun
         }
     except Exception as e:
         logging.error(f"Error getting checkout status: {str(e)}")
-        raise HTTPException(500, f"Error retrieving order status: {str(e)}")
+        # If Stripe lookup fails but order exists, return what we have
+        return {
+            "payment_status": order.get("payment_status", "unknown"),
+            "order_number": order.get("order_number"),
+            "print_title": order.get("print_title"),
+            "print_type": type_name,
+            "size": order.get("size"),
+            "price": order.get("price"),
+            "special_instructions": order.get("special_instructions"),
+            "customer_email": order.get("customer_email"),
+            "customer_name": order.get("customer_name"),
+            "shipping_address": order.get("shipping_address"),
+            "created_at": order.get("created_at").isoformat() if order.get("created_at") else None
+        }
 
 async def send_print_order_notification(session_id: str):
     """Send order notification email to Roy."""
