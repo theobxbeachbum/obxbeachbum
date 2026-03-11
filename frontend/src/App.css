@@ -2454,3 +2454,235 @@ h1, h2, h3, h4, h5, h6 {
     text-align: center;
   }
 }
+
+/* ============================================
+   B.B. Muggs Page Styles
+   ============================================ */
+
+.muggs-hero {
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  padding: 60px 20px;
+  text-align: center;
+}
+
+.muggs-hero .hero-content {
+  max-width: 700px;
+  margin: 0 auto;
+}
+
+.muggs-hero .hero-icon {
+  color: #1a1a1a;
+  margin-bottom: 20px;
+}
+
+.muggs-hero h1 {
+  font-family: 'Playfair Display', Georgia, serif;
+  font-size: 42px;
+  margin: 0 0 10px;
+  color: #1a1a1a;
+}
+
+.muggs-hero .hero-subtitle {
+  font-size: 18px;
+  color: #666;
+  margin: 0 0 20px;
+  font-weight: 500;
+}
+
+.muggs-hero .hero-description {
+  font-size: 16px;
+  color: #666;
+  line-height: 1.6;
+  margin: 0;
+}
+
+.muggs-main {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 60px 20px;
+}
+
+.products-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 40px;
+}
+
+.muggs-product-card {
+  background: #fff;
+  border: 1px solid #e0e0e0;
+  border-radius: 12px;
+  overflow: hidden;
+  transition: box-shadow 0.3s ease;
+}
+
+.muggs-product-card:hover {
+  box-shadow: 0 8px 30px rgba(0,0,0,0.1);
+}
+
+.product-image-container {
+  width: 100%;
+  aspect-ratio: 1;
+  overflow: hidden;
+  background: #f8f9fa;
+}
+
+.product-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.3s ease;
+}
+
+.muggs-product-card:hover .product-image {
+  transform: scale(1.05);
+}
+
+.product-details {
+  padding: 25px;
+}
+
+.product-title {
+  font-family: 'Playfair Display', Georgia, serif;
+  font-size: 22px;
+  margin: 0 0 10px;
+  color: #1a1a1a;
+}
+
+.product-description {
+  font-size: 14px;
+  color: #666;
+  line-height: 1.5;
+  margin: 0 0 20px;
+}
+
+.variant-selector {
+  margin-bottom: 20px;
+}
+
+.variant-selector label {
+  display: block;
+  font-size: 14px;
+  font-weight: 600;
+  color: #1a1a1a;
+  margin-bottom: 8px;
+}
+
+.variant-dropdown {
+  width: 100%;
+  padding: 12px 15px;
+  font-size: 16px;
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  background: #fff;
+  cursor: pointer;
+  transition: border-color 0.2s;
+}
+
+.variant-dropdown:focus {
+  outline: none;
+  border-color: #1a1a1a;
+}
+
+.product-price {
+  font-size: 28px;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin-bottom: 20px;
+}
+
+.special-instructions {
+  margin-bottom: 20px;
+}
+
+.special-instructions label {
+  display: block;
+  font-size: 14px;
+  font-weight: 600;
+  color: #1a1a1a;
+  margin-bottom: 8px;
+}
+
+.instructions-textarea {
+  width: 100%;
+  padding: 12px 15px;
+  font-size: 14px;
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  resize: vertical;
+  font-family: inherit;
+  transition: border-color 0.2s;
+}
+
+.instructions-textarea:focus {
+  outline: none;
+  border-color: #1a1a1a;
+}
+
+.instructions-textarea::placeholder {
+  color: #999;
+}
+
+.buy-now-btn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 16px 24px;
+  font-size: 16px;
+  font-weight: 600;
+  background: #1a1a1a;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.buy-now-btn:hover {
+  background: #333;
+  transform: translateY(-2px);
+}
+
+.buy-now-btn:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.shipping-info {
+  text-align: center;
+  margin-top: 40px;
+  padding: 20px;
+  background: #f8f9fa;
+  border-radius: 8px;
+  font-size: 14px;
+  color: #666;
+}
+
+/* Responsive Muggs */
+@media (max-width: 900px) {
+  .products-grid {
+    grid-template-columns: 1fr;
+    gap: 30px;
+  }
+}
+
+@media (max-width: 600px) {
+  .muggs-hero h1 {
+    font-size: 32px;
+  }
+  
+  .product-details {
+    padding: 20px;
+  }
+  
+  .product-title {
+    font-size: 20px;
+  }
+  
+  .product-price {
+    font-size: 24px;
+  }
+}
