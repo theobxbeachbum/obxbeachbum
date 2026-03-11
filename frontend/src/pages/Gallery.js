@@ -244,8 +244,8 @@ function Gallery() {
         )}
       </main>
 
-      {/* Print Modal */}
-      {selectedPrint && (
+      {/* Print Modal - rendered via portal to document.body */}
+      {selectedPrint && createPortal(
         <div className="print-modal-overlay" onClick={closePrintModal}>
           <div className="print-modal" onClick={e => e.stopPropagation()}>
             <button className="modal-close" onClick={closePrintModal}>
@@ -332,7 +332,8 @@ function Gallery() {
               </div>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
 
       {/* Footer */}
