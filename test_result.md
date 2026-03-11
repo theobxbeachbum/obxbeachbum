@@ -214,6 +214,21 @@ frontend:
         agent: "testing"
         comment: "✅ VERIFIED: Homepage clean excerpts working perfectly. Found 'A Beautiful Beach Day' post card on homepage with clean excerpt text containing no Markdown symbols (#, **, *, ![], ](, __). Excerpt shows clean text: 'A Beautiful Beach Day Today was an amazing day at the Outer Banks!' Navigation from homepage post card to /post/a-beautiful-beach-day works correctly. stripMarkdown function successfully removes all Markdown syntax."
 
+  - task: "Print Gallery modal with dark overlay"
+    implemented: true
+    working: true
+    file: "/app/frontend/src/pages/Gallery.js"
+    stuck_count: 1
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: false
+        agent: "testing"
+        comment: "❌ ISSUE IDENTIFIED: Print modal overlay not displaying correctly. Modal HTML was being rendered via createPortal but CSS styles (position: fixed, z-index: 99999, background: rgba(0,0,0,0.85)) were not being applied. Modal appeared as static element without dark overlay background."
+      - working: true
+        agent: "testing"
+        comment: "✅ FIXED: Added inline styles to modal overlay in Gallery.js to ensure correct display. Modal now shows dark overlay background (rgba(0,0,0,0.85)) covering viewport with centered modal card. Tested complete functionality: print type selection (Canvas), size selection (7 options), price updates ($120), special instructions textarea, checkout button enabled. Modal opens/closes correctly. All requirements met: image left, purchase options right, dark overlay background."
+
 metadata:
   created_by: "main_agent"
   version: "1.0"
