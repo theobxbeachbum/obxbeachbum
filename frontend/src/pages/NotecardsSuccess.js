@@ -1,0 +1,193 @@
+import { useState, useEffect } from 'react';
+import { Link, useSearchParams } from 'react-router-dom';
+import axios from 'axios';
+import { CheckCircle, Package, Mail, MapPin, FileText } from 'lucide-react';
+
+const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
+
+function NotecardsSuccess() {
+  const [searchParams] = useSearchParams();
+  const [status, setStatus] = useState('loading');
+  const [orderData, setOrderData] = useState(null);
+
+  useEffect(() => {
+    const sessionId = searchParams.get('session_id');
+    if (sessionId) {
+      checkPaymentStatus(sessionId);
+    } else {
+      setStatus('error');
+    }
+  }, [searchParams]);
+
+  const checkPaymentStatus = async (sessionId) => {
+    try {
+      const response = await axios.get(`${BACKEND_URL}/api/notecards/checkout/status/${sessionId}`);
+      if (response.data.payment_status === 'paid') {
+        setStatus('success');
+        setOrderData(response.data);
+      } else {
+        setStatus('pending');
+      }
+    } catch (error) {
+      console.error('Failed to check status:', error);
+      setStatus('error');
+    }
+  };
+
+  const formatAddress = (shipping) => {
+    if (!shipping || !shipping.address) return null;
+    const addr = shipping.address;
+    return (
+      <>
+        <p>{shipping.name}</p>
+        <p>{addr.line1}</p>
+        {addr.line2 && <p>{addr.line2}</p>}
+        <p>{addr.city}, {addr.state} {addr.postal_code}</p>
+      </>
+    );
+  };
+
+  return (
+    <div className="substack-site">
+      {/* Header */}
+      <header className="substack-header">
+        <div className="header-logo">
+          <Link to="/">
+            <img 
+              src="https://customer-assets.emergentagent.com/job_photo-news/artifacts/ds3e93fb_logo-ish.jpg" 
+              alt="the OBX Beach Bum" 
+              className="main-logo"
+            />
+          </Link>
+        </div>
+        <nav className="header-nav">
+          <Link to="/" className="nav-item">Home</Link>
+          <Link to="/shop/notecards" className="nav-item">Notecards</Link>
+          <Link to="/subscribe" className="nav-item subscribe-btn">Subscribe</Link>
+        </nav>
+      </header>
+
+      {/* Success Content */}
+      <main className="order-success-page" style={{ display: 'flex', justifyContent: 'center', padding: '60px 20px', minHeight: '60vh' }}>
+        {status === 'loading' && (
+          <div className="success-content" style={{ textAlign: 'center', maxWidth: '700px', width: '100%' }}>
+            <div className="loading-spinner"></div>
+            <h2>Processing your order...</h2>
+          </div>
+        )}
+
+        {status === 'success' && orderData && (
+          <div className="success-content" style={{ textAlign: 'center', maxWidth: '700px', width: '100%' }}>
+            <div className="success-icon">
+              <CheckCircle size={80} color="#28a745" />
+            </div>
+            <h1>Thank You for Your Order!</h1>
+            <p className="order-number">Order #{orderData.order_number}</p>
+            
+            {/* Order Details Card */}
+            <div className="order-details-card" data-testid="order-details-card">
+              <h2>Order Details</h2>
+              
+              <div className="order-item">
+                <div className="order-item-icon">
+                  <Mail size={24} />
+                </div>
+                <div className="order-item-details">
+                  <h3>{orderData.product_title}</h3>
+                  {orderData.variant_label && (
+                    <p className="item-specs">{orderData.variant_label} • 5x7 Notecard</p>
+                  )}
+                  <p className="item-price">${orderData.price?.toFixed(2)}</p>
+                </div>
+              </div>
+
+              {orderData.special_instructions && (
+                <div className="order-section">
+                  <div className="section-header">
+                    <FileText size={18} />
+                    <span>Special Instructions</span>
+                  </div>
+                  <p className="special-instructions">{orderData.special_instructions}</p>
+                </div>
+              )}
+
+              {orderData.shipping_address && (
+                <div className="order-section">
+                  <div className="section-header">
+                    <MapPin size={18} />
+                    <span>Shipping Address</span>
+                  </div>
+                  <div className="shipping-address">
+                    {formatAddress(orderData.shipping_address)}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Info Cards */}
+            <div className="order-info-cards">
+              <div className="info-card">
+                <Mail size={32} />
+                <h3>Confirmation Email</h3>
+                <p>A confirmation has been sent to <strong>{orderData.customer_email}</strong></p>
+              </div>
+              
+              <div className="info-card">
+                <Package size={32} />
+                <h3>Shipping</h3>
+                <p>Your notecards will be carefully packaged and shipped within 3-5 business days.</p>
+              </div>
+            </div>
+
+            <div className="success-actions">
+              <Link to="/shop/notecards" className="btn-primary" data-testid="continue-shopping-btn">
+                Continue Shopping
+              </Link>
+              <Link to="/" className="btn-secondary">Back to Home</Link>
+            </div>
+          </div>
+        )}
+
+        {status === 'pending' && (
+          <div className="success-content" style={{ textAlign: 'center', maxWidth: '700px', width: '100%' }}>
+            <h2>Payment Processing</h2>
+            <p>Your payment is still being processed. Please check your email for confirmation.</p>
+            <Link to="/" className="btn-primary">Back to Home</Link>
+          </div>
+        )}
+
+        {status === 'error' && (
+          <div className="success-content" style={{ textAlign: 'center', maxWidth: '700px', width: '100%' }}>
+            <h2>Something went wrong</h2>
+            <p>We couldn't verify your order. Please contact us if you have any questions.</p>
+            <Link to="/" className="btn-primary">Back to Home</Link>
+          </div>
+        )}
+      </main>
+
+      {/* Footer */}
+      <footer className="substack-footer">
+        <div className="footer-container">
+          <div className="footer-top">
+            <div className="footer-logo">
+              <img 
+                src="https://customer-assets.emergentagent.com/job_photo-news/artifacts/fndpshgx_whitelogo-obxbb.png" 
+                alt="the OBX Beach Bum" 
+              />
+            </div>
+            <nav className="footer-nav">
+              <Link to="/about">About</Link>
+              <Link to="/gallery">Gallery</Link>
+              <Link to="/admin/login">Admin</Link>
+            </nav>
+          </div>
+          <div className="footer-bottom">
+            <p className="copyright">© {new Date().getFullYear()} the OBX Beach Bum</p>
+          </div>
+        </div>
+      </footer>
+    </div>
+  );
+}
+
+export default NotecardsSuccess;
