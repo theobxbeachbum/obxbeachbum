@@ -966,6 +966,446 @@ async def get_subscribe_embed(request: Request):
     """
     return HTMLResponse(content=html)
 
+# ============================================
+# PRINT GALLERY ENDPOINTS
+# ============================================
+
+# Pricing tables
+PRINT_PRICING = {
+    "paper": {
+        "5x7": 25,
+        "8x12": 35,
+        "12x18": 58,
+        "16x24": 93,
+        "20x30": 137,
+        "24x36": 175
+    },
+    "canvas": {
+        "8x12": 87,
+        "12x18": 120,
+        "16x24": 170,
+        "20x30": 205,
+        "24x36": 300,
+        "32x48": 500,
+        "40x60": 749
+    },
+    "metal": {
+        "4x6": 37,
+        "5x7": 47,
+        "8x12": 77,
+        "12x18": 157,
+        "16x24": 350,
+        "20x30": 460,
+        "24x36": 532,
+        "32x48": 979,
+        "40x60": 1463
+    }
+}
+
+PRINT_TYPE_NAMES = {
+    "paper": "Fine Art Paper Print",
+    "canvas": "Canvas Wall Art",
+    "metal": "Metal Print"
+}
+
+# Get pricing data (public)
+@api_router.get("/prints/pricing")
+async def get_print_pricing():
+    """Get print pricing tables."""
+    return {
+        "pricing": PRINT_PRICING,
+        "type_names": PRINT_TYPE_NAMES
+    }
+
+# Admin: Get all prints
+@api_router.get("/prints", response_model=List[Print])
+async def get_prints(authorization: str = Header(None)):
+    await verify_admin_token(authorization)
+    prints = await db.prints.find({}, {"_id": 0}).sort("sort_order", 1).to_list(1000)
+    return [Print(**p) for p in prints]
+
+# Admin: Create print
+@api_router.post("/prints", response_model=Print)
+async def create_print(print_data: PrintCreate, authorization: str = Header(None)):
+    await verify_admin_token(authorization)
+    
+    # Get max sort_order
+    max_order = await db.prints.find_one(sort=[("sort_order", -1)])
+    next_order = (max_order.get("sort_order", 0) + 1) if max_order else 1
+    
+    new_print = Print(
+        **print_data.model_dump(),
+        sort_order=next_order
+    )
+    await db.prints.insert_one(new_print.model_dump())
+    return new_print
+
+# Admin: Update print
+@api_router.put("/prints/{print_id}", response_model=Print)
+async def update_print(print_id: str, print_data: PrintUpdate, authorization: str = Header(None)):
+    await verify_admin_token(authorization)
+    
+    update_data = {k: v for k, v in print_data.model_dump().items() if v is not None}
+    if not update_data:
+        raise HTTPException(400, "No data to update")
+    
+    result = await db.prints.update_one({"id": print_id}, {"$set": update_data})
+    if result.matched_count == 0:
+        raise HTTPException(404, "Print not found")
+    
+    updated = await db.prints.find_one({"id": print_id}, {"_id": 0})
+    return Print(**updated)
+
+# Admin: Delete print
+@api_router.delete("/prints/{print_id}")
+async def delete_print(print_id: str, authorization: str = Header(None)):
+    await verify_admin_token(authorization)
+    result = await db.prints.delete_one({"id": print_id})
+    if result.deleted_count == 0:
+        raise HTTPException(404, "Print not found")
+    return {"success": True}
+
+# Public: Get gallery (curated prints + purchasable posts)
+@api_router.get("/public/gallery")
+async def get_public_gallery(tag: Optional[str] = None):
+    """Get all prints for the public gallery."""
+    # Get active curated prints
+    query = {"active": True}
+    if tag:
+        query["tags"] = {"$regex": tag, "$options": "i"}
+    
+    prints = await db.prints.find(query, {"_id": 0}).to_list(1000)
+    
+    # Get purchasable posts (published + available_for_purchase)
+    post_query = {"status": "published", "available_for_purchase": True}
+    if tag:
+        post_query["title"] = {"$regex": tag, "$options": "i"}
+    
+    purchasable_posts = await db.posts.find(post_query, {"_id": 0}).to_list(1000)
+    
+    # Convert posts to print-like format
+    post_prints = []
+    for post in purchasable_posts:
+        if post.get("image_url"):
+            post_prints.append({
+                "id": post["id"],
+                "title": post["title"],
+                "description": None,
+                "image_url": post["image_url"],
+                "tags": [],
+                "available_types": ["paper", "canvas", "metal"],
+                "featured": False,
+                "active": True,
+                "sort_order": 999,
+                "source": "post"
+            })
+    
+    # Sort: featured first, then by sort_order
+    all_prints = prints + post_prints
+    all_prints.sort(key=lambda x: (not x.get("featured", False), x.get("sort_order", 999)))
+    
+    return all_prints
+
+# Public: Get all tags
+@api_router.get("/public/gallery/tags")
+async def get_gallery_tags():
+    """Get all unique tags from prints."""
+    prints = await db.prints.find({"active": True}, {"tags": 1, "_id": 0}).to_list(1000)
+    all_tags = set()
+    for p in prints:
+        all_tags.update(p.get("tags", []))
+    return sorted(list(all_tags))
+
+# Print checkout
+@api_router.post("/prints/checkout")
+async def create_print_checkout(order: PrintOrderCreate, authorization: str = Header(None)):
+    """Create Stripe checkout for print purchase."""
+    settings = await get_settings()
+    
+    # Validate price
+    if order.print_type not in PRINT_PRICING:
+        raise HTTPException(400, "Invalid print type")
+    if order.size not in PRINT_PRICING[order.print_type]:
+        raise HTTPException(400, "Invalid size for print type")
+    
+    expected_price = PRINT_PRICING[order.print_type][order.size]
+    if abs(order.price - expected_price) > 0.01:
+        raise HTTPException(400, "Price mismatch")
+    
+    # Create order record
+    print_order = PrintOrder(
+        print_id=order.print_id,
+        print_title=order.print_title,
+        print_type=order.print_type,
+        size=order.size,
+        price=order.price,
+        special_instructions=order.special_instructions,
+        source=order.source
+    )
+    await db.print_orders.insert_one(print_order.model_dump())
+    
+    # Create Stripe checkout
+    stripe_api_key = os.environ.get('STRIPE_API_KEY')
+    if not stripe_api_key:
+        raise HTTPException(500, "Stripe not configured")
+    
+    type_name = PRINT_TYPE_NAMES.get(order.print_type, order.print_type)
+    product_name = f"{order.print_title} - {type_name} ({order.size})"
+    
+    stripe_checkout = StripeCheckout(api_key=stripe_api_key)
+    
+    checkout_request = CheckoutSessionRequest(
+        line_items=[{
+            "price_data": {
+                "currency": "usd",
+                "product_data": {
+                    "name": product_name,
+                    "description": f"Fine art print by the OBX Beach Bum"
+                },
+                "unit_amount": int(order.price * 100)
+            },
+            "quantity": 1
+        }],
+        mode="payment",
+        success_url=f"{order.origin_url}/order-success?session_id={{CHECKOUT_SESSION_ID}}",
+        cancel_url=f"{order.origin_url}/gallery",
+        shipping_address_collection={"allowed_countries": ["US"]},
+        metadata={
+            "order_id": print_order.id,
+            "print_title": order.print_title,
+            "print_type": order.print_type,
+            "size": order.size,
+            "special_instructions": order.special_instructions or ""
+        }
+    )
+    
+    session = await stripe_checkout.create_checkout_session(checkout_request)
+    
+    # Update order with session ID
+    await db.print_orders.update_one(
+        {"id": print_order.id},
+        {"$set": {"stripe_session_id": session.session_id}}
+    )
+    
+    return {"checkout_url": session.checkout_url, "session_id": session.session_id}
+
+# Print checkout status & order completion
+@api_router.get("/prints/checkout/status/{session_id}")
+async def get_print_checkout_status(session_id: str, background_tasks: BackgroundTasks):
+    """Check print order payment status."""
+    stripe_api_key = os.environ.get('STRIPE_API_KEY')
+    if not stripe_api_key:
+        raise HTTPException(500, "Stripe not configured")
+    
+    stripe_checkout = StripeCheckout(api_key=stripe_api_key)
+    status = await stripe_checkout.get_checkout_status(session_id)
+    
+    if status.payment_status == "paid":
+        # Update order
+        order = await db.print_orders.find_one({"stripe_session_id": session_id}, {"_id": 0})
+        if order and order.get("payment_status") != "paid":
+            # Get customer details from Stripe
+            customer_email = status.customer_email
+            customer_name = status.customer_name if hasattr(status, 'customer_name') else None
+            
+            await db.print_orders.update_one(
+                {"stripe_session_id": session_id},
+                {"$set": {
+                    "payment_status": "paid",
+                    "customer_email": customer_email,
+                    "customer_name": customer_name
+                }}
+            )
+            
+            # Send order notification email
+            background_tasks.add_task(send_print_order_notification, session_id)
+    
+    return {
+        "payment_status": status.payment_status,
+        "customer_email": status.customer_email
+    }
+
+async def send_print_order_notification(session_id: str):
+    """Send order notification email to Roy."""
+    settings = await get_settings()
+    order = await db.print_orders.find_one({"stripe_session_id": session_id}, {"_id": 0})
+    
+    if not order:
+        return
+    
+    # Get Stripe session for shipping address
+    stripe_api_key = os.environ.get('STRIPE_API_KEY')
+    stripe_checkout = StripeCheckout(api_key=stripe_api_key)
+    
+    try:
+        import stripe
+        stripe.api_key = stripe_api_key
+        session = stripe.checkout.Session.retrieve(session_id, expand=['shipping_details', 'customer_details'])
+        
+        shipping = session.shipping_details or {}
+        shipping_address = shipping.get('address', {})
+        customer_details = session.customer_details or {}
+    except:
+        shipping_address = {}
+        customer_details = {}
+    
+    type_name = PRINT_TYPE_NAMES.get(order['print_type'], order['print_type'])
+    
+    # Build email
+    subject = f"🖼️ New Print Order: {order['order_number']}"
+    
+    html_content = f"""
+    <div style="font-family: Georgia, serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+        <h1 style="color: #1a1a1a; border-bottom: 2px solid #1a1a1a; padding-bottom: 10px;">New Print Order!</h1>
+        
+        <h2 style="color: #333;">Order #{order['order_number']}</h2>
+        <p><strong>Date:</strong> {order['created_at'][:10] if isinstance(order['created_at'], str) else order['created_at'].strftime('%Y-%m-%d')}</p>
+        
+        <h3 style="color: #333; margin-top: 30px;">Customer Information</h3>
+        <p><strong>Name:</strong> {customer_details.get('name', order.get('customer_name', 'N/A'))}</p>
+        <p><strong>Email:</strong> {order.get('customer_email', 'N/A')}</p>
+        
+        <h3 style="color: #333; margin-top: 30px;">Shipping Address</h3>
+        <p>
+            {shipping_address.get('line1', '')}<br>
+            {shipping_address.get('line2', '') + '<br>' if shipping_address.get('line2') else ''}
+            {shipping_address.get('city', '')}, {shipping_address.get('state', '')} {shipping_address.get('postal_code', '')}<br>
+            {shipping_address.get('country', '')}
+        </p>
+        
+        <h3 style="color: #333; margin-top: 30px;">Order Details</h3>
+        <table style="width: 100%; border-collapse: collapse;">
+            <tr style="background: #f5f5f5;">
+                <td style="padding: 10px; border: 1px solid #ddd;"><strong>Photo Title</strong></td>
+                <td style="padding: 10px; border: 1px solid #ddd;">{order['print_title']}</td>
+            </tr>
+            <tr>
+                <td style="padding: 10px; border: 1px solid #ddd;"><strong>Print Type</strong></td>
+                <td style="padding: 10px; border: 1px solid #ddd;">{type_name}</td>
+            </tr>
+            <tr style="background: #f5f5f5;">
+                <td style="padding: 10px; border: 1px solid #ddd;"><strong>Size</strong></td>
+                <td style="padding: 10px; border: 1px solid #ddd;">{order['size']}</td>
+            </tr>
+            <tr>
+                <td style="padding: 10px; border: 1px solid #ddd;"><strong>Price</strong></td>
+                <td style="padding: 10px; border: 1px solid #ddd;">${order['price']:.2f}</td>
+            </tr>
+        </table>
+        
+        {"<h3 style='color: #333; margin-top: 30px;'>Special Instructions</h3><p style='background: #fff9e6; padding: 15px; border-left: 4px solid #f0ad4e;'>" + order['special_instructions'] + "</p>" if order.get('special_instructions') else ""}
+        
+        <p style="margin-top: 30px; padding: 15px; background: #d4edda; border-radius: 4px;">
+            <strong>Stripe Payment ID:</strong> {session_id}
+        </p>
+    </div>
+    """
+    
+    # Send to Roy
+    roy_email = "roye@theobxbeachbum.com"
+    
+    if settings.smtp_host and settings.smtp_username:
+        try:
+            msg = MIMEMultipart('alternative')
+            msg['Subject'] = subject
+            msg['From'] = settings.sender_email or settings.smtp_username
+            msg['To'] = roy_email
+            msg.attach(MIMEText(html_content, 'html'))
+            
+            with smtplib.SMTP(settings.smtp_host, settings.smtp_port) as server:
+                server.starttls()
+                server.login(settings.smtp_username, settings.smtp_password)
+                server.sendmail(msg['From'], [roy_email], msg.as_string())
+            
+            logging.info(f"Order notification sent for {order['order_number']}")
+        except Exception as e:
+            logging.error(f"Failed to send order notification: {e}")
+
+# Send customer confirmation email
+async def send_customer_order_confirmation(session_id: str):
+    """Send order confirmation to customer."""
+    settings = await get_settings()
+    order = await db.print_orders.find_one({"stripe_session_id": session_id}, {"_id": 0})
+    
+    if not order or not order.get('customer_email'):
+        return
+    
+    # Get shipping details from Stripe
+    stripe_api_key = os.environ.get('STRIPE_API_KEY')
+    try:
+        import stripe
+        stripe.api_key = stripe_api_key
+        session = stripe.checkout.Session.retrieve(session_id, expand=['shipping_details', 'customer_details'])
+        shipping = session.shipping_details or {}
+        shipping_address = shipping.get('address', {})
+        customer_details = session.customer_details or {}
+        customer_name = customer_details.get('name', '').split()[0] if customer_details.get('name') else 'Valued Customer'
+    except:
+        shipping_address = {}
+        customer_name = 'Valued Customer'
+    
+    type_name = PRINT_TYPE_NAMES.get(order['print_type'], order['print_type'])
+    order_date = order['created_at'][:10] if isinstance(order['created_at'], str) else order['created_at'].strftime('%B %d, %Y')
+    
+    subject = f"Your Order Confirmation - {order['order_number']}"
+    
+    html_content = f"""
+    <div style="font-family: Georgia, serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+        <img src="https://customer-assets.emergentagent.com/job_photo-news/artifacts/ds3e93fb_logo-ish.jpg" alt="the OBX Beach Bum" style="height: 60px; margin-bottom: 20px;">
+        
+        <p>Hello {customer_name},</p>
+        
+        <p>Thank you for your purchase at the OBX Beach Bum!</p>
+        
+        <h2 style="color: #1a1a1a;">Your Order # {order['order_number']}</h2>
+        <p><strong>Date:</strong> {order_date}</p>
+        <p><strong>Email:</strong> {order['customer_email']}</p>
+        
+        <h3 style="color: #333; margin-top: 30px;">Order Details</h3>
+        <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px;">
+            <tr style="background: #f5f5f5;">
+                <td style="padding: 10px; border: 1px solid #ddd;">{order['print_title']}</td>
+                <td style="padding: 10px; border: 1px solid #ddd;">{type_name} - {order['size']}</td>
+                <td style="padding: 10px; border: 1px solid #ddd; text-align: right;">${order['price']:.2f}</td>
+            </tr>
+        </table>
+        
+        <h3 style="color: #333;">Shipping Address</h3>
+        <p>
+            {shipping_address.get('line1', '')}<br>
+            {shipping_address.get('line2', '') + '<br>' if shipping_address.get('line2') else ''}
+            {shipping_address.get('city', '')}, {shipping_address.get('state', '')} {shipping_address.get('postal_code', '')}
+        </p>
+        
+        <p style="margin-top: 30px; padding: 15px; background: #f0f7ff; border-radius: 4px;">
+            Your print will be carefully prepared and shipped within 5-7 business days. You'll receive a shipping confirmation email with tracking information once your order is on its way.
+        </p>
+        
+        <p style="margin-top: 30px;">Thank you for your business!</p>
+        
+        <p><strong>the OBX Beach Bum</strong><br>
+        <a href="https://theobxbeachbum.com">theobxbeachbum.com</a></p>
+    </div>
+    """
+    
+    if settings.smtp_host and settings.smtp_username:
+        try:
+            msg = MIMEMultipart('alternative')
+            msg['Subject'] = subject
+            msg['From'] = settings.sender_email or settings.smtp_username
+            msg['To'] = order['customer_email']
+            msg.attach(MIMEText(html_content, 'html'))
+            
+            with smtplib.SMTP(settings.smtp_host, settings.smtp_port) as server:
+                server.starttls()
+                server.login(settings.smtp_username, settings.smtp_password)
+                server.sendmail(msg['From'], [order['customer_email']], msg.as_string())
+            
+            logging.info(f"Customer confirmation sent for {order['order_number']}")
+        except Exception as e:
+            logging.error(f"Failed to send customer confirmation: {e}")
+
+
 # Include router
 app.include_router(api_router)
 
