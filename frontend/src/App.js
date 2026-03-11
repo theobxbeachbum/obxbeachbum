@@ -19,6 +19,8 @@ import AddToHomeScreen from '@/pages/AddToHomeScreen';
 import Gallery from '@/pages/Gallery';
 import OrderSuccess from '@/pages/OrderSuccess';
 import ShopPlaceholder from '@/pages/ShopPlaceholder';
+import Muggs from '@/pages/Muggs';
+import MuggsSuccess from '@/pages/MuggsSuccess';
 import { Toaster } from 'sonner';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
