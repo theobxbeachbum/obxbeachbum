@@ -87,6 +87,11 @@ function App() {
           <Route path="/support" element={<Support />} />
           <Route path="/supporter-success" element={<SupporterSuccess />} />
           <Route path="/add-to-homescreen" element={<AddToHomeScreen />} />
+          <Route path="/gallery" element={<Gallery />} />
+          <Route path="/order-success" element={<OrderSuccess />} />
+          <Route path="/shop/muggs" element={<ShopPlaceholder type="muggs" />} />
+          <Route path="/shop/tees" element={<ShopPlaceholder type="tees" />} />
+          <Route path="/shop/notecards" element={<ShopPlaceholder type="notecards" />} />
           
           {/* Admin routes */}
           <Route
