@@ -63,6 +63,19 @@ A self-hosted newsletter system similar to Substack for a personal photography w
   - Root cause: emergentintegrations library incompatibility with stripe 13.x
   - Solution: Bypassed library wrapper, used Stripe SDK directly with proper error handling
 
+### New Features Added
+- **March 11, 2025:** Enhanced Order Confirmation Page (`/order-success`)
+  - Shows full order details after successful Stripe payment
+  - Displays: order number, print details (title, type, size, price)
+  - Shows special instructions if provided
+  - Displays shipping address
+  - Confirmation email notice and shipping timeline
+  - Continue Shopping / Back to Home navigation
+
+- **March 11, 2025:** SMTP2GO Email Configuration
+  - Configured verified sender: roye@theobxbeachbum.com
+  - Ready for newsletter delivery
+
 ## Pending Tasks
 
 ### P1 (High Priority)
