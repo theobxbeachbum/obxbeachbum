@@ -92,6 +92,14 @@ A self-hosted newsletter system similar to Substack for a personal photography w
   - Full Stripe checkout integration with order success page
   - Order notification emails sent to admin with all details
 
+- **March 11, 2025:** Admin Product Management for Muggs & Notecards
+  - Created admin pages at `/admin/muggs` and `/admin/notecards`
+  - Full CRUD: Add, Edit, Delete products with image upload
+  - Product type selector for Muggs (Mug, Tumbler, Sippy Cup, Coaster)
+  - Active/Inactive toggle for visibility control
+  - Public pages now fetch from database instead of hardcoded data
+  - Shows "Coming Soon!" when no products exist
+
 ## Pending Tasks
 
 ### P1 (High Priority)
