@@ -1,5 +1,5 @@
 import { Link, useLocation } from 'react-router-dom';
-import { LayoutDashboard, FileText, Users, Heart, Settings, LogOut } from 'lucide-react';
+import { LayoutDashboard, FileText, Users, Heart, Settings, LogOut, Image } from 'lucide-react';
 
 function AdminLayout({ children, onLogout, currentPage }) {
   const location = useLocation();
@@ -7,6 +7,7 @@ function AdminLayout({ children, onLogout, currentPage }) {
   const navItems = [
     { path: '/admin/dashboard', label: 'Dashboard', icon: LayoutDashboard, id: 'dashboard' },
     { path: '/admin/posts', label: 'Posts', icon: FileText, id: 'posts' },
+    { path: '/admin/prints', label: 'Prints', icon: Image, id: 'prints' },
     { path: '/admin/subscribers', label: 'Subscribers', icon: Users, id: 'subscribers' },
     { path: '/admin/supporters', label: 'Supporters', icon: Heart, id: 'supporters' },
     { path: '/admin/settings', label: 'Settings', icon: Settings, id: 'settings' },
