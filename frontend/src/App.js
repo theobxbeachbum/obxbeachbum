@@ -120,6 +120,16 @@ function App() {
             }
           />
           <Route
+            path="/admin/prints"
+            element={
+              isAuthenticated ? (
+                <Prints onLogout={handleLogout} />
+              ) : (
+                <Navigate to="/admin/login" replace />
+              )
+            }
+          />
+          <Route
             path="/admin/subscribers"
             element={
               isAuthenticated ? (
