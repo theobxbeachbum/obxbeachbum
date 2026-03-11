@@ -1620,6 +1620,7 @@ h1, h2, h3, h4, h5, h6 {
 /* Shop Dropdown */
 .nav-dropdown {
   position: relative;
+  display: inline-block;
 }
 
 .dropdown-trigger {
@@ -1628,8 +1629,9 @@ h1, h2, h3, h4, h5, h6 {
 
 .dropdown-menu {
   position: absolute;
-  top: 100%;
-  left: 0;
+  top: calc(100% + 5px);
+  left: 50%;
+  transform: translateX(-50%);
   background: #fff;
   border: 1px solid #e0e0e0;
   border-radius: 8px;
@@ -1637,7 +1639,6 @@ h1, h2, h3, h4, h5, h6 {
   min-width: 180px;
   opacity: 0;
   visibility: hidden;
-  transform: translateY(-10px);
   transition: all 0.2s;
   z-index: 100;
 }
@@ -1645,7 +1646,6 @@ h1, h2, h3, h4, h5, h6 {
 .nav-dropdown:hover .dropdown-menu {
   opacity: 1;
   visibility: visible;
-  transform: translateY(0);
 }
 
 .dropdown-item {
