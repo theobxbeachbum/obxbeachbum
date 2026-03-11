@@ -1200,38 +1200,78 @@ async def create_print_checkout(order: PrintOrderCreate, authorization: str = He
 # Print checkout status & order completion
 @api_router.get("/prints/checkout/status/{session_id}")
 async def get_print_checkout_status(session_id: str, background_tasks: BackgroundTasks):
-    """Check print order payment status."""
+    """Check print order payment status and return order details."""
     stripe_api_key = os.environ.get('STRIPE_API_KEY')
     if not stripe_api_key:
         raise HTTPException(500, "Stripe not configured")
     
-    stripe_checkout = StripeCheckout(api_key=stripe_api_key)
-    status = await stripe_checkout.get_checkout_status(session_id)
+    stripe.api_key = stripe_api_key
+    if "sk_test_emergent" in stripe_api_key:
+        stripe.api_base = "https://integrations.emergentagent.com/stripe"
     
-    if status.payment_status == "paid":
-        # Update order
-        order = await db.print_orders.find_one({"stripe_session_id": session_id}, {"_id": 0})
-        if order and order.get("payment_status") != "paid":
-            # Get customer details from Stripe
-            customer_email = status.customer_email
-            customer_name = status.customer_name if hasattr(status, 'customer_name') else None
+    # Get order from database
+    order = await db.print_orders.find_one({"stripe_session_id": session_id}, {"_id": 0})
+    if not order:
+        raise HTTPException(404, "Order not found")
+    
+    try:
+        # Get session details from Stripe
+        session = stripe.checkout.Session.retrieve(session_id)
+        payment_status = session.payment_status
+        
+        if payment_status == "paid" and order.get("payment_status") != "paid":
+            # Update order with customer details
+            customer_email = session.customer_details.email if session.customer_details else None
+            customer_name = session.customer_details.name if session.customer_details else None
+            shipping = None
+            if session.shipping_details:
+                shipping = {
+                    "name": session.shipping_details.name,
+                    "address": {
+                        "line1": session.shipping_details.address.line1,
+                        "line2": session.shipping_details.address.line2,
+                        "city": session.shipping_details.address.city,
+                        "state": session.shipping_details.address.state,
+                        "postal_code": session.shipping_details.address.postal_code,
+                        "country": session.shipping_details.address.country
+                    }
+                }
             
             await db.print_orders.update_one(
                 {"stripe_session_id": session_id},
                 {"$set": {
                     "payment_status": "paid",
                     "customer_email": customer_email,
-                    "customer_name": customer_name
+                    "customer_name": customer_name,
+                    "shipping_address": shipping
                 }}
             )
             
+            # Refresh order data
+            order = await db.print_orders.find_one({"stripe_session_id": session_id}, {"_id": 0})
+            
             # Send order notification email
             background_tasks.add_task(send_print_order_notification, session_id)
-    
-    return {
-        "payment_status": status.payment_status,
-        "customer_email": status.customer_email
-    }
+        
+        # Get type display name
+        type_name = PRINT_TYPE_NAMES.get(order.get("print_type"), order.get("print_type"))
+        
+        return {
+            "payment_status": payment_status,
+            "order_number": order.get("order_number"),
+            "print_title": order.get("print_title"),
+            "print_type": type_name,
+            "size": order.get("size"),
+            "price": order.get("price"),
+            "special_instructions": order.get("special_instructions"),
+            "customer_email": order.get("customer_email"),
+            "customer_name": order.get("customer_name"),
+            "shipping_address": order.get("shipping_address"),
+            "created_at": order.get("created_at").isoformat() if order.get("created_at") else None
+        }
+    except Exception as e:
+        logging.error(f"Error getting checkout status: {str(e)}")
+        raise HTTPException(500, f"Error retrieving order status: {str(e)}")
 
 async def send_print_order_notification(session_id: str):
     """Send order notification email to Roy."""
