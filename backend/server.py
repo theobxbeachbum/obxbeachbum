@@ -167,6 +167,33 @@ class MuggsOrder(BaseModel):
     order_number: str = Field(default_factory=lambda: f"MUG-{datetime.now().strftime('%Y%m%d')}-{secrets.token_hex(3).upper()}")
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
+# Notecards order models
+class NotecardsOrderCreate(BaseModel):
+    product_id: str
+    product_title: str
+    variant: str  # single, six-pak, ten-pak
+    variant_label: str
+    price: float
+    special_instructions: Optional[str] = None
+    origin_url: str
+
+class NotecardsOrder(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    product_id: str
+    product_title: str
+    variant: str
+    variant_label: str
+    price: float
+    special_instructions: Optional[str] = None
+    stripe_session_id: Optional[str] = None
+    customer_email: Optional[str] = None
+    customer_name: Optional[str] = None
+    shipping_address: Optional[Dict] = None
+    payment_status: str = "pending"
+    order_number: str = Field(default_factory=lambda: f"NOTE-{datetime.now().strftime('%Y%m%d')}-{secrets.token_hex(3).upper()}")
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
 class SendNewsletterRequest(BaseModel):
     post_id: str
 
