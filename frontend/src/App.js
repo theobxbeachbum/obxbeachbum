@@ -96,7 +96,8 @@ function App() {
           <Route path="/shop/muggs" element={<Muggs />} />
           <Route path="/muggs-success" element={<MuggsSuccess />} />
           <Route path="/shop/tees" element={<ShopPlaceholder type="tees" />} />
-          <Route path="/shop/notecards" element={<ShopPlaceholder type="notecards" />} />
+          <Route path="/shop/notecards" element={<Notecards />} />
+          <Route path="/notecards-success" element={<NotecardsSuccess />} />
           
           {/* Admin routes */}
           <Route
