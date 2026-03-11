@@ -63,7 +63,8 @@ function Posts({ onLogout }) {
       title: post.title,
       content: post.content,
       image_url: post.image_url || '',
-      image_urls: post.image_urls || []
+      image_urls: post.image_urls || [],
+      available_for_purchase: post.available_for_purchase || false
     });
     setShowDialog(true);
   };
