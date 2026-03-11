@@ -84,6 +84,14 @@ A self-hosted newsletter system similar to Substack for a personal photography w
   - Full Stripe checkout integration with order success page
   - Order notification emails sent to admin with all details
 
+- **March 11, 2025:** Mostly Good Notecards Product Page
+  - Created complete e-commerce product page at `/shop/notecards`
+  - 6 notecard designs with quantity dropdown: Single ($6), Six-Pak ($30), Ten-Pak ($40)
+  - Product info banner: 5x7 Size, Envelope Included, Individually Wrapped, Blank Inside
+  - Special Instructions field on all products
+  - Full Stripe checkout integration with order success page
+  - Order notification emails sent to admin with all details
+
 ## Pending Tasks
 
 ### P1 (High Priority)
