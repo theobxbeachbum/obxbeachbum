@@ -214,7 +214,7 @@ function Gallery() {
       </div>
 
       {/* Gallery Grid */}
-      <main className="gallery-main" style={{ maxWidth: '1400px', margin: '0 auto', padding: '0 20px 60px' }}>
+      <main className="gallery-main" style={{ maxWidth: '1400px', margin: '0 auto', padding: '20px' }}>
         {loading ? (
           <div className="loading-spinner"></div>
         ) : prints.length === 0 ? (
@@ -223,16 +223,16 @@ function Gallery() {
             <p>Try a different search term or check back soon for new additions.</p>
           </div>
         ) : (
-          <div className="gallery-grid" style={{ 
+          <div style={{ 
             display: 'grid', 
-            gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', 
-            gap: '20px' 
+            gridTemplateColumns: 'repeat(5, 1fr)', 
+            gap: '16px',
+            width: '100%'
           }}>
             {prints.map((print) => (
               <div 
                 key={print.id} 
                 id={`print-${print.id}`}
-                className={`gallery-item ${print.featured ? 'featured' : ''}`}
                 onClick={() => openPrintModal(print)}
                 style={{
                   background: '#fff',
@@ -240,10 +240,11 @@ function Gallery() {
                   overflow: 'hidden',
                   boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
                   cursor: 'pointer',
-                  position: 'relative'
+                  position: 'relative',
+                  transition: 'transform 0.2s, box-shadow 0.2s'
                 }}
               >
-                {print.featured && <span className="featured-badge" style={{
+                {print.featured && <span style={{
                   position: 'absolute',
                   top: '8px',
                   left: '8px',
@@ -258,19 +259,19 @@ function Gallery() {
                 <img 
                   src={print.image_url} 
                   alt={print.title} 
-                  style={{ width: '100%', height: '180px', objectFit: 'cover', display: 'block' }}
+                  style={{ width: '100%', height: '160px', objectFit: 'cover', display: 'block' }}
                 />
-                <div className="gallery-item-info" style={{ padding: '12px 14px' }}>
+                <div style={{ padding: '10px 12px' }}>
                   <h3 style={{ 
                     fontFamily: "'Playfair Display', Georgia, serif",
-                    fontSize: '15px',
+                    fontSize: '14px',
                     margin: '0 0 4px',
                     color: '#1a1a1a',
                     whiteSpace: 'nowrap',
                     overflow: 'hidden',
                     textOverflow: 'ellipsis'
                   }}>{print.title}</h3>
-                  <span className="buy-prompt" style={{ fontSize: '12px', color: '#666' }}>Click to buy print →</span>
+                  <span style={{ fontSize: '11px', color: '#888' }}>View →</span>
                 </div>
               </div>
             ))}
