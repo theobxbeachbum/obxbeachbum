@@ -5,6 +5,7 @@ import '@/App.css';
 import AdminLogin from '@/pages/AdminLogin';
 import Dashboard from '@/pages/Dashboard';
 import Posts from '@/pages/Posts';
+import Prints from '@/pages/Prints';
 import Subscribers from '@/pages/Subscribers';
 import Settings from '@/pages/Settings';
 import Supporters from '@/pages/Supporters';
@@ -15,6 +16,9 @@ import SupporterSuccess from '@/pages/SupporterSuccess';
 import PublicHome from '@/pages/PublicHome';
 import PostView from '@/pages/PostView';
 import AddToHomeScreen from '@/pages/AddToHomeScreen';
+import Gallery from '@/pages/Gallery';
+import OrderSuccess from '@/pages/OrderSuccess';
+import ShopPlaceholder from '@/pages/ShopPlaceholder';
 import { Toaster } from 'sonner';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
