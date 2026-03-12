@@ -184,13 +184,13 @@ function Gallery() {
       </section>
 
       {/* Search/Filter */}
-      <div className="gallery-filter">
-        <form onSubmit={handleSearch} className="search-form">
+      <div className="gallery-filter" style={{ maxWidth: '600px', margin: '0 auto', padding: '30px 20px', textAlign: 'center' }}>
+        <form onSubmit={handleSearch} className="search-form" style={{ display: 'flex', gap: '12px', justifyContent: 'center' }}>
           <div className="search-input-wrapper">
             <Search size={20} />
             <input
               type="text"
-              placeholder="Search by keyword (e.g., sunrise, lighthouse, pelican)"
+              placeholder="Search prints..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
             />
@@ -204,7 +204,7 @@ function Gallery() {
         </form>
         
         {tags.length > 0 && (
-          <div className="tag-filters">
+          <div className="tag-filters" style={{ display: 'flex', flexWrap: 'wrap', gap: '10px', marginTop: '20px', justifyContent: 'center' }}>
             {tags.slice(0, 10).map(tag => (
               <button
                 key={tag}
