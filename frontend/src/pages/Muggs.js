@@ -175,8 +175,8 @@ function Muggs() {
             style={{ maxWidth: '280px', marginBottom: '20px' }}
           />
           <p className="hero-description">
-            Start your morning with a sunrise coffee in style. Our collection of beach-themed 
-            mugs and drinkware features stunning OBX photography.
+            Life's too short for boring mugs. Coffee tastes better with a little salt air 
+            and a proper mugg designed by the legendary OBX Beach Bum.
           </p>
         </div>
       </section>
