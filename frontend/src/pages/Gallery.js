@@ -173,14 +173,14 @@ function Gallery() {
       </header>
 
       {/* Gallery Hero */}
-      <section className="gallery-hero">
+      <section className="gallery-hero" style={{ textAlign: 'center', padding: '60px 20px 30px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
         <img 
           src="https://customer-assets.emergentagent.com/job_381afaab-428f-429b-b443-99e1de976f4c/artifacts/hdwrm88d_Beach%20Bum%20Gallery.png" 
           alt="Beach Bum Gallery - Mostly Good Beach Photography" 
           className="shop-hero-logo"
           style={{ maxWidth: '320px', marginBottom: '15px', display: 'block', marginLeft: 'auto', marginRight: 'auto' }}
         />
-        <p>Fine art prints of stunning OBX photography</p>
+        <p style={{ fontSize: '18px', color: '#666', margin: 0, textAlign: 'center' }}>Fine art prints of stunning OBX photography</p>
       </section>
 
       {/* Search/Filter */}
