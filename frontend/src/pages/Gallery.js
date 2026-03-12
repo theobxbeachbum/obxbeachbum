@@ -174,7 +174,12 @@ function Gallery() {
 
       {/* Gallery Hero */}
       <section className="gallery-hero">
-        <h1>Beach Bum Gallery</h1>
+        <img 
+          src="https://customer-assets.emergentagent.com/job_381afaab-428f-429b-b443-99e1de976f4c/artifacts/hdwrm88d_Beach%20Bum%20Gallery.png" 
+          alt="Beach Bum Gallery - Mostly Good Beach Photography" 
+          className="shop-hero-logo"
+          style={{ maxWidth: '320px', marginBottom: '15px' }}
+        />
         <p>Fine art prints of stunning OBX photography</p>
       </section>
 
