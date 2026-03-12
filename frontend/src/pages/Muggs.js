@@ -168,9 +168,12 @@ function Muggs() {
       {/* Hero Section */}
       <section className="muggs-hero">
         <div className="hero-content">
-          <Coffee size={48} className="hero-icon" />
-          <h1>B.B. Muggs</h1>
-          <p className="hero-subtitle">Beach Bum Drinkware Collection</p>
+          <img 
+            src="https://customer-assets.emergentagent.com/job_381afaab-428f-429b-b443-99e1de976f4c/artifacts/lwdla9in_bbmuggs%20logo.png" 
+            alt="B.B. Muggs - Distinctive Drinkware & Stuff" 
+            className="shop-hero-logo"
+            style={{ maxWidth: '280px', marginBottom: '20px' }}
+          />
           <p className="hero-description">
             Start your morning with a sunrise coffee in style. Our collection of beach-themed 
             mugs and drinkware features stunning OBX photography.
