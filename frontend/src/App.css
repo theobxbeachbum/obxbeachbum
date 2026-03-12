@@ -1684,6 +1684,19 @@ h1, h2, h3, h4, h5, h6 {
   margin: 0;
 }
 
+/* Shop Hero Logos */
+.shop-hero-logo {
+  display: block;
+  margin: 0 auto;
+  height: auto;
+}
+
+@media (max-width: 600px) {
+  .shop-hero-logo {
+    max-width: 220px !important;
+  }
+}
+
 /* Gallery Filter */
 .gallery-filter {
   max-width: 800px;
