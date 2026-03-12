@@ -1709,7 +1709,7 @@ h1, h2, h3, h4, h5, h6 {
 
 /* Gallery Filter */
 .gallery-filter {
-  max-width: 800px;
+  max-width: 700px;
   margin: 0 auto;
   padding: 30px 20px;
   text-align: center;
@@ -1719,6 +1719,8 @@ h1, h2, h3, h4, h5, h6 {
   display: flex;
   gap: 12px;
   justify-content: center;
+  max-width: 600px;
+  margin: 0 auto;
 }
 
 .search-input-wrapper {
@@ -1729,6 +1731,7 @@ h1, h2, h3, h4, h5, h6 {
   border: 1px solid #ddd;
   border-radius: 8px;
   padding: 0 15px;
+  max-width: 450px;
 }
 
 .search-input-wrapper svg {
