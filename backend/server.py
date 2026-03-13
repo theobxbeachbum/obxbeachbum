@@ -1695,44 +1695,45 @@ async def send_customer_order_confirmation(session_id: str):
 # ============================================
 
 # Muggs pricing validation
-MUGGS_PRICING = {
-    'ceramic-mug-15oz': 18,
-    'tumbler-20oz': 28,
-    'sippy-cup-12oz': 20,
-    'ceramic-coaster': {
+# Muggs pricing by product type (base prices)
+MUGGS_TYPE_PRICING = {
+    'mug': 18,
+    'tumbler': 28,
+    'sippy': 20,
+    'coaster': {
         'single': 7,
         'set-2': 12,
         'set-4': 21
     }
 }
 
-MUGGS_PRODUCT_NAMES = {
-    'ceramic-mug-15oz': '15oz Ceramic Coffee Mugg',
-    'tumbler-20oz': '20oz Stainless Steel Tumbler',
-    'sippy-cup-12oz': '12oz Sippy Cup',
-    'ceramic-coaster': '4x4 Ceramic Coaster'
-}
-
 @api_router.post("/muggs/checkout")
 async def create_muggs_checkout(order: MuggsOrderCreate):
     """Create Stripe checkout for muggs purchase."""
     
-    # Validate price
-    if order.product_id not in MUGGS_PRICING:
+    # Get product from database to validate
+    product = await db.muggs_products.find_one({"id": order.product_id}, {"_id": 0})
+    if not product:
         raise HTTPException(400, "Invalid product")
     
-    pricing = MUGGS_PRICING[order.product_id]
-    
-    if isinstance(pricing, dict):
+    # Validate price based on product type
+    if product.get('has_variants') or product.get('product_type') == 'coaster':
         # Coaster with variants
-        if not order.variant or order.variant not in pricing:
-            raise HTTPException(400, "Invalid variant selection")
-        expected_price = pricing[order.variant]
+        if order.product_type not in MUGGS_TYPE_PRICING:
+            raise HTTPException(400, "Invalid product type")
+        pricing = MUGGS_TYPE_PRICING[order.product_type]
+        if isinstance(pricing, dict):
+            if not order.variant or order.variant not in pricing:
+                raise HTTPException(400, "Invalid variant selection")
+            expected_price = pricing[order.variant]
+        else:
+            expected_price = pricing
     else:
-        expected_price = pricing
+        # Regular product - use price from database
+        expected_price = product.get('price', 0)
     
     if abs(order.price - expected_price) > 0.01:
-        raise HTTPException(400, "Price mismatch")
+        raise HTTPException(400, f"Price mismatch: expected {expected_price}, got {order.price}")
     
     # Create order record
     muggs_order = MuggsOrder(
