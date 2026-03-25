@@ -153,14 +153,14 @@ function Support() {
       </header>
 
       {/* Support Hero */}
-      <section className="support-hero">
-        <Heart size={48} className="hero-icon" style={{ color: '#dc3545' }} />
-        <h1>Support the OBX Beach Bum</h1>
-        <p>Your support helps keep the salt air flowing and the camera clicking</p>
+      <section className="support-hero" style={{ textAlign: 'center', padding: '60px 20px 40px', background: 'linear-gradient(135deg, #fff5f5 0%, #ffe6e6 100%)' }}>
+        <Heart size={48} style={{ color: '#dc3545', marginBottom: '20px' }} />
+        <h1 style={{ fontFamily: "'Playfair Display', Georgia, serif", fontSize: '42px', margin: '0 0 15px', color: '#1a1a1a' }}>Support the OBX Beach Bum</h1>
+        <p style={{ fontSize: '18px', color: '#666', margin: 0 }}>Your support helps keep the salt air flowing and the camera clicking</p>
       </section>
 
       {/* Subscription Plans */}
-      <main className="support-main">
+      <main className="support-main" style={{ maxWidth: '1000px', margin: '0 auto', padding: '60px 20px' }}>
         <div className="plans-container">
           {SUBSCRIPTION_PLANS.map(plan => (
             <div 
