@@ -55,6 +55,7 @@ const SUBSCRIPTION_PLANS = [
 ];
 
 function Support() {
+  const navigate = useNavigate();
   const [email, setEmail] = useState('');
   const [selectedPlan, setSelectedPlan] = useState('free');
   const [donationAmount, setDonationAmount] = useState('');
@@ -76,8 +77,8 @@ function Support() {
         // Free subscription - just add to subscriber list
         const response = await axios.post(`${BACKEND_URL}/api/subscribe`, { email });
         if (response.data.success) {
-          toast.success('You\'re subscribed! Check your email for confirmation.');
-          setEmail('');
+          // Redirect to success page
+          navigate('/subscribe-success?type=free');
         }
       } else {
         // Paid subscription - redirect to Stripe
