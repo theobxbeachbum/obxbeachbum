@@ -284,6 +284,12 @@ class SupporterSubscription(BaseModel):
 class SupporterCheckoutRequest(BaseModel):
     email: EmailStr
     origin_url: str
+    plan: Optional[str] = "monthly"  # monthly, annual
+
+class DonationCheckoutRequest(BaseModel):
+    email: EmailStr
+    origin_url: str
+    amount: float
 
 class PaymentTransaction(BaseModel):
     model_config = ConfigDict(extra="ignore")
