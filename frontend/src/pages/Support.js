@@ -161,7 +161,7 @@ function Support() {
 
       {/* Subscription Plans */}
       <main className="support-main" style={{ maxWidth: '1000px', margin: '0 auto', padding: '60px 20px' }}>
-        <div className="plans-container">
+        <div className="plans-container" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '25px', marginBottom: '40px' }}>
           {SUBSCRIPTION_PLANS.map(plan => (
             <div 
               key={plan.id}
