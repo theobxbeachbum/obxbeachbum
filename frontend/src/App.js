@@ -93,6 +93,7 @@ function App() {
           <Route path="/unsubscribe" element={<Unsubscribe />} />
           <Route path="/support" element={<Support />} />
           <Route path="/supporter-success" element={<SupporterSuccess />} />
+          <Route path="/subscribe-success" element={<SubscribeSuccess />} />
           <Route path="/add-to-homescreen" element={<AddToHomeScreen />} />
           <Route path="/gallery" element={<Gallery />} />
           <Route path="/order-success" element={<OrderSuccess />} />
