@@ -1,120 +1,303 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
+import { Link } from 'react-router-dom';
 import axios from 'axios';
 import { toast } from 'sonner';
-import { Heart } from 'lucide-react';
-import { config } from '@/config';
+import { Heart, Check, Gift } from 'lucide-react';
+import { Button } from '../components/ui/button';
+
+const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
+
+const SUBSCRIPTION_PLANS = [
+  {
+    id: 'free',
+    name: 'Free',
+    price: 0,
+    period: '',
+    description: 'Stay connected with the OBX Beach Bum',
+    features: [
+      'Weekly newsletter',
+      'Beach photography updates',
+      'Event announcements'
+    ],
+    buttonText: 'Subscribe Free',
+    popular: false
+  },
+  {
+    id: 'monthly',
+    name: 'Monthly Supporter',
+    price: 7,
+    period: '/month',
+    description: 'Help keep the salt air flowing',
+    features: [
+      'Everything in Free',
+      'Supporter badge',
+      'Early access to new prints',
+      'Behind-the-scenes content'
+    ],
+    buttonText: 'Support Monthly',
+    popular: true
+  },
+  {
+    id: 'annual',
+    name: 'Annual Supporter',
+    price: 70,
+    period: '/year',
+    description: 'Best value for true beach bums',
+    features: [
+      'Everything in Monthly',
+      'Save $14/year',
+      'Exclusive annual supporter gift',
+      'Priority print requests'
+    ],
+    buttonText: 'Support Annually',
+    popular: false
+  }
+];
 
 function Support() {
   const [email, setEmail] = useState('');
+  const [selectedPlan, setSelectedPlan] = useState('free');
+  const [donationAmount, setDonationAmount] = useState('');
   const [loading, setLoading] = useState(false);
-  const [settings, setSettings] = useState(null);
+  const [showDonation, setShowDonation] = useState(false);
 
-  useEffect(() => {
-    // Check if supporter subscriptions are enabled
-    checkSettings();
-  }, []);
-
-  const checkSettings = async () => {
-    try {
-      // We need to make this endpoint public or fetch via a public route
-      // For now, we'll assume it's enabled and show the amount from local state
-      setSettings({ enabled: true, amount: 5.0 });
-    } catch (error) {
-      console.error('Failed to fetch settings');
-    }
-  };
-
-  const handleSubmit = async (e) => {
+  const handleSubscribe = async (e) => {
     e.preventDefault();
+    
+    if (!email) {
+      toast.error('Please enter your email address');
+      return;
+    }
+
     setLoading(true);
 
     try {
-      const originUrl = window.location.origin;
-      const response = await axios.post('/supporters/checkout', {
+      if (selectedPlan === 'free') {
+        // Free subscription - just add to subscriber list
+        const response = await axios.post(`${BACKEND_URL}/api/subscribe`, { email });
+        if (response.data.success) {
+          toast.success('You\'re subscribed! Check your email for confirmation.');
+          setEmail('');
+        }
+      } else {
+        // Paid subscription - redirect to Stripe
+        const response = await axios.post(`${BACKEND_URL}/api/supporters/checkout`, {
+          email,
+          plan: selectedPlan,
+          origin_url: window.location.origin
+        });
+
+        if (response.data.url) {
+          window.location.href = response.data.url;
+        }
+      }
+    } catch (error) {
+      toast.error(error.response?.data?.detail || 'Failed to process. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleDonation = async (e) => {
+    e.preventDefault();
+    
+    const amount = parseFloat(donationAmount);
+    if (!amount || amount < 1) {
+      toast.error('Please enter a donation amount of at least $1');
+      return;
+    }
+
+    if (!email) {
+      toast.error('Please enter your email address');
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      const response = await axios.post(`${BACKEND_URL}/api/supporters/donate`, {
         email,
-        origin_url: originUrl
+        amount,
+        origin_url: window.location.origin
       });
 
-      // Redirect to Stripe checkout
       if (response.data.url) {
         window.location.href = response.data.url;
       }
     } catch (error) {
-      toast.error(error.response?.data?.detail || 'Failed to process. Please try again.');
+      toast.error(error.response?.data?.detail || 'Failed to process donation. Please try again.');
+    } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="public-page" style={{
-      backgroundImage: `url(${config.backgroundImage})`,
-      backgroundSize: 'cover',
-      backgroundPosition: 'center',
-      backgroundRepeat: 'no-repeat'
-    }}>
-      <div className="public-container" style={{
-        backgroundColor: 'rgba(255, 255, 255, 0.95)',
-        backdropFilter: 'blur(10px)'
-      }}>
-        <Heart
-          style={{
-            width: '48px',
-            height: '48px',
-            margin: '0 auto 20px',
-            display: 'block',
-            color: '#dc3545'
-          }}
-        />
-        <h1 data-testid="support-title">Support This Newsletter</h1>
-        <p>Help keep this newsletter running with a small monthly contribution</p>
-
-        <div style={{
-          background: '#f8f9fa',
-          padding: '20px',
-          borderRadius: '8px',
-          margin: '30px 0',
-          textAlign: 'center'
-        }}>
-          <div style={{ fontSize: '48px', fontWeight: '700', color: '#1a1a1a' }}>
-            ${settings?.amount || 5}/mo
-          </div>
-          <div style={{ color: '#666', marginTop: '10px' }}>
-            All content remains free. Your support helps us continue.
-          </div>
-        </div>
-
-        <form onSubmit={handleSubmit} data-testid="support-form">
-          <div className="form-group">
-            <label htmlFor="email">Email Address</label>
-            <input
-              type="email"
-              id="email"
-              data-testid="support-email-input"
-              className="form-input"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-              placeholder="you@example.com"
-              autoFocus
+    <div className="substack-site">
+      {/* Header */}
+      <header className="substack-header">
+        <div className="header-logo">
+          <Link to="/">
+            <img 
+              src="https://customer-assets.emergentagent.com/job_photo-news/artifacts/ds3e93fb_logo-ish.jpg" 
+              alt="the OBX Beach Bum" 
+              className="main-logo"
             />
-          </div>
-
-          <button
-            type="submit"
-            data-testid="become-supporter-btn"
-            className="btn btn-primary btn-full"
-            disabled={loading}
-          >
-            {loading ? 'Processing...' : 'Become a Supporter'}
-          </button>
-        </form>
-
-        <div style={{ marginTop: '30px', fontSize: '14px', color: '#666', textAlign: 'center' }}>
-          <p>✓ Cancel anytime</p>
-          <p>✓ Secure payment via Stripe</p>
-          <p>✓ All content remains free for everyone</p>
+          </Link>
         </div>
-      </div>
+        <nav className="header-nav">
+          <Link to="/" className="nav-item">Home</Link>
+          <Link to="/gallery" className="nav-item">Gallery</Link>
+          <Link to="/archive" className="nav-item">Archive</Link>
+          <Link to="/subscribe" className="nav-item subscribe-btn">Subscribe</Link>
+        </nav>
+      </header>
+
+      {/* Support Hero */}
+      <section className="support-hero">
+        <Heart size={48} className="hero-icon" style={{ color: '#dc3545' }} />
+        <h1>Support the OBX Beach Bum</h1>
+        <p>Your support helps keep the salt air flowing and the camera clicking</p>
+      </section>
+
+      {/* Subscription Plans */}
+      <main className="support-main">
+        <div className="plans-container">
+          {SUBSCRIPTION_PLANS.map(plan => (
+            <div 
+              key={plan.id}
+              className={`plan-card ${selectedPlan === plan.id ? 'selected' : ''} ${plan.popular ? 'popular' : ''}`}
+              onClick={() => setSelectedPlan(plan.id)}
+              data-testid={`plan-${plan.id}`}
+            >
+              {plan.popular && <div className="popular-badge">Most Popular</div>}
+              <h3 className="plan-name">{plan.name}</h3>
+              <div className="plan-price">
+                {plan.price === 0 ? (
+                  <span className="price-amount">Free</span>
+                ) : (
+                  <>
+                    <span className="price-amount">${plan.price}</span>
+                    <span className="price-period">{plan.period}</span>
+                  </>
+                )}
+              </div>
+              <p className="plan-description">{plan.description}</p>
+              <ul className="plan-features">
+                {plan.features.map((feature, idx) => (
+                  <li key={idx}>
+                    <Check size={16} className="feature-check" />
+                    {feature}
+                  </li>
+                ))}
+              </ul>
+              <div className="plan-select-indicator">
+                {selectedPlan === plan.id ? '✓ Selected' : 'Click to select'}
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Email & Subscribe Form */}
+        <div className="subscribe-form-container">
+          <form onSubmit={handleSubscribe} className="subscribe-form">
+            <div className="form-row">
+              <input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="Enter your email address"
+                required
+                className="email-input"
+                data-testid="support-email-input"
+              />
+              <Button 
+                type="submit" 
+                disabled={loading}
+                className="subscribe-btn"
+                data-testid="subscribe-btn"
+              >
+                {loading ? 'Processing...' : SUBSCRIPTION_PLANS.find(p => p.id === selectedPlan)?.buttonText}
+              </Button>
+            </div>
+          </form>
+
+          <div className="support-info">
+            <p>✓ Cancel anytime &nbsp;•&nbsp; ✓ Secure payment via Stripe &nbsp;•&nbsp; ✓ All content remains free for everyone</p>
+          </div>
+        </div>
+
+        {/* One-time Donation Section */}
+        <div className="donation-section">
+          <div className="donation-header" onClick={() => setShowDonation(!showDonation)}>
+            <Gift size={24} />
+            <span>Prefer a one-time donation?</span>
+            <span className="toggle-arrow">{showDonation ? '▲' : '▼'}</span>
+          </div>
+          
+          {showDonation && (
+            <form onSubmit={handleDonation} className="donation-form">
+              <p>Send a one-time tip of any amount to show your support.</p>
+              <div className="donation-row">
+                <div className="donation-input-wrapper">
+                  <span className="currency-symbol">$</span>
+                  <input
+                    type="number"
+                    min="1"
+                    step="1"
+                    value={donationAmount}
+                    onChange={(e) => setDonationAmount(e.target.value)}
+                    placeholder="Enter amount"
+                    className="donation-input"
+                    data-testid="donation-amount-input"
+                  />
+                </div>
+                <Button 
+                  type="submit" 
+                  disabled={loading || !donationAmount}
+                  variant="outline"
+                  data-testid="donate-btn"
+                >
+                  {loading ? 'Processing...' : 'Send Donation'}
+                </Button>
+              </div>
+              <div className="quick-amounts">
+                {[5, 10, 25, 50].map(amount => (
+                  <button
+                    key={amount}
+                    type="button"
+                    onClick={() => setDonationAmount(amount.toString())}
+                    className={`quick-amount ${donationAmount === amount.toString() ? 'selected' : ''}`}
+                  >
+                    ${amount}
+                  </button>
+                ))}
+              </div>
+            </form>
+          )}
+        </div>
+      </main>
+
+      {/* Footer */}
+      <footer className="substack-footer">
+        <div className="footer-container">
+          <div className="footer-top">
+            <div className="footer-logo">
+              <img 
+                src="https://customer-assets.emergentagent.com/job_photo-news/artifacts/fndpshgx_whitelogo-obxbb.png" 
+                alt="the OBX Beach Bum" 
+              />
+            </div>
+            <nav className="footer-nav">
+              <Link to="/about">About</Link>
+              <Link to="/gallery">Gallery</Link>
+              <Link to="/admin/login">Admin</Link>
+            </nav>
+          </div>
+          <div className="footer-bottom">
+            <p className="copyright">© {new Date().getFullYear()} the OBX Beach Bum</p>
+          </div>
+        </div>
+      </footer>
     </div>
   );
 }
