@@ -23,6 +23,7 @@ import Muggs from '@/pages/Muggs';
 import MuggsSuccess from '@/pages/MuggsSuccess';
 import Notecards from '@/pages/Notecards';
 import NotecardsSuccess from '@/pages/NotecardsSuccess';
+import SubscribeSuccess from '@/pages/SubscribeSuccess';
 import AdminMuggs from '@/pages/AdminMuggs';
 import AdminNotecards from '@/pages/AdminNotecards';
 import { Toaster } from 'sonner';
