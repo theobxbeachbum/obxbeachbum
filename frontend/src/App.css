@@ -2856,6 +2856,320 @@ h1, h2, h3, h4, h5, h6 {
   .product-title {
     font-size: 20px;
   }
+
+
+/* ============================================
+   Support/Subscription Page Styles
+   ============================================ */
+
+.support-hero {
+  text-align: center;
+  padding: 60px 20px 40px;
+  background: linear-gradient(135deg, #fff5f5 0%, #ffe6e6 100%);
+}
+
+.support-hero .hero-icon {
+  margin-bottom: 20px;
+}
+
+.support-hero h1 {
+  font-family: 'Playfair Display', Georgia, serif;
+  font-size: 42px;
+  margin: 0 0 15px;
+  color: #1a1a1a;
+}
+
+.support-hero p {
+  font-size: 18px;
+  color: #666;
+  margin: 0;
+}
+
+.support-main {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 60px 20px;
+}
+
+.plans-container {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 25px;
+  margin-bottom: 40px;
+}
+
+.plan-card {
+  background: #fff;
+  border: 2px solid #e0e0e0;
+  border-radius: 16px;
+  padding: 30px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+.plan-card:hover {
+  border-color: #999;
+  transform: translateY(-4px);
+}
+
+.plan-card.selected {
+  border-color: #1a1a1a;
+  box-shadow: 0 8px 30px rgba(0,0,0,0.12);
+}
+
+.plan-card.popular {
+  border-color: #dc3545;
+}
+
+.plan-card.popular.selected {
+  border-color: #dc3545;
+  box-shadow: 0 8px 30px rgba(220, 53, 69, 0.2);
+}
+
+.popular-badge {
+  position: absolute;
+  top: -12px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #dc3545;
+  color: #fff;
+  padding: 4px 16px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.plan-name {
+  font-family: 'Playfair Display', Georgia, serif;
+  font-size: 22px;
+  margin: 0 0 15px;
+  color: #1a1a1a;
+}
+
+.plan-price {
+  margin-bottom: 15px;
+}
+
+.price-amount {
+  font-size: 42px;
+  font-weight: 700;
+  color: #1a1a1a;
+}
+
+.price-period {
+  font-size: 16px;
+  color: #666;
+}
+
+.plan-description {
+  font-size: 14px;
+  color: #666;
+  margin: 0 0 20px;
+}
+
+.plan-features {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 20px;
+}
+
+.plan-features li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 14px;
+  color: #333;
+  margin-bottom: 10px;
+}
+
+.feature-check {
+  color: #28a745;
+  flex-shrink: 0;
+}
+
+.plan-select-indicator {
+  text-align: center;
+  font-size: 13px;
+  color: #999;
+  padding-top: 15px;
+  border-top: 1px solid #eee;
+}
+
+.plan-card.selected .plan-select-indicator {
+  color: #1a1a1a;
+  font-weight: 600;
+}
+
+.subscribe-form-container {
+  max-width: 600px;
+  margin: 0 auto 50px;
+  text-align: center;
+}
+
+.subscribe-form .form-row {
+  display: flex;
+  gap: 12px;
+}
+
+.subscribe-form .email-input {
+  flex: 1;
+  padding: 14px 18px;
+  font-size: 16px;
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.subscribe-form .email-input:focus {
+  border-color: #1a1a1a;
+}
+
+.subscribe-form .subscribe-btn {
+  padding: 14px 28px;
+  font-size: 16px;
+  white-space: nowrap;
+}
+
+.support-info {
+  margin-top: 20px;
+  font-size: 14px;
+  color: #666;
+}
+
+/* Donation Section */
+.donation-section {
+  max-width: 500px;
+  margin: 0 auto;
+  background: #f8f9fa;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.donation-header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 20px;
+  cursor: pointer;
+  color: #666;
+  transition: background 0.2s;
+}
+
+.donation-header:hover {
+  background: #f0f0f0;
+}
+
+.toggle-arrow {
+  font-size: 12px;
+}
+
+.donation-form {
+  padding: 0 30px 30px;
+  text-align: center;
+}
+
+.donation-form p {
+  font-size: 14px;
+  color: #666;
+  margin: 0 0 20px;
+}
+
+.donation-row {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 15px;
+}
+
+.donation-input-wrapper {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  background: #fff;
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 0 15px;
+}
+
+.currency-symbol {
+  font-size: 18px;
+  font-weight: 600;
+  color: #666;
+}
+
+.donation-input {
+  flex: 1;
+  padding: 12px 10px;
+  font-size: 18px;
+  border: none;
+  outline: none;
+  background: transparent;
+}
+
+.donation-input::placeholder {
+  color: #999;
+}
+
+.quick-amounts {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+}
+
+.quick-amount {
+  padding: 8px 20px;
+  border: 2px solid #e0e0e0;
+  border-radius: 20px;
+  background: #fff;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.quick-amount:hover {
+  border-color: #999;
+}
+
+.quick-amount.selected {
+  background: #1a1a1a;
+  color: #fff;
+  border-color: #1a1a1a;
+}
+
+/* Responsive Support Page */
+@media (max-width: 850px) {
+  .plans-container {
+    grid-template-columns: 1fr;
+    max-width: 400px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  
+  .plan-card.popular {
+    order: -1;
+  }
+}
+
+@media (max-width: 550px) {
+  .support-hero h1 {
+    font-size: 32px;
+  }
+  
+  .subscribe-form .form-row {
+    flex-direction: column;
+  }
+  
+  .donation-row {
+    flex-direction: column;
+  }
+  
+  .quick-amounts {
+    flex-wrap: wrap;
+  }
+}
   
   .product-price {
     font-size: 24px;
