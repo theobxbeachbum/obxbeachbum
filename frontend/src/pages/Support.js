@@ -163,36 +163,61 @@ function Support() {
 
       {/* Subscription Plans */}
       <main className="support-main" style={{ maxWidth: '1000px', margin: '0 auto', padding: '60px 20px' }}>
-        <div className="plans-container" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '25px', marginBottom: '40px' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '25px', marginBottom: '40px' }}>
           {SUBSCRIPTION_PLANS.map(plan => (
             <div 
               key={plan.id}
-              className={`plan-card ${selectedPlan === plan.id ? 'selected' : ''} ${plan.popular ? 'popular' : ''}`}
               onClick={() => setSelectedPlan(plan.id)}
               data-testid={`plan-${plan.id}`}
+              style={{
+                background: '#fff',
+                border: selectedPlan === plan.id 
+                  ? (plan.popular ? '2px solid #dc3545' : '2px solid #1a1a1a')
+                  : '2px solid #e0e0e0',
+                borderRadius: '16px',
+                padding: '30px',
+                cursor: 'pointer',
+                position: 'relative',
+                transition: 'all 0.3s ease',
+                boxShadow: selectedPlan === plan.id ? '0 8px 30px rgba(0,0,0,0.12)' : 'none'
+              }}
             >
-              {plan.popular && <div className="popular-badge">Most Popular</div>}
-              <h3 className="plan-name">{plan.name}</h3>
-              <div className="plan-price">
+              {plan.popular && (
+                <div style={{
+                  position: 'absolute',
+                  top: '-12px',
+                  left: '50%',
+                  transform: 'translateX(-50%)',
+                  background: '#dc3545',
+                  color: '#fff',
+                  padding: '4px 16px',
+                  borderRadius: '20px',
+                  fontSize: '12px',
+                  fontWeight: '600',
+                  textTransform: 'uppercase'
+                }}>Most Popular</div>
+              )}
+              <h3 style={{ fontFamily: "'Playfair Display', Georgia, serif", fontSize: '22px', margin: '0 0 15px', color: '#1a1a1a' }}>{plan.name}</h3>
+              <div style={{ marginBottom: '15px' }}>
                 {plan.price === 0 ? (
-                  <span className="price-amount">Free</span>
+                  <span style={{ fontSize: '42px', fontWeight: '700', color: '#1a1a1a' }}>Free</span>
                 ) : (
                   <>
-                    <span className="price-amount">${plan.price}</span>
-                    <span className="price-period">{plan.period}</span>
+                    <span style={{ fontSize: '42px', fontWeight: '700', color: '#1a1a1a' }}>${plan.price}</span>
+                    <span style={{ fontSize: '16px', color: '#666' }}>{plan.period}</span>
                   </>
                 )}
               </div>
-              <p className="plan-description">{plan.description}</p>
-              <ul className="plan-features">
+              <p style={{ fontSize: '14px', color: '#666', margin: '0 0 20px' }}>{plan.description}</p>
+              <ul style={{ listStyle: 'none', padding: 0, margin: '0 0 20px' }}>
                 {plan.features.map((feature, idx) => (
-                  <li key={idx}>
-                    <Check size={16} className="feature-check" />
+                  <li key={idx} style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '14px', color: '#333', marginBottom: '10px' }}>
+                    <Check size={16} style={{ color: '#28a745', flexShrink: 0 }} />
                     {feature}
                   </li>
                 ))}
               </ul>
-              <div className="plan-select-indicator">
+              <div style={{ textAlign: 'center', fontSize: '13px', color: selectedPlan === plan.id ? '#1a1a1a' : '#999', paddingTop: '15px', borderTop: '1px solid #eee', fontWeight: selectedPlan === plan.id ? '600' : '400' }}>
                 {selectedPlan === plan.id ? '✓ Selected' : 'Click to select'}
               </div>
             </div>
