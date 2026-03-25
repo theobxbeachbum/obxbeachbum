@@ -759,54 +759,137 @@ async def send_newsletter(request: SendNewsletterRequest, http_request: Request,
     return {"success": True, "message": f"Newsletter queued for {len(subscribers)} subscribers"}
 
 # Supporter endpoints
+# Subscription plan pricing
+SUBSCRIPTION_PLANS = {
+    'monthly': {'amount': 7, 'name': 'Monthly Supporter', 'interval': 'month'},
+    'annual': {'amount': 70, 'name': 'Annual Supporter', 'interval': 'year'}
+}
+
 @api_router.post("/supporters/checkout")
 async def create_supporter_checkout(request: SupporterCheckoutRequest, http_request: Request):
-    settings = await get_settings()
-    if not settings.stripe_enabled:
-        raise HTTPException(400, "Supporter subscriptions not enabled")
+    # Validate plan
+    if request.plan not in SUBSCRIPTION_PLANS:
+        raise HTTPException(400, "Invalid subscription plan")
+    
+    plan = SUBSCRIPTION_PLANS[request.plan]
     
     # Get Stripe API key from environment
     stripe_api_key = os.getenv('STRIPE_API_KEY')
     if not stripe_api_key:
         raise HTTPException(500, "Stripe not configured")
     
-    # Initialize Stripe
+    stripe.api_key = stripe_api_key
+    if "sk_test_emergent" in stripe_api_key:
+        stripe.api_base = "https://integrations.emergentagent.com/stripe"
+    
     host_url = request.origin_url.rstrip('/')
-    webhook_url = f"{str(http_request.base_url).rstrip('/')}/api/webhook/stripe"
-    stripe_checkout = StripeCheckout(api_key=stripe_api_key, webhook_url=webhook_url)
     
-    # Create checkout session
-    success_url = f"{host_url}/supporter-success?session_id={{{{CHECKOUT_SESSION_ID}}}}"
-    cancel_url = f"{host_url}/support"
+    try:
+        session = stripe.checkout.Session.create(
+            payment_method_types=['card'],
+            line_items=[{
+                "price_data": {
+                    "currency": "usd",
+                    "product_data": {
+                        "name": plan['name'],
+                        "description": f"Support the OBX Beach Bum - {plan['name']}"
+                    },
+                    "unit_amount": int(plan['amount'] * 100),
+                    "recurring": {"interval": plan['interval']}
+                },
+                "quantity": 1
+            }],
+            mode="subscription",
+            success_url=f"{host_url}/supporter-success?session_id={{CHECKOUT_SESSION_ID}}",
+            cancel_url=f"{host_url}/support",
+            customer_email=request.email,
+            metadata={
+                "email": request.email,
+                "plan": request.plan,
+                "type": "supporter_subscription"
+            }
+        )
+        
+        # Create payment transaction record
+        transaction = PaymentTransaction(
+            session_id=session.id,
+            email=request.email,
+            amount=plan['amount'],
+            currency="usd",
+            payment_status="pending",
+            metadata={"email": request.email, "plan": request.plan, "type": "supporter_subscription"}
+        )
+        doc = transaction.model_dump()
+        doc['created_at'] = doc['created_at'].isoformat()
+        doc['updated_at'] = doc['updated_at'].isoformat()
+        await db.payment_transactions.insert_one(doc)
+        
+        return {"url": session.url, "session_id": session.id}
+    except Exception as e:
+        logging.error(f"Supporter checkout error: {str(e)}")
+        raise HTTPException(500, f"Payment error: {str(e)}")
+
+
+@api_router.post("/supporters/donate")
+async def create_donation_checkout(request: DonationCheckoutRequest, http_request: Request):
+    """Create a one-time donation checkout."""
+    if request.amount < 1:
+        raise HTTPException(400, "Minimum donation is $1")
     
-    checkout_request = CheckoutSessionRequest(
-        amount=settings.support_amount,
-        currency="usd",
-        success_url=success_url,
-        cancel_url=cancel_url,
-        metadata={
-            "email": request.email,
-            "type": "supporter_subscription"
-        }
-    )
+    # Get Stripe API key from environment
+    stripe_api_key = os.getenv('STRIPE_API_KEY')
+    if not stripe_api_key:
+        raise HTTPException(500, "Stripe not configured")
     
-    session = await stripe_checkout.create_checkout_session(checkout_request)
+    stripe.api_key = stripe_api_key
+    if "sk_test_emergent" in stripe_api_key:
+        stripe.api_base = "https://integrations.emergentagent.com/stripe"
     
-    # Create payment transaction record
-    transaction = PaymentTransaction(
-        session_id=session.session_id,
-        email=request.email,
-        amount=settings.support_amount,
-        currency="usd",
-        payment_status="pending",
-        metadata={"email": request.email, "type": "supporter_subscription"}
-    )
-    doc = transaction.model_dump()
-    doc['created_at'] = doc['created_at'].isoformat()
-    doc['updated_at'] = doc['updated_at'].isoformat()
-    await db.payment_transactions.insert_one(doc)
+    host_url = request.origin_url.rstrip('/')
     
-    return {"url": session.url, "session_id": session.session_id}
+    try:
+        session = stripe.checkout.Session.create(
+            payment_method_types=['card'],
+            line_items=[{
+                "price_data": {
+                    "currency": "usd",
+                    "product_data": {
+                        "name": "One-Time Donation",
+                        "description": "Support the OBX Beach Bum with a one-time donation"
+                    },
+                    "unit_amount": int(request.amount * 100)
+                },
+                "quantity": 1
+            }],
+            mode="payment",
+            success_url=f"{host_url}/supporter-success?session_id={{CHECKOUT_SESSION_ID}}&type=donation",
+            cancel_url=f"{host_url}/support",
+            customer_email=request.email,
+            metadata={
+                "email": request.email,
+                "amount": str(request.amount),
+                "type": "donation"
+            }
+        )
+        
+        # Create payment transaction record
+        transaction = PaymentTransaction(
+            session_id=session.id,
+            email=request.email,
+            amount=request.amount,
+            currency="usd",
+            payment_status="pending",
+            metadata={"email": request.email, "type": "donation"}
+        )
+        doc = transaction.model_dump()
+        doc['created_at'] = doc['created_at'].isoformat()
+        doc['updated_at'] = doc['updated_at'].isoformat()
+        await db.payment_transactions.insert_one(doc)
+        
+        return {"url": session.url, "session_id": session.id}
+    except Exception as e:
+        logging.error(f"Donation checkout error: {str(e)}")
+        raise HTTPException(500, f"Payment error: {str(e)}")
 
 @api_router.get("/supporters/checkout/status/{session_id}")
 async def get_checkout_status(session_id: str, http_request: Request):
