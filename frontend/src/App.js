@@ -23,9 +23,11 @@ import MuggsSuccess from '@/pages/MuggsSuccess';
 import Notecards from '@/pages/Notecards';
 import NotecardsSuccess from '@/pages/NotecardsSuccess';
 import Tees from '@/pages/Tees';
+import TeesSuccess from '@/pages/TeesSuccess';
 import SubscribeSuccess from '@/pages/SubscribeSuccess';
 import AdminMuggs from '@/pages/AdminMuggs';
 import AdminNotecards from '@/pages/AdminNotecards';
+import AdminTees from '@/pages/AdminTees';
 import { Toaster } from 'sonner';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
@@ -100,6 +102,7 @@ function App() {
           <Route path="/shop/muggs" element={<Muggs />} />
           <Route path="/muggs-success" element={<MuggsSuccess />} />
           <Route path="/shop/tees" element={<Tees />} />
+          <Route path="/tees-success" element={<TeesSuccess />} />
           <Route path="/shop/notecards" element={<Notecards />} />
           <Route path="/notecards-success" element={<NotecardsSuccess />} />
           
@@ -189,6 +192,16 @@ function App() {
             element={
               isAuthenticated ? (
                 <Settings onLogout={handleLogout} />
+              ) : (
+                <Navigate to="/admin/login" replace />
+              )
+            }
+          />
+          <Route
+            path="/admin/tees"
+            element={
+              isAuthenticated ? (
+                <AdminTees onLogout={handleLogout} />
               ) : (
                 <Navigate to="/admin/login" replace />
               )

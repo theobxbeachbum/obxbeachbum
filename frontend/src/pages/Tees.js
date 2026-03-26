@@ -32,13 +32,16 @@ function Tees() {
     }
   };
 
-  const handleCheckout = async (product, selectedVariant) => {
+  const handleCheckout = async (product, selectedSize) => {
     setCheckoutLoading(prev => ({ ...prev, [product.id]: true }));
     
     try {
       const response = await axios.post(`${BACKEND_URL}/api/tees/create-checkout-session`, {
         product_id: product.id,
-        variant: selectedVariant,
+        product_title: product.title,
+        product_type: product.product_type || 'tshirt',
+        size: selectedSize,
+        price: product.price,
         origin_url: window.location.origin
       });
       
@@ -264,11 +267,13 @@ function Tees() {
   );
 }
 
-// Product Card Component (for future use when products are added)
+// Product Card Component with size selection
 function ProductCard({ product, onCheckout, loading }) {
-  const [selectedVariant, setSelectedVariant] = useState(
-    product.variants?.[0] || { name: 'Default', price: product.price || 25 }
+  const [selectedSize, setSelectedSize] = useState(
+    (product.sizes && product.sizes.length > 0) ? product.sizes[0] : 'M'
   );
+
+  const availableSizes = product.sizes || ['S', 'M', 'L', 'XL', '2XL'];
 
   return (
     <div style={{
@@ -301,11 +306,20 @@ function ProductCard({ product, onCheckout, loading }) {
         <h3 style={{
           fontFamily: "'Playfair Display', Georgia, serif",
           fontSize: '20px',
-          margin: '0 0 10px',
+          margin: '0 0 5px',
           color: '#1a1a1a'
         }}>
           {product.title}
         </h3>
+
+        <p style={{
+          fontSize: '13px',
+          color: '#888',
+          margin: '0 0 10px',
+          textTransform: 'capitalize'
+        }}>
+          {product.product_type || 'T-Shirt'}
+        </p>
         
         {product.description && (
           <p style={{
@@ -318,39 +332,39 @@ function ProductCard({ product, onCheckout, loading }) {
           </p>
         )}
         
-        {/* Variant Selector */}
-        {product.variants && product.variants.length > 1 && (
-          <div style={{ marginBottom: '15px' }}>
-            <label style={{
-              display: 'block',
-              fontSize: '14px',
-              fontWeight: '600',
-              marginBottom: '8px'
-            }}>
-              Size / Style
-            </label>
-            <select
-              value={selectedVariant.name}
-              onChange={(e) => {
-                const variant = product.variants.find(v => v.name === e.target.value);
-                setSelectedVariant(variant);
-              }}
-              style={{
-                width: '100%',
-                padding: '10px',
-                fontSize: '14px',
-                border: '2px solid #e0e0e0',
-                borderRadius: '6px'
-              }}
-            >
-              {product.variants.map(v => (
-                <option key={v.name} value={v.name}>
-                  {v.name} - ${v.price}
-                </option>
-              ))}
-            </select>
+        {/* Size Selector */}
+        <div style={{ marginBottom: '15px' }}>
+          <label style={{
+            display: 'block',
+            fontSize: '14px',
+            fontWeight: '600',
+            marginBottom: '8px'
+          }}>
+            Size
+          </label>
+          <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+            {availableSizes.map(size => (
+              <button
+                key={size}
+                type="button"
+                onClick={() => setSelectedSize(size)}
+                style={{
+                  padding: '8px 14px',
+                  border: selectedSize === size ? '2px solid #1a1a1a' : '1px solid #d0d0d0',
+                  borderRadius: '6px',
+                  background: selectedSize === size ? '#1a1a1a' : '#fff',
+                  color: selectedSize === size ? '#fff' : '#333',
+                  cursor: 'pointer',
+                  fontSize: '13px',
+                  fontWeight: '500',
+                  minWidth: '44px'
+                }}
+              >
+                {size}
+              </button>
+            ))}
           </div>
-        )}
+        </div>
         
         {/* Price */}
         <div style={{
@@ -359,12 +373,12 @@ function ProductCard({ product, onCheckout, loading }) {
           color: '#1a1a1a',
           marginBottom: '15px'
         }}>
-          ${selectedVariant.price}
+          ${product.price}
         </div>
         
         {/* Buy Button */}
         <Button
-          onClick={() => onCheckout(product, selectedVariant)}
+          onClick={() => onCheckout(product, selectedSize)}
           disabled={loading}
           style={{
             width: '100%',

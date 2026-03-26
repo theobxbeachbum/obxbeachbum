@@ -234,6 +234,56 @@ class NotecardsOrder(BaseModel):
     order_number: str = Field(default_factory=lambda: f"NOTE-{datetime.now().strftime('%Y%m%d')}-{secrets.token_hex(3).upper()}")
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
+# Tees product models
+class TeesProductCreate(BaseModel):
+    title: str
+    description: Optional[str] = None
+    image_url: str
+    product_type: str = "tshirt"  # tshirt, tank, hoodie, cap
+    sizes: List[str] = ["S", "M", "L", "XL", "2XL"]
+    price: float = 25.00
+    active: bool = True
+
+class TeesProduct(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    title: str
+    description: Optional[str] = None
+    image_url: str
+    product_type: str = "tshirt"
+    sizes: List[str] = ["S", "M", "L", "XL", "2XL"]
+    price: float = 25.00
+    active: bool = True
+    sort_order: int = 0
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+# Tees order models
+class TeesOrderCreate(BaseModel):
+    product_id: str
+    product_title: str
+    product_type: str
+    size: str
+    price: float
+    special_instructions: Optional[str] = None
+    origin_url: str
+
+class TeesOrder(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    product_id: str
+    product_title: str
+    product_type: str
+    size: str
+    price: float
+    special_instructions: Optional[str] = None
+    stripe_session_id: Optional[str] = None
+    customer_email: Optional[str] = None
+    customer_name: Optional[str] = None
+    shipping_address: Optional[Dict] = None
+    payment_status: str = "pending"
+    order_number: str = Field(default_factory=lambda: f"TEE-{datetime.now().strftime('%Y%m%d')}-{secrets.token_hex(3).upper()}")
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
 class SendNewsletterRequest(BaseModel):
     post_id: str
 
@@ -1362,6 +1412,61 @@ async def get_notecards_products():
     return products
 
 
+# ============================================
+# Tees Products API Endpoints
+# ============================================
+
+# Admin: Get all tees products
+@api_router.get("/admin/tees-products")
+async def get_admin_tees_products(authorization: str = Header(None)):
+    verify_token(authorization)
+    products = await db.tees_products.find({}, {"_id": 0}).sort("sort_order", 1).to_list(1000)
+    return products
+
+# Admin: Create tees product
+@api_router.post("/admin/tees-products")
+async def create_tees_product(product: TeesProductCreate, authorization: str = Header(None)):
+    verify_token(authorization)
+    new_product = TeesProduct(**product.model_dump())
+    await db.tees_products.insert_one(new_product.model_dump())
+    return {"success": True, "id": new_product.id}
+
+# Admin: Update tees product
+@api_router.put("/admin/tees-products/{product_id}")
+async def update_tees_product(product_id: str, product: TeesProductCreate, authorization: str = Header(None)):
+    verify_token(authorization)
+    result = await db.tees_products.update_one(
+        {"id": product_id},
+        {"$set": product.model_dump()}
+    )
+    if result.matched_count == 0:
+        raise HTTPException(status_code=404, detail="Product not found")
+    return {"success": True}
+
+# Admin: Delete tees product
+@api_router.delete("/admin/tees-products/{product_id}")
+async def delete_tees_product(product_id: str, authorization: str = Header(None)):
+    verify_token(authorization)
+    result = await db.tees_products.delete_one({"id": product_id})
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Product not found")
+    return {"success": True}
+
+# Admin: Reorder tees products
+@api_router.post("/admin/tees-products/reorder")
+async def reorder_tees_products(order: List[str], authorization: str = Header(None)):
+    verify_token(authorization)
+    for i, product_id in enumerate(order):
+        await db.tees_products.update_one({"id": product_id}, {"$set": {"sort_order": i}})
+    return {"success": True}
+
+# Public: Get active tees products
+@api_router.get("/tees")
+async def get_tees_products():
+    products = await db.tees_products.find({"active": True}, {"_id": 0}).sort("sort_order", 1).to_list(1000)
+    return products
+
+
 # Public: Get gallery (curated prints + purchasable posts)
 @api_router.get("/public/gallery")
 async def get_public_gallery(tag: Optional[str] = None):
@@ -2337,6 +2442,267 @@ async def send_notecards_order_notification(session_id: str):
             logging.info(f"Notecards order notification sent for {order['order_number']}")
         except Exception as e:
             logging.error(f"Failed to send notecards order notification: {e}")
+
+
+# ============================================
+# TEES Checkout Endpoints
+# ============================================
+
+@api_router.post("/tees/create-checkout-session")
+async def create_tees_checkout(order: TeesOrderCreate):
+    """Create Stripe checkout for tees purchase."""
+    
+    # Validate product exists
+    product = await db.tees_products.find_one({"id": order.product_id}, {"_id": 0})
+    if not product:
+        raise HTTPException(404, "Product not found")
+    
+    # Create order record
+    tees_order = TeesOrder(
+        product_id=order.product_id,
+        product_title=order.product_title,
+        product_type=order.product_type,
+        size=order.size,
+        price=order.price,
+        special_instructions=order.special_instructions
+    )
+    await db.tees_orders.insert_one(tees_order.model_dump())
+    
+    # Create Stripe checkout
+    stripe_api_key = os.environ.get('STRIPE_API_KEY')
+    if not stripe_api_key:
+        raise HTTPException(500, "Stripe not configured")
+    
+    stripe.api_key = stripe_api_key
+    if "sk_test_emergent" in stripe_api_key:
+        stripe.api_base = "https://integrations.emergentagent.com/stripe"
+    
+    # Build product name
+    product_name = f"{order.product_title} - {order.size}"
+    
+    try:
+        session = stripe.checkout.Session.create(
+            payment_method_types=['card'],
+            line_items=[{
+                "price_data": {
+                    "currency": "usd",
+                    "product_data": {
+                        "name": product_name,
+                        "description": f"Beach Bum Tees - {order.product_type.title()}",
+                        "images": [product.get("image_url")] if product.get("image_url") else []
+                    },
+                    "unit_amount": int(order.price * 100)
+                },
+                "quantity": 1
+            }],
+            mode="payment",
+            success_url=f"{order.origin_url}/tees-success?session_id={{CHECKOUT_SESSION_ID}}",
+            cancel_url=f"{order.origin_url}/shop/tees",
+            shipping_address_collection={"allowed_countries": ["US"]},
+            metadata={
+                "order_id": tees_order.id,
+                "product_title": order.product_title,
+                "product_type": order.product_type,
+                "size": order.size,
+                "special_instructions": order.special_instructions or ""
+            }
+        )
+        
+        # Update order with session ID
+        await db.tees_orders.update_one(
+            {"id": tees_order.id},
+            {"$set": {"stripe_session_id": session.id}}
+        )
+        
+        return {"url": session.url, "session_id": session.id}
+    except Exception as e:
+        error_msg = str(e)
+        logging.error(f"Tees checkout error: {error_msg}")
+        raise HTTPException(500, f"Payment error: {error_msg}")
+
+
+@api_router.get("/tees/checkout/status/{session_id}")
+async def get_tees_checkout_status(session_id: str, background_tasks: BackgroundTasks):
+    """Check tees order payment status and return order details."""
+    stripe_api_key = os.environ.get('STRIPE_API_KEY')
+    if not stripe_api_key:
+        raise HTTPException(500, "Stripe not configured")
+    
+    stripe.api_key = stripe_api_key
+    if "sk_test_emergent" in stripe_api_key:
+        stripe.api_base = "https://integrations.emergentagent.com/stripe"
+    
+    # Get order from database
+    order = await db.tees_orders.find_one({"stripe_session_id": session_id}, {"_id": 0})
+    if not order:
+        raise HTTPException(404, "Order not found")
+    
+    # If order is already marked as paid, return the stored data
+    if order.get("payment_status") == "paid":
+        return {
+            "payment_status": "paid",
+            "order_number": order.get("order_number"),
+            "product_title": order.get("product_title"),
+            "product_type": order.get("product_type"),
+            "size": order.get("size"),
+            "price": order.get("price"),
+            "special_instructions": order.get("special_instructions"),
+            "customer_email": order.get("customer_email"),
+            "customer_name": order.get("customer_name"),
+            "shipping_address": order.get("shipping_address"),
+            "created_at": order.get("created_at").isoformat() if order.get("created_at") else None
+        }
+    
+    try:
+        # Get session details from Stripe
+        session = stripe.checkout.Session.retrieve(session_id)
+        payment_status = session.payment_status
+        
+        if payment_status == "paid":
+            # Update order with customer details
+            customer_email = session.customer_details.email if session.customer_details else None
+            customer_name = session.customer_details.name if session.customer_details else None
+            shipping = None
+            if session.shipping_details:
+                shipping = {
+                    "name": session.shipping_details.name,
+                    "address": {
+                        "line1": session.shipping_details.address.line1,
+                        "line2": session.shipping_details.address.line2,
+                        "city": session.shipping_details.address.city,
+                        "state": session.shipping_details.address.state,
+                        "postal_code": session.shipping_details.address.postal_code,
+                        "country": session.shipping_details.address.country
+                    }
+                }
+            
+            await db.tees_orders.update_one(
+                {"stripe_session_id": session_id},
+                {"$set": {
+                    "payment_status": "paid",
+                    "customer_email": customer_email,
+                    "customer_name": customer_name,
+                    "shipping_address": shipping
+                }}
+            )
+            
+            # Refresh order data
+            order = await db.tees_orders.find_one({"stripe_session_id": session_id}, {"_id": 0})
+            
+            # Send order notification email
+            background_tasks.add_task(send_tees_order_notification, session_id)
+        
+        return {
+            "payment_status": payment_status,
+            "order_number": order.get("order_number"),
+            "product_title": order.get("product_title"),
+            "product_type": order.get("product_type"),
+            "size": order.get("size"),
+            "price": order.get("price"),
+            "special_instructions": order.get("special_instructions"),
+            "customer_email": order.get("customer_email"),
+            "customer_name": order.get("customer_name"),
+            "shipping_address": order.get("shipping_address"),
+            "created_at": order.get("created_at").isoformat() if order.get("created_at") else None
+        }
+    except Exception as e:
+        logging.error(f"Error getting tees checkout status: {str(e)}")
+        return {
+            "payment_status": order.get("payment_status", "unknown"),
+            "order_number": order.get("order_number"),
+            "product_title": order.get("product_title"),
+            "product_type": order.get("product_type"),
+            "size": order.get("size"),
+            "price": order.get("price"),
+            "special_instructions": order.get("special_instructions"),
+            "customer_email": order.get("customer_email"),
+            "customer_name": order.get("customer_name"),
+            "shipping_address": order.get("shipping_address"),
+            "created_at": order.get("created_at").isoformat() if order.get("created_at") else None
+        }
+
+
+async def send_tees_order_notification(session_id: str):
+    """Send tees order notification email to Roy."""
+    settings = await get_settings()
+    order = await db.tees_orders.find_one({"stripe_session_id": session_id}, {"_id": 0})
+    
+    if not order:
+        return
+    
+    shipping = order.get('shipping_address', {})
+    shipping_address = shipping.get('address', {}) if shipping else {}
+    shipping_name = shipping.get('name', 'N/A') if shipping else 'N/A'
+    
+    subject = f"👕 New Tees Order: {order['order_number']}"
+    
+    html_content = f"""
+    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+        <h1 style="color: #333; border-bottom: 2px solid #1a1a1a; padding-bottom: 10px;">
+            👕 New Tees Order!
+        </h1>
+        
+        <p style="background: #e8f4ff; padding: 15px; border-radius: 4px;">
+            <strong>Order Number:</strong> {order['order_number']}<br>
+            <strong>Customer:</strong> {order.get('customer_name', 'N/A')}<br>
+            <strong>Email:</strong> {order.get('customer_email', 'N/A')}
+        </p>
+        
+        <h3 style="color: #333; margin-top: 30px;">Shipping Address</h3>
+        <p style="background: #f9f9f9; padding: 15px; border-radius: 4px;">
+            {shipping_name}<br>
+            {shipping_address.get('line1', 'N/A')}<br>
+            {shipping_address.get('line2', '') + '<br>' if shipping_address.get('line2') else ''}
+            {shipping_address.get('city', '')}, {shipping_address.get('state', '')} {shipping_address.get('postal_code', '')}
+        </p>
+        
+        <h3 style="color: #333; margin-top: 30px;">Order Details</h3>
+        <table style="width: 100%; border-collapse: collapse;">
+            <tr style="background: #f5f5f5;">
+                <td style="padding: 10px; border: 1px solid #ddd;"><strong>Product</strong></td>
+                <td style="padding: 10px; border: 1px solid #ddd;">{order['product_title']}</td>
+            </tr>
+            <tr>
+                <td style="padding: 10px; border: 1px solid #ddd;"><strong>Type</strong></td>
+                <td style="padding: 10px; border: 1px solid #ddd;">{order['product_type'].title()}</td>
+            </tr>
+            <tr style="background: #f5f5f5;">
+                <td style="padding: 10px; border: 1px solid #ddd;"><strong>Size</strong></td>
+                <td style="padding: 10px; border: 1px solid #ddd;">{order['size']}</td>
+            </tr>
+            <tr>
+                <td style="padding: 10px; border: 1px solid #ddd;"><strong>Price</strong></td>
+                <td style="padding: 10px; border: 1px solid #ddd;">${order['price']:.2f}</td>
+            </tr>
+        </table>
+        
+        {"<h3 style='color: #333; margin-top: 30px;'>Special Instructions</h3><p style='background: #fff9e6; padding: 15px; border-left: 4px solid #f0ad4e;'>" + order['special_instructions'] + "</p>" if order.get('special_instructions') else ""}
+        
+        <p style="margin-top: 30px; padding: 15px; background: #d4edda; border-radius: 4px;">
+            <strong>Stripe Payment ID:</strong> {session_id}
+        </p>
+    </div>
+    """
+    
+    # Send to Roy
+    roy_email = "roye@theobxbeachbum.com"
+    
+    if settings.smtp_host and settings.smtp_username:
+        try:
+            msg = MIMEMultipart('alternative')
+            msg['Subject'] = subject
+            msg['From'] = settings.sender_email or settings.smtp_username
+            msg['To'] = roy_email
+            msg.attach(MIMEText(html_content, 'html'))
+            
+            with smtplib.SMTP(settings.smtp_host, settings.smtp_port) as server:
+                server.starttls()
+                server.login(settings.smtp_username, settings.smtp_password)
+                server.sendmail(msg['From'], [roy_email], msg.as_string())
+            
+            logging.info(f"Tees order notification sent for {order['order_number']}")
+        except Exception as e:
+            logging.error(f"Failed to send tees order notification: {e}")
 
 
 # Include router
