@@ -189,6 +189,15 @@ function PublicHome() {
             <aside className="sidebar">
               <div className="sidebar-card">
                 <h3 className="sidebar-title">the OBX Beach Bum</h3>
+                <img 
+                  src="https://customer-assets.emergentagent.com/job_e79063ba-4cfe-4d19-91ab-648826687dcc/artifacts/gjr8vfov_menher.jpg"
+                  alt="the OBX Beach Bum"
+                  style={{
+                    width: '100%',
+                    borderRadius: '8px',
+                    marginBottom: '15px'
+                  }}
+                />
                 <p className="sidebar-description">
                   I wander around the Outer Banks with my girlfriend and pair of cameras to photograph some of the most beautiful and stunning beachscapes and scenery anywhere. I'll share my photos, inspirational beach bum philosophy, location guides, and maybe even tutorials on how to get the most from your photography.
                 </p>
