@@ -18,11 +18,11 @@ import PostView from '@/pages/PostView';
 import AddToHomeScreen from '@/pages/AddToHomeScreen';
 import Gallery from '@/pages/Gallery';
 import OrderSuccess from '@/pages/OrderSuccess';
-import ShopPlaceholder from '@/pages/ShopPlaceholder';
 import Muggs from '@/pages/Muggs';
 import MuggsSuccess from '@/pages/MuggsSuccess';
 import Notecards from '@/pages/Notecards';
 import NotecardsSuccess from '@/pages/NotecardsSuccess';
+import Tees from '@/pages/Tees';
 import SubscribeSuccess from '@/pages/SubscribeSuccess';
 import AdminMuggs from '@/pages/AdminMuggs';
 import AdminNotecards from '@/pages/AdminNotecards';
@@ -99,7 +99,7 @@ function App() {
           <Route path="/order-success" element={<OrderSuccess />} />
           <Route path="/shop/muggs" element={<Muggs />} />
           <Route path="/muggs-success" element={<MuggsSuccess />} />
-          <Route path="/shop/tees" element={<ShopPlaceholder type="tees" />} />
+          <Route path="/shop/tees" element={<Tees />} />
           <Route path="/shop/notecards" element={<Notecards />} />
           <Route path="/notecards-success" element={<NotecardsSuccess />} />
           
