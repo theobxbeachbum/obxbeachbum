@@ -154,7 +154,7 @@ function Notecards() {
       </header>
 
       {/* Hero Section */}
-      <section className="notecards-hero" style={{ background: '#1a1a1a', padding: '50px 20px', textAlign: 'center' }}>
+      <section className="notecards-hero" style={{ background: '#5C4A3D', padding: '50px 20px', textAlign: 'center' }}>
         <div className="hero-content" style={{ maxWidth: '600px', margin: '0 auto' }}>
           <img 
             src="https://customer-assets.emergentagent.com/job_e79063ba-4cfe-4d19-91ab-648826687dcc/artifacts/ow79p8gd_mgnotecards.png"
@@ -166,7 +166,7 @@ function Notecards() {
               marginBottom: '25px'
             }}
           />
-          <p className="hero-description" style={{ color: '#ccc', fontSize: '16px', lineHeight: '1.6', margin: 0 }}>
+          <p className="hero-description" style={{ color: '#e8e0d8', fontSize: '16px', lineHeight: '1.6', margin: 0 }}>
             Send a piece of the OBX to someone special. Each 5x7 notecard features stunning 
             photography, is blank inside, individually wrapped, and includes an envelope.
           </p>
