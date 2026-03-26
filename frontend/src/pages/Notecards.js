@@ -154,12 +154,19 @@ function Notecards() {
       </header>
 
       {/* Hero Section */}
-      <section className="notecards-hero">
-        <div className="hero-content">
-          <Mail size={48} className="hero-icon" />
-          <h1>Mostly Good Notecards</h1>
-          <p className="hero-subtitle">Share the Beauty of the Outer Banks</p>
-          <p className="hero-description">
+      <section className="notecards-hero" style={{ background: '#1a1a1a', padding: '50px 20px', textAlign: 'center' }}>
+        <div className="hero-content" style={{ maxWidth: '600px', margin: '0 auto' }}>
+          <img 
+            src="https://customer-assets.emergentagent.com/job_e79063ba-4cfe-4d19-91ab-648826687dcc/artifacts/ow79p8gd_mgnotecards.png"
+            alt="Mostly Good Notecards by the Legendary OBX Beach Bum"
+            style={{
+              maxWidth: '350px',
+              width: '80%',
+              height: 'auto',
+              marginBottom: '25px'
+            }}
+          />
+          <p className="hero-description" style={{ color: '#ccc', fontSize: '16px', lineHeight: '1.6', margin: 0 }}>
             Send a piece of the OBX to someone special. Each 5x7 notecard features stunning 
             photography, is blank inside, individually wrapped, and includes an envelope.
           </p>
