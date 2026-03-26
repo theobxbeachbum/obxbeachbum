@@ -162,14 +162,9 @@ function Notecards() {
             style={{
               maxWidth: '350px',
               width: '80%',
-              height: 'auto',
-              marginBottom: '25px'
+              height: 'auto'
             }}
           />
-          <p className="hero-description" style={{ color: '#5C4A3D', fontSize: '16px', lineHeight: '1.6', margin: 0 }}>
-            Send a piece of the OBX to someone special. Each 5x7 notecard features stunning 
-            photography, is blank inside, individually wrapped, and includes an envelope.
-          </p>
         </div>
       </section>
 
