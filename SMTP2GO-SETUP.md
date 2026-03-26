@@ -36,7 +36,7 @@ Go to https://www.smtp2go.com/ and login to your account.
 ### Step 5: Configure in Your Newsletter Admin
 
 Login to your newsletter admin panel:
-https://seaside-commerce.preview.emergentagent.com/admin/login
+https://beach-bum-merch.preview.emergentagent.com/admin/login
 
 Go to **Settings** and enter:
 

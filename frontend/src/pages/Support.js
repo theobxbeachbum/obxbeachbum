@@ -75,7 +75,7 @@ function Support() {
     try {
       if (selectedPlan === 'free') {
         // Free subscription - just add to subscriber list
-        const response = await axios.post(`${BACKEND_URL}/api/subscribe`, { email });
+        const response = await axios.post(`${BACKEND_URL}/api/subscribers`, { email });
         if (response.data.success) {
           // Redirect to success page
           navigate('/subscribe-success?type=free');

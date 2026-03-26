@@ -100,10 +100,29 @@ A self-hosted newsletter system similar to Substack for a personal photography w
   - Public pages now fetch from database instead of hardcoded data
   - Shows "Coming Soon!" when no products exist
 
+## Completed Tasks
+
+### March 26, 2025 - Two-Step Subscription Flow
+- **Implemented Substack-style subscription flow** matching user's mockups:
+  - Step 1: Beautiful water ripple background with centered white card
+    - Email collection form with "Email Address" label
+    - Copy: "the OBX Beach Bum has a new way to share his Outer Banks photography..."
+    - Black "Subscribe" button
+    - "Free newsletter. Unsubscribe anytime." footer
+  - Step 2: Plan selection with three options
+    - "Always Free" (pre-selected): New Photos, New Videos, Comments
+    - "Monthly $7/month": Archives access, Comments, Support
+    - "Annual $70/year": Archives access, Comments, Support, 17% savings
+    - Blue "Subscribe" button with radio selection UI
+  - Mobile responsive (plans stack vertically on mobile)
+  - Full-screen water ripple background from user's uploaded asset
+- **Fixed API endpoint bug**: Changed `/api/subscribe` to correct `/api/subscribers`
+
 ## Pending Tasks
 
 ### P1 (High Priority)
-- Complete placeholder pages for "B.B. Muggs," "Beach Bum Tees," and "Notecards" with "Coming Soon" text
+- Add logos to Beach Bum Tees and Mostly Good Notecards pages (awaiting user artwork)
+- Build Beach Bum Tees shop page (currently "Coming Soon" placeholder)
 
 ### P2 (Medium Priority)
 - Security Vulnerabilities:
