@@ -7,8 +7,9 @@ import { Button } from '../components/ui/button';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 
-// Hero background image
-const HERO_BG = 'https://customer-assets.emergentagent.com/job_e79063ba-4cfe-4d19-91ab-648826687dcc/artifacts/w6bg4znr_beachbumtees.jpg';
+// Separate logo and background images
+const HERO_BG = 'https://customer-assets.emergentagent.com/job_e79063ba-4cfe-4d19-91ab-648826687dcc/artifacts/idywq15b_bbteesbg.png';
+const LOGO = 'https://customer-assets.emergentagent.com/job_e79063ba-4cfe-4d19-91ab-648826687dcc/artifacts/s18uwkdg_bbtees.png';
 
 function Tees() {
   const [products, setProducts] = useState([]);
@@ -81,30 +82,34 @@ function Tees() {
         </nav>
       </header>
 
-      {/* Hero Section with Background Image */}
+      {/* Hero Section with Background Image and Logo Overlay */}
       <section 
         className="tees-hero"
         style={{
           backgroundImage: `url(${HERO_BG})`,
           backgroundSize: 'cover',
-          backgroundPosition: 'center top',
+          backgroundPosition: 'center',
           backgroundRepeat: 'no-repeat',
-          minHeight: '400px',
+          minHeight: '450px',
           display: 'flex',
-          alignItems: 'flex-end',
+          alignItems: 'center',
           justifyContent: 'center',
           position: 'relative'
         }}
       >
-        {/* Gradient overlay at bottom for text readability if needed */}
-        <div style={{
-          position: 'absolute',
-          bottom: 0,
-          left: 0,
-          right: 0,
-          height: '100px',
-          background: 'linear-gradient(transparent, rgba(255,255,255,0.9))'
-        }} />
+        {/* Logo Overlay */}
+        <img 
+          src={LOGO} 
+          alt="Beach Bum Tees & Stuff"
+          className="tees-logo"
+          style={{
+            maxWidth: '500px',
+            width: '80%',
+            height: 'auto',
+            position: 'relative',
+            zIndex: 2
+          }}
+        />
       </section>
 
       {/* Main Content */}
@@ -227,19 +232,31 @@ function Tees() {
       {/* Responsive Styles */}
       <style>{`
         .tees-hero {
-          min-height: 400px;
+          min-height: 450px;
+        }
+        
+        .tees-logo {
+          max-width: 500px;
+          width: 80%;
         }
         
         @media (max-width: 768px) {
           .tees-hero {
-            min-height: 300px;
-            background-position: center top !important;
+            min-height: 350px;
+          }
+          .tees-logo {
+            max-width: 320px;
+            width: 85%;
           }
         }
         
         @media (max-width: 480px) {
           .tees-hero {
-            min-height: 250px;
+            min-height: 280px;
+          }
+          .tees-logo {
+            max-width: 260px;
+            width: 90%;
           }
         }
       `}</style>
