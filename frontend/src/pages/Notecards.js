@@ -154,7 +154,7 @@ function Notecards() {
       </header>
 
       {/* Hero Section */}
-      <section className="notecards-hero" style={{ background: '#F7F2D6', padding: '50px 20px', textAlign: 'center' }}>
+      <section className="notecards-hero" style={{ background: '#fffcee', padding: '50px 20px', textAlign: 'center' }}>
         <div className="hero-content" style={{ maxWidth: '600px', margin: '0 auto' }}>
           <img 
             src="https://customer-assets.emergentagent.com/job_e79063ba-4cfe-4d19-91ab-648826687dcc/artifacts/ow79p8gd_mgnotecards.png"
