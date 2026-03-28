@@ -710,20 +710,8 @@ async def create_post(post_data: PostCreate, authorization: Optional[str] = Head
     doc['created_at'] = doc['created_at'].isoformat()
     await db.posts.insert_one(doc)
     
-    # Auto-add featured image to Gallery under "Latest Posts" category
-    if post_data.image_url:
-        gallery_print = Print(
-            title=post_data.title,
-            description=f"From newsletter: {post_data.title}",
-            image_url=post_data.image_url,
-            category="Latest Posts",
-            tags=["newsletter", "latest"],
-            source_post_id=post.id,
-            active=True
-        )
-        print_doc = gallery_print.model_dump()
-        print_doc['created_at'] = print_doc['created_at'].isoformat()
-        await db.prints.insert_one(print_doc)
+    # Note: Posts with available_for_purchase=true will automatically appear in gallery
+    # No need to create separate print entries
     
     return post
 
