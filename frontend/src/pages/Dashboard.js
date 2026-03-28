@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
 import AdminLayout from '@/components/AdminLayout';
-import { Mail, Users, DollarSign, FileText } from 'lucide-react';
+import { Mail, Users, DollarSign, FileText, CheckCircle, Circle } from 'lucide-react';
 
 function Dashboard({ onLogout }) {
   const [stats, setStats] = useState({
@@ -9,6 +9,7 @@ function Dashboard({ onLogout }) {
     posts: 0,
     supporters: 0
   });
+  const [settings, setSettings] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -17,10 +18,11 @@ function Dashboard({ onLogout }) {
 
   const fetchStats = async () => {
     try {
-      const [subscribersRes, postsRes, supportersRes] = await Promise.all([
+      const [subscribersRes, postsRes, supportersRes, settingsRes] = await Promise.all([
         axios.get('/subscribers'),
         axios.get('/posts'),
-        axios.get('/supporters')
+        axios.get('/supporters'),
+        axios.get('/settings')
       ]);
 
       setStats({
@@ -28,12 +30,16 @@ function Dashboard({ onLogout }) {
         posts: postsRes.data.length,
         supporters: supportersRes.data.length
       });
+      setSettings(settingsRes.data);
     } catch (error) {
       console.error('Failed to fetch stats:', error);
     } finally {
       setLoading(false);
     }
   };
+
+  const smtpConfigured = settings?.smtp_host && settings?.smtp_username;
+  const stripeConfigured = settings?.stripe_enabled;
 
   return (
     <AdminLayout onLogout={onLogout} currentPage="dashboard">
@@ -65,13 +71,52 @@ function Dashboard({ onLogout }) {
 
         <div className="card">
           <h2>Quick Start Guide</h2>
-          <ol style={{ paddingLeft: '20px', fontSize: '16px', lineHeight: '2' }}>
-            <li>Go to <strong>Settings</strong> to configure SMTP2GO credentials and sender email</li>
-            <li>Add subscriber emails in <strong>Subscribers</strong> or share the subscribe form</li>
-            <li>Create a newsletter post in <strong>Posts</strong></li>
-            <li>Send the newsletter to all subscribers from the Posts page</li>
-            <li>Enable Stripe supporters in Settings to accept monthly contributions</li>
-          </ol>
+          <ul style={{ paddingLeft: '0', fontSize: '16px', lineHeight: '2.2', listStyle: 'none' }}>
+            <li style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+              {smtpConfigured ? (
+                <CheckCircle size={20} style={{ color: '#22c55e', flexShrink: 0 }} />
+              ) : (
+                <Circle size={20} style={{ color: '#d0d0d0', flexShrink: 0 }} />
+              )}
+              <span style={{ color: smtpConfigured ? '#888' : 'inherit' }}>
+                {smtpConfigured ? 'SMTP2GO configured' : 'Go to Settings to configure SMTP2GO credentials'}
+              </span>
+            </li>
+            <li style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+              {stats.subscribers > 0 ? (
+                <CheckCircle size={20} style={{ color: '#22c55e', flexShrink: 0 }} />
+              ) : (
+                <Circle size={20} style={{ color: '#d0d0d0', flexShrink: 0 }} />
+              )}
+              <span style={{ color: stats.subscribers > 0 ? '#888' : 'inherit' }}>
+                {stats.subscribers > 0 ? `${stats.subscribers} subscribers added` : 'Add subscribers (import CSV or share subscribe form)'}
+              </span>
+            </li>
+            <li style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+              {stats.posts > 0 ? (
+                <CheckCircle size={20} style={{ color: '#22c55e', flexShrink: 0 }} />
+              ) : (
+                <Circle size={20} style={{ color: '#d0d0d0', flexShrink: 0 }} />
+              )}
+              <span style={{ color: stats.posts > 0 ? '#888' : 'inherit' }}>
+                {stats.posts > 0 ? `${stats.posts} posts created` : 'Create a newsletter post in Posts'}
+              </span>
+            </li>
+            <li style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+              <Circle size={20} style={{ color: '#d0d0d0', flexShrink: 0 }} />
+              <span>Send newsletters to subscribers from the Posts page</span>
+            </li>
+            <li style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+              {stripeConfigured ? (
+                <CheckCircle size={20} style={{ color: '#22c55e', flexShrink: 0 }} />
+              ) : (
+                <Circle size={20} style={{ color: '#d0d0d0', flexShrink: 0 }} />
+              )}
+              <span style={{ color: stripeConfigured ? '#888' : 'inherit' }}>
+                {stripeConfigured ? 'Stripe payments enabled' : 'Enable Stripe in Settings to accept contributions'}
+              </span>
+            </li>
+          </ul>
         </div>
 
         <div className="card">

@@ -1,16 +1,19 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import AdminLayout from '@/components/AdminLayout';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { toast } from 'sonner';
-import { Plus, Download, Trash2 } from 'lucide-react';
+import { Plus, Download, Trash2, Upload } from 'lucide-react';
 
 function Subscribers({ onLogout }) {
   const [subscribers, setSubscribers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showDialog, setShowDialog] = useState(false);
+  const [showImportDialog, setShowImportDialog] = useState(false);
   const [newEmail, setNewEmail] = useState('');
+  const [importing, setImporting] = useState(false);
+  const fileInputRef = useRef(null);
 
   useEffect(() => {
     fetchSubscribers();
@@ -72,6 +75,58 @@ function Subscribers({ onLogout }) {
     }
   };
 
+  const handleImportCSV = async (event) => {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    if (!file.name.endsWith('.csv')) {
+      toast.error('Please select a CSV file');
+      return;
+    }
+
+    setImporting(true);
+    
+    try {
+      const text = await file.text();
+      const lines = text.split('\n').filter(line => line.trim());
+      
+      // Skip header row if it contains "email"
+      const startIndex = lines[0].toLowerCase().includes('email') ? 1 : 0;
+      
+      let imported = 0;
+      let skipped = 0;
+      
+      for (let i = startIndex; i < lines.length; i++) {
+        const columns = lines[i].split(',');
+        const email = columns[0].trim().replace(/"/g, ''); // First column is email
+        
+        // Basic email validation
+        if (email && email.includes('@') && email.includes('.')) {
+          try {
+            await axios.post('/subscribers', { email });
+            imported++;
+          } catch (error) {
+            // Already exists or invalid
+            skipped++;
+          }
+        } else {
+          skipped++;
+        }
+      }
+      
+      toast.success(`Imported ${imported} subscribers${skipped > 0 ? `, ${skipped} skipped` : ''}`);
+      setShowImportDialog(false);
+      fetchSubscribers();
+    } catch (error) {
+      toast.error('Failed to import CSV');
+    } finally {
+      setImporting(false);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
+    }
+  };
+
   return (
     <AdminLayout onLogout={onLogout} currentPage="subscribers">
       <div data-testid="subscribers-page">
@@ -87,6 +142,50 @@ function Subscribers({ onLogout }) {
               <Download className="w-4 h-4 mr-2" />
               Export CSV
             </Button>
+            
+            {/* Import CSV Dialog */}
+            <Dialog open={showImportDialog} onOpenChange={setShowImportDialog}>
+              <DialogTrigger asChild>
+                <Button variant="outline" data-testid="import-subscribers-btn">
+                  <Upload className="w-4 h-4 mr-2" />
+                  Import CSV
+                </Button>
+              </DialogTrigger>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>Import Subscribers from CSV</DialogTitle>
+                </DialogHeader>
+                <div style={{ padding: '10px 0' }}>
+                  <p style={{ marginBottom: '15px', color: '#666', fontSize: '14px' }}>
+                    Upload a CSV file with email addresses. The file should have:
+                  </p>
+                  <div style={{ background: '#f5f5f5', padding: '15px', borderRadius: '8px', marginBottom: '20px', fontFamily: 'monospace', fontSize: '13px' }}>
+                    <strong>Column format:</strong><br />
+                    email (required), name (optional)<br /><br />
+                    <strong>Example:</strong><br />
+                    email,name<br />
+                    john@example.com,John Doe<br />
+                    jane@example.com,Jane Smith
+                  </div>
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept=".csv"
+                    onChange={handleImportCSV}
+                    style={{ display: 'none' }}
+                    data-testid="csv-file-input"
+                  />
+                  <Button 
+                    onClick={() => fileInputRef.current?.click()}
+                    disabled={importing}
+                    style={{ width: '100%' }}
+                  >
+                    {importing ? 'Importing...' : 'Select CSV File'}
+                  </Button>
+                </div>
+              </DialogContent>
+            </Dialog>
+
             <Dialog open={showDialog} onOpenChange={setShowDialog}>
               <DialogTrigger asChild>
                 <Button data-testid="add-subscriber-btn">
