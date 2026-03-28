@@ -8,10 +8,26 @@ import { toast } from 'sonner';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 
+// Category display order
+const CATEGORY_ORDER = [
+  'Featured Images',
+  'Best Selling',
+  'Beachscapes',
+  'OBX Sunrises',
+  'Waves',
+  'Shorebirds',
+  'Pelicans',
+  'Ripples',
+  'Seaoats',
+  'Dodging Shadows'
+];
+
 function Gallery() {
   const [searchParams] = useSearchParams();
   const [prints, setPrints] = useState([]);
   const [tags, setTags] = useState([]);
+  const [categories, setCategories] = useState([]);
+  const [selectedCategory, setSelectedCategory] = useState('');
   const [loading, setLoading] = useState(true);
   const [pricing, setPricing] = useState({});
   const [typeNames, setTypeNames] = useState({});
@@ -26,6 +42,7 @@ function Gallery() {
     fetchGallery();
     fetchPricing();
     fetchTags();
+    fetchCategories();
   }, []);
 
   useEffect(() => {
@@ -50,6 +67,41 @@ function Gallery() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const fetchCategories = async () => {
+    try {
+      const response = await axios.get(`${BACKEND_URL}/api/public/gallery/categories`);
+      setCategories(response.data);
+    } catch (error) {
+      console.error('Failed to fetch categories:', error);
+    }
+  };
+
+  // Group prints by category
+  const groupedPrints = () => {
+    const groups = {};
+    
+    prints.forEach(print => {
+      // Posts go under "Featured Images"
+      const category = print.source === 'post' ? 'Featured Images' : (print.category || 'Uncategorized');
+      if (!groups[category]) {
+        groups[category] = [];
+      }
+      groups[category].push(print);
+    });
+    
+    // Sort categories by predefined order
+    const sortedCategories = Object.keys(groups).sort((a, b) => {
+      const indexA = CATEGORY_ORDER.indexOf(a);
+      const indexB = CATEGORY_ORDER.indexOf(b);
+      if (indexA === -1 && indexB === -1) return a.localeCompare(b);
+      if (indexA === -1) return 1;
+      if (indexB === -1) return -1;
+      return indexA - indexB;
+    });
+    
+    return { groups, sortedCategories };
   };
 
   const fetchPricing = async () => {
@@ -228,58 +280,78 @@ function Gallery() {
             <p>Try a different search term or check back soon for new additions.</p>
           </div>
         ) : (
-          <div style={{ 
-            display: 'grid', 
-            gridTemplateColumns: 'repeat(5, 1fr)', 
-            gap: '16px',
-            width: '100%'
-          }}>
-            {prints.map((print) => (
-              <div 
-                key={print.id} 
-                id={`print-${print.id}`}
-                onClick={() => openPrintModal(print)}
-                style={{
-                  background: '#fff',
-                  borderRadius: '8px',
-                  overflow: 'hidden',
-                  boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
-                  cursor: 'pointer',
-                  position: 'relative',
-                  transition: 'transform 0.2s, box-shadow 0.2s'
-                }}
-              >
-                {print.featured && <span style={{
-                  position: 'absolute',
-                  top: '8px',
-                  left: '8px',
-                  background: '#ffd700',
-                  color: '#333',
-                  padding: '3px 8px',
-                  borderRadius: '10px',
-                  fontSize: '11px',
-                  fontWeight: '600',
-                  zIndex: 1
-                }}>★ Featured</span>}
-                <img 
-                  src={print.image_url} 
-                  alt={print.title} 
-                  style={{ width: '100%', height: '160px', objectFit: 'cover', display: 'block' }}
-                />
-                <div style={{ padding: '10px 12px' }}>
-                  <h3 style={{ 
+          <div>
+            {(() => {
+              const { groups, sortedCategories } = groupedPrints();
+              return sortedCategories.map(category => (
+                <div key={category} style={{ marginBottom: '50px' }}>
+                  <h2 style={{
                     fontFamily: "'Playfair Display', Georgia, serif",
-                    fontSize: '14px',
-                    margin: '0 0 4px',
-                    color: '#1a1a1a',
-                    whiteSpace: 'nowrap',
-                    overflow: 'hidden',
-                    textOverflow: 'ellipsis'
-                  }}>{print.title}</h3>
-                  <span style={{ fontSize: '11px', color: '#888' }}>View →</span>
+                    fontSize: '28px',
+                    fontWeight: '600',
+                    marginBottom: '20px',
+                    paddingBottom: '10px',
+                    borderBottom: '2px solid #e0e0e0',
+                    color: '#1a1a1a'
+                  }}>
+                    {category}
+                  </h2>
+                  <div style={{ 
+                    display: 'grid', 
+                    gridTemplateColumns: 'repeat(5, 1fr)', 
+                    gap: '16px',
+                    width: '100%'
+                  }}>
+                    {groups[category].map((print) => (
+                      <div 
+                        key={print.id} 
+                        id={`print-${print.id}`}
+                        onClick={() => openPrintModal(print)}
+                        style={{
+                          background: '#fff',
+                          borderRadius: '8px',
+                          overflow: 'hidden',
+                          boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
+                          cursor: 'pointer',
+                          position: 'relative',
+                          transition: 'transform 0.2s, box-shadow 0.2s'
+                        }}
+                      >
+                        {print.featured && <span style={{
+                          position: 'absolute',
+                          top: '8px',
+                          left: '8px',
+                          background: '#ffd700',
+                          color: '#333',
+                          padding: '3px 8px',
+                          borderRadius: '10px',
+                          fontSize: '11px',
+                          fontWeight: '600',
+                          zIndex: 1
+                        }}>★ Featured</span>}
+                        <img 
+                          src={print.image_url} 
+                          alt={print.title} 
+                          style={{ width: '100%', height: '160px', objectFit: 'cover', display: 'block' }}
+                        />
+                        <div style={{ padding: '10px 12px' }}>
+                          <h3 style={{ 
+                            fontFamily: "'Playfair Display', Georgia, serif",
+                            fontSize: '14px',
+                            margin: '0 0 4px',
+                            color: '#1a1a1a',
+                            whiteSpace: 'nowrap',
+                            overflow: 'hidden',
+                            textOverflow: 'ellipsis'
+                          }}>{print.title}</h3>
+                          <span style={{ fontSize: '11px', color: '#888' }}>View →</span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
                 </div>
-              </div>
-            ))}
+              ));
+            })()}
           </div>
         )}
       </main>

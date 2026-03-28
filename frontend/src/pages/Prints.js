@@ -6,6 +6,18 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { toast } from 'sonner';
 import { Plus, Trash2, Edit, Image as ImageIcon, X, Star, StarOff } from 'lucide-react';
 
+const GALLERY_CATEGORIES = [
+  'Beachscapes',
+  'Dodging Shadows',
+  'OBX Sunrises',
+  'Waves',
+  'Shorebirds',
+  'Pelicans',
+  'Ripples',
+  'Seaoats',
+  'Best Selling'
+];
+
 function Prints({ onLogout }) {
   const [prints, setPrints] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -19,6 +31,7 @@ function Prints({ onLogout }) {
     description: '',
     image_url: '',
     tags: [],
+    category: '',
     available_types: ['paper', 'canvas', 'metal'],
     featured: false,
     active: true
@@ -89,6 +102,7 @@ function Prints({ onLogout }) {
       description: '',
       image_url: '',
       tags: [],
+      category: '',
       available_types: ['paper', 'canvas', 'metal'],
       featured: false,
       active: true
@@ -109,6 +123,7 @@ function Prints({ onLogout }) {
       description: print.description || '',
       image_url: print.image_url,
       tags: print.tags || [],
+      category: print.category || '',
       available_types: print.available_types || ['paper', 'canvas', 'metal'],
       featured: print.featured || false,
       active: print.active !== false
@@ -302,6 +317,23 @@ function Prints({ onLogout }) {
                     placeholder="A brief description of this photo..."
                     rows={3}
                   />
+                </div>
+
+                {/* Category */}
+                <div className="form-group">
+                  <label htmlFor="category">Category</label>
+                  <select
+                    id="category"
+                    className="form-input"
+                    value={formData.category}
+                    onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+                    style={{ width: '100%', padding: '10px' }}
+                  >
+                    <option value="">-- Select Category --</option>
+                    {GALLERY_CATEGORIES.map(cat => (
+                      <option key={cat} value={cat}>{cat}</option>
+                    ))}
+                  </select>
                 </div>
 
                 {/* Tags */}
