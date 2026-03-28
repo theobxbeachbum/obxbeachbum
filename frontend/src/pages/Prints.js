@@ -30,8 +30,28 @@ function Prints({ onLogout }) {
 
   const fetchPrints = async () => {
     try {
-      const response = await axios.get('/prints');
-      setPrints(response.data);
+      // Fetch both prints and purchasable posts
+      const [printsRes, postsRes] = await Promise.all([
+        axios.get('/prints'),
+        axios.get('/posts')
+      ]);
+      
+      // Get purchasable posts and convert to print-like format
+      const purchasablePosts = postsRes.data
+        .filter(p => p.available_for_purchase && p.image_url)
+        .map(p => ({
+          id: p.id,
+          title: p.title,
+          description: 'From post',
+          image_url: p.image_url,
+          tags: ['post'],
+          source: 'post',
+          active: true
+        }));
+      
+      // Combine and mark prints with source
+      const allPrints = printsRes.data.map(p => ({ ...p, source: 'print' }));
+      setPrints([...allPrints, ...purchasablePosts]);
     } catch (error) {
       toast.error('Failed to fetch prints');
     } finally {
@@ -78,6 +98,11 @@ function Prints({ onLogout }) {
   };
 
   const handleEdit = (print) => {
+    // Don't allow editing posts from this page
+    if (print.source === 'post') {
+      toast.info('Edit this in the Posts section');
+      return;
+    }
     setEditingPrint(print);
     setFormData({
       title: print.title,
@@ -91,12 +116,23 @@ function Prints({ onLogout }) {
     setShowDialog(true);
   };
 
-  const handleDelete = async (printId) => {
-    if (!window.confirm('Are you sure you want to delete this print?')) return;
+  const handleDelete = async (item) => {
+    const isPost = item.source === 'post';
+    const message = isPost 
+      ? 'Remove this post from the gallery? (The post itself will remain)'
+      : 'Are you sure you want to delete this print?';
+    
+    if (!window.confirm(message)) return;
     
     try {
-      await axios.delete(`/prints/${printId}`);
-      toast.success('Print deleted');
+      if (isPost) {
+        // For posts, use the remove-from-gallery endpoint
+        await axios.post(`/posts/${item.id}/remove-from-gallery`);
+        toast.success('Removed from gallery');
+      } else {
+        await axios.delete(`/prints/${item.id}`);
+        toast.success('Print deleted');
+      }
       fetchPrints();
     } catch (error) {
       toast.error('Failed to delete print');
@@ -470,14 +506,23 @@ function Prints({ onLogout }) {
                       )}
                     </div>
                   )}
-                  <div style={{ display: 'flex', gap: '8px' }}>
-                    <Button size="sm" variant="outline" onClick={() => toggleFeatured(print)}>
-                      {print.featured ? <StarOff size={16} /> : <Star size={16} />}
-                    </Button>
-                    <Button size="sm" variant="outline" onClick={() => handleEdit(print)}>
-                      <Edit size={16} />
-                    </Button>
-                    <Button size="sm" variant="outline" onClick={() => handleDelete(print.id)}>
+                  <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                    {print.source === 'post' && (
+                      <span style={{ fontSize: '11px', background: '#e0e7ff', color: '#4338ca', padding: '2px 8px', borderRadius: '4px', marginRight: '5px' }}>
+                        From Post
+                      </span>
+                    )}
+                    {print.source !== 'post' && (
+                      <>
+                        <Button size="sm" variant="outline" onClick={() => toggleFeatured(print)}>
+                          {print.featured ? <StarOff size={16} /> : <Star size={16} />}
+                        </Button>
+                        <Button size="sm" variant="outline" onClick={() => handleEdit(print)}>
+                          <Edit size={16} />
+                        </Button>
+                      </>
+                    )}
+                    <Button size="sm" variant="outline" onClick={() => handleDelete(print)}>
                       <Trash2 size={16} />
                     </Button>
                   </div>

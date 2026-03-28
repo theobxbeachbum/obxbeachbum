@@ -765,6 +765,18 @@ async def delete_post(post_id: str, authorization: Optional[str] = Header(None))
     await db.posts.delete_one({"id": post_id})
     return {"success": True}
 
+@api_router.post("/posts/{post_id}/remove-from-gallery")
+async def remove_post_from_gallery(post_id: str, authorization: Optional[str] = Header(None)):
+    """Remove a post from the gallery by setting available_for_purchase to false."""
+    await verify_admin_token(authorization)
+    result = await db.posts.update_one(
+        {"id": post_id},
+        {"$set": {"available_for_purchase": False}}
+    )
+    if result.matched_count == 0:
+        raise HTTPException(404, "Post not found")
+    return {"success": True}
+
 # Public post endpoints (no authentication required)
 @api_router.get("/public/posts", response_model=List[Post])
 async def get_public_posts():
