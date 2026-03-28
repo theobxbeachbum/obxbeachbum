@@ -66,6 +66,7 @@ class PostCreate(BaseModel):
     image_urls: Optional[List[str]] = None  # Support multiple images
     slug: Optional[str] = None  # URL-friendly version of title
     status: Optional[str] = "draft"  # draft, published
+    published_at: Optional[str] = None  # Allow custom date
     available_for_purchase: Optional[bool] = False  # Toggle for print sales
 
 class Post(BaseModel):

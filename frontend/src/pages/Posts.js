@@ -17,7 +17,8 @@ function Posts({ onLogout }) {
     image_url: '',
     image_urls: [],
     available_for_purchase: false,
-    status: 'draft'
+    status: 'draft',
+    published_at: ''
   });
   const [sending, setSending] = useState(null);
   const [uploading, setUploading] = useState(false);
@@ -50,7 +51,7 @@ function Posts({ onLogout }) {
         toast.success('Post created successfully');
       }
       setShowDialog(false);
-      setFormData({ title: '', content: '', image_url: '', image_urls: [], available_for_purchase: false, status: 'draft' });
+      setFormData({ title: '', content: '', image_url: '', image_urls: [], available_for_purchase: false, status: 'draft', published_at: '' });
       setEditingPost(null);
       fetchPosts();
     } catch (error) {
@@ -60,13 +61,20 @@ function Posts({ onLogout }) {
 
   const handleEdit = (post) => {
     setEditingPost(post);
+    // Format date for input field (YYYY-MM-DD)
+    let dateValue = '';
+    if (post.published_at) {
+      const d = new Date(post.published_at);
+      dateValue = d.toISOString().split('T')[0];
+    }
     setFormData({
       title: post.title,
       content: post.content,
       image_url: post.image_url || '',
       image_urls: post.image_urls || [],
       available_for_purchase: post.available_for_purchase || false,
-      status: post.status || 'draft'
+      status: post.status || 'draft',
+      published_at: dateValue
     });
     setShowDialog(true);
   };
@@ -358,27 +366,41 @@ function Posts({ onLogout }) {
                   </small>
                 </div>
 
-                <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end', alignItems: 'center' }}>
-                  <div style={{ marginRight: 'auto', display: 'flex', alignItems: 'center', gap: '10px' }}>
-                    <label style={{ fontSize: '14px', fontWeight: '500' }}>Status:</label>
-                    <select
-                      value={formData.status}
-                      onChange={(e) => setFormData({ ...formData, status: e.target.value })}
-                      style={{
-                        padding: '8px 12px',
-                        borderRadius: '6px',
-                        border: '1px solid #d0d0d0',
-                        fontSize: '14px',
-                        background: formData.status === 'published' ? '#d4edda' : '#fff'
-                      }}
-                      data-testid="post-status-select"
-                    >
-                      <option value="draft">Draft</option>
-                      <option value="published">Published</option>
-                    </select>
-                    <span style={{ fontSize: '12px', color: '#666' }}>
-                      {formData.status === 'published' ? '(visible on site)' : '(not visible)'}
-                    </span>
+                <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end', alignItems: 'center', flexWrap: 'wrap' }}>
+                  <div style={{ marginRight: 'auto', display: 'flex', alignItems: 'center', gap: '15px', flexWrap: 'wrap' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <label style={{ fontSize: '14px', fontWeight: '500' }}>Status:</label>
+                      <select
+                        value={formData.status}
+                        onChange={(e) => setFormData({ ...formData, status: e.target.value })}
+                        style={{
+                          padding: '8px 12px',
+                          borderRadius: '6px',
+                          border: '1px solid #d0d0d0',
+                          fontSize: '14px',
+                          background: formData.status === 'published' ? '#d4edda' : '#fff'
+                        }}
+                        data-testid="post-status-select"
+                      >
+                        <option value="draft">Draft</option>
+                        <option value="published">Published</option>
+                      </select>
+                    </div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <label style={{ fontSize: '14px', fontWeight: '500' }}>Date:</label>
+                      <input
+                        type="date"
+                        value={formData.published_at}
+                        onChange={(e) => setFormData({ ...formData, published_at: e.target.value })}
+                        style={{
+                          padding: '8px 12px',
+                          borderRadius: '6px',
+                          border: '1px solid #d0d0d0',
+                          fontSize: '14px'
+                        }}
+                        data-testid="post-date-input"
+                      />
+                    </div>
                   </div>
                   <Button
                     type="button"
