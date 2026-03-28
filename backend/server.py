@@ -46,11 +46,15 @@ class AdminResponse(BaseModel):
 
 class SubscriberCreate(BaseModel):
     email: EmailStr
+    first_name: Optional[str] = None
+    last_name: Optional[str] = None
 
 class Subscriber(BaseModel):
     model_config = ConfigDict(extra="ignore")
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
     email: str
+    first_name: Optional[str] = None
+    last_name: Optional[str] = None
     subscribed_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     status: str = "active"  # active, unsubscribed
     unsubscribe_token: str = Field(default_factory=lambda: secrets.token_urlsafe(32))

@@ -97,13 +97,19 @@ function Subscribers({ onLogout }) {
       let skipped = 0;
       
       for (let i = startIndex; i < lines.length; i++) {
-        const columns = lines[i].split(',');
-        const email = columns[0].trim().replace(/"/g, ''); // First column is email
+        const columns = lines[i].split(',').map(col => col.trim().replace(/"/g, ''));
+        const email = columns[0]; // First column is email
+        const firstName = columns[1] || null; // Second column is first name
+        const lastName = columns[2] || null; // Third column is last name
         
-        // Basic email validation
+        // Basic email validation - skip rows with empty or invalid emails
         if (email && email.includes('@') && email.includes('.')) {
           try {
-            await axios.post('/subscribers', { email });
+            await axios.post('/subscribers', { 
+              email,
+              first_name: firstName,
+              last_name: lastName
+            });
             imported++;
           } catch (error) {
             // Already exists or invalid
@@ -157,16 +163,19 @@ function Subscribers({ onLogout }) {
                 </DialogHeader>
                 <div style={{ padding: '10px 0' }}>
                   <p style={{ marginBottom: '15px', color: '#666', fontSize: '14px' }}>
-                    Upload a CSV file with email addresses. The file should have:
+                    Upload a CSV file with subscriber info:
                   </p>
                   <div style={{ background: '#f5f5f5', padding: '15px', borderRadius: '8px', marginBottom: '20px', fontFamily: 'monospace', fontSize: '13px' }}>
                     <strong>Column format:</strong><br />
-                    email (required), name (optional)<br /><br />
+                    email, firstname, lastname<br /><br />
                     <strong>Example:</strong><br />
-                    email,name<br />
-                    john@example.com,John Doe<br />
-                    jane@example.com,Jane Smith
+                    email,firstname,lastname<br />
+                    john@example.com,John,Doe<br />
+                    jane@example.com,Jane,Smith
                   </div>
+                  <p style={{ marginBottom: '15px', color: '#888', fontSize: '13px' }}>
+                    Rows without valid emails will be skipped.
+                  </p>
                   <input
                     ref={fileInputRef}
                     type="file"
@@ -242,6 +251,7 @@ function Subscribers({ onLogout }) {
               <thead>
                 <tr>
                   <th>Email</th>
+                  <th>Name</th>
                   <th>Subscribed At</th>
                   <th>Actions</th>
                 </tr>
@@ -250,6 +260,11 @@ function Subscribers({ onLogout }) {
                 {subscribers.map((subscriber) => (
                   <tr key={subscriber.id} data-testid={`subscriber-row-${subscriber.email}`}>
                     <td>{subscriber.email}</td>
+                    <td style={{ color: subscriber.first_name ? 'inherit' : '#999' }}>
+                      {subscriber.first_name || subscriber.last_name 
+                        ? `${subscriber.first_name || ''} ${subscriber.last_name || ''}`.trim()
+                        : '—'}
+                    </td>
                     <td>{new Date(subscriber.subscribed_at).toLocaleDateString()}</td>
                     <td>
                       <Button
