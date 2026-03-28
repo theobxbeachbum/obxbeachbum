@@ -2,6 +2,9 @@ import { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { ArrowLeft, Mail, ShoppingBag } from 'lucide-react';
+import { toast } from 'sonner';
+
+const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 
 function PostView() {
   const { slug } = useParams();
@@ -9,6 +12,7 @@ function PostView() {
   const [post, setPost] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [checkoutLoading, setCheckoutLoading] = useState({});
 
   useEffect(() => {
     fetchPost();
@@ -33,6 +37,32 @@ function PostView() {
       month: 'long', 
       day: 'numeric' 
     });
+  };
+
+  const handleBuyPrint = async (imageUrl, imageTitle) => {
+    const imageKey = imageUrl;
+    setCheckoutLoading(prev => ({ ...prev, [imageKey]: true }));
+    
+    try {
+      const response = await axios.post(`${BACKEND_URL}/api/prints/checkout`, {
+        print_id: `post-${post.id}-${Date.now()}`,
+        print_title: imageTitle || post.title,
+        print_type: 'paper',
+        size: '8x10',
+        price: 25,
+        image_url: imageUrl,
+        origin_url: window.location.origin,
+        source: 'post'
+      });
+      
+      if (response.data.checkout_url) {
+        window.location.href = response.data.checkout_url;
+      }
+    } catch (error) {
+      toast.error('Failed to start checkout. Please try again.');
+    } finally {
+      setCheckoutLoading(prev => ({ ...prev, [imageKey]: false }));
+    }
   };
 
   if (loading) {
@@ -96,16 +126,73 @@ function PostView() {
           {post.image_url && (
             <div className="post-featured-image">
               <img src={post.image_url} alt={post.title} />
+              {post.available_for_purchase && (
+                <button 
+                  onClick={() => handleBuyPrint(post.image_url, post.title)}
+                  disabled={checkoutLoading[post.image_url]}
+                  className="buy-print-btn"
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '8px',
+                    marginTop: '15px',
+                    padding: '12px 24px',
+                    background: '#1a1a1a',
+                    color: '#fff',
+                    border: 'none',
+                    borderRadius: '6px',
+                    fontSize: '15px',
+                    fontWeight: '500',
+                    cursor: checkoutLoading[post.image_url] ? 'not-allowed' : 'pointer',
+                    opacity: checkoutLoading[post.image_url] ? 0.7 : 1
+                  }}
+                  data-testid="buy-featured-print"
+                >
+                  <ShoppingBag size={18} />
+                  {checkoutLoading[post.image_url] ? 'Loading...' : 'Buy This Print'}
+                </button>
+              )}
             </div>
           )}
 
-          {/* Buy a Print Button */}
-          {post.available_for_purchase && post.image_url && (
-            <div className="buy-print-cta">
-              <Link to={`/gallery?print=${post.id}`} className="buy-print-btn">
-                <ShoppingBag size={20} />
-                Buy a Print of This Photo
-              </Link>
+          {/* Additional Images */}
+          {post.image_urls && post.image_urls.length > 0 && (
+            <div className="post-additional-images" style={{ marginTop: '30px' }}>
+              {post.image_urls.map((imgUrl, index) => (
+                <div key={index} className="post-image-item" style={{ marginBottom: '30px' }}>
+                  <img 
+                    src={imgUrl} 
+                    alt={`${post.title} - Image ${index + 1}`}
+                    style={{ width: '100%', borderRadius: '8px' }}
+                  />
+                  {post.available_for_purchase && (
+                    <button 
+                      onClick={() => handleBuyPrint(imgUrl, `${post.title} - Image ${index + 1}`)}
+                      disabled={checkoutLoading[imgUrl]}
+                      className="buy-print-btn"
+                      style={{
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '8px',
+                        marginTop: '15px',
+                        padding: '12px 24px',
+                        background: '#1a1a1a',
+                        color: '#fff',
+                        border: 'none',
+                        borderRadius: '6px',
+                        fontSize: '15px',
+                        fontWeight: '500',
+                        cursor: checkoutLoading[imgUrl] ? 'not-allowed' : 'pointer',
+                        opacity: checkoutLoading[imgUrl] ? 0.7 : 1
+                      }}
+                      data-testid={`buy-print-${index}`}
+                    >
+                      <ShoppingBag size={18} />
+                      {checkoutLoading[imgUrl] ? 'Loading...' : 'Buy This Print'}
+                    </button>
+                  )}
+                </div>
+              ))}
             </div>
           )}
 

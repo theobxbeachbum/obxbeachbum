@@ -125,6 +125,7 @@ class PrintOrderCreate(BaseModel):
     print_type: str  # paper, canvas, metal
     size: str
     price: float
+    image_url: Optional[str] = None  # For direct post purchases
     special_instructions: Optional[str] = None
     origin_url: str
     source: str = "gallery"  # gallery or post
@@ -137,6 +138,7 @@ class PrintOrder(BaseModel):
     print_type: str
     size: str
     price: float
+    image_url: Optional[str] = None
     special_instructions: Optional[str] = None
     source: str = "gallery"
     stripe_session_id: Optional[str] = None
@@ -1592,6 +1594,7 @@ async def create_print_checkout(order: PrintOrderCreate, authorization: str = He
         print_type=order.print_type,
         size=order.size,
         price=order.price,
+        image_url=order.image_url,
         special_instructions=order.special_instructions,
         source=order.source
     )
@@ -1610,29 +1613,40 @@ async def create_print_checkout(order: PrintOrderCreate, authorization: str = He
     type_name = PRINT_TYPE_NAMES.get(order.print_type, order.print_type)
     product_name = f"{order.print_title} - {type_name} ({order.size})"
     
+    # Determine cancel URL based on source
+    cancel_url = f"{order.origin_url}/gallery"
+    if order.source == "post":
+        cancel_url = order.origin_url  # Go back to the post they were viewing
+    
+    # Build product data with image if available
+    product_data = {
+        "name": product_name,
+        "description": "Fine art print by the OBX Beach Bum"
+    }
+    if order.image_url:
+        product_data["images"] = [order.image_url]
+    
     try:
         session = stripe.checkout.Session.create(
             payment_method_types=['card'],
             line_items=[{
                 "price_data": {
                     "currency": "usd",
-                    "product_data": {
-                        "name": product_name,
-                        "description": "Fine art print by the OBX Beach Bum"
-                    },
+                    "product_data": product_data,
                     "unit_amount": int(order.price * 100)
                 },
                 "quantity": 1
             }],
             mode="payment",
             success_url=f"{order.origin_url}/order-success?session_id={{CHECKOUT_SESSION_ID}}",
-            cancel_url=f"{order.origin_url}/gallery",
+            cancel_url=cancel_url,
             shipping_address_collection={"allowed_countries": ["US"]},
             metadata={
                 "order_id": print_order.id,
                 "print_title": order.print_title,
                 "print_type": order.print_type,
                 "size": order.size,
+                "source": order.source,
                 "special_instructions": order.special_instructions or ""
             }
         )
