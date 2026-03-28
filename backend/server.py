@@ -9,7 +9,7 @@ from pathlib import Path
 from pydantic import BaseModel, Field, ConfigDict, EmailStr
 from typing import List, Optional, Dict
 import uuid
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 import bcrypt
 import secrets
 import io
@@ -86,9 +86,11 @@ class PrintCreate(BaseModel):
     description: Optional[str] = None
     image_url: str
     tags: Optional[List[str]] = []
+    category: Optional[str] = None  # e.g., "Latest Posts", "Landscapes", etc.
     available_types: Optional[List[str]] = ["paper", "canvas", "metal"]
     featured: Optional[bool] = False
     active: Optional[bool] = True
+    source_post_id: Optional[str] = None  # Links to originating post if auto-created
 
 class Print(BaseModel):
     model_config = ConfigDict(extra="ignore")
@@ -97,10 +99,12 @@ class Print(BaseModel):
     description: Optional[str] = None
     image_url: str
     tags: List[str] = []
+    category: Optional[str] = None
     available_types: List[str] = ["paper", "canvas", "metal"]
     featured: bool = False
     active: bool = True
     sort_order: int = 0
+    source_post_id: Optional[str] = None
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
 class PrintUpdate(BaseModel):
@@ -108,6 +112,7 @@ class PrintUpdate(BaseModel):
     description: Optional[str] = None
     image_url: Optional[str] = None
     tags: Optional[List[str]] = None
+    category: Optional[str] = None
     available_types: Optional[List[str]] = None
     featured: Optional[bool] = None
     active: Optional[bool] = None
@@ -701,6 +706,22 @@ async def create_post(post_data: PostCreate, authorization: Optional[str] = Head
     doc = post.model_dump()
     doc['created_at'] = doc['created_at'].isoformat()
     await db.posts.insert_one(doc)
+    
+    # Auto-add featured image to Gallery under "Latest Posts" category
+    if post_data.image_url:
+        gallery_print = Print(
+            title=post_data.title,
+            description=f"From newsletter: {post_data.title}",
+            image_url=post_data.image_url,
+            category="Latest Posts",
+            tags=["newsletter", "latest"],
+            source_post_id=post.id,
+            active=True
+        )
+        print_doc = gallery_print.model_dump()
+        print_doc['created_at'] = print_doc['created_at'].isoformat()
+        await db.prints.insert_one(print_doc)
+    
     return post
 
 @api_router.get("/posts", response_model=List[Post])
@@ -1473,14 +1494,29 @@ async def get_tees_products():
 
 # Public: Get gallery (curated prints + purchasable posts)
 @api_router.get("/public/gallery")
-async def get_public_gallery(tag: Optional[str] = None):
+async def get_public_gallery(tag: Optional[str] = None, category: Optional[str] = None):
     """Get all prints for the public gallery."""
     # Get active curated prints
     query = {"active": True}
     if tag:
         query["tags"] = {"$regex": tag, "$options": "i"}
+    if category:
+        query["category"] = category
     
     prints = await db.prints.find(query, {"_id": 0}).to_list(1000)
+    
+    # Filter "Latest Posts" category to only show last 30 days
+    thirty_days_ago = datetime.now(timezone.utc) - timedelta(days=30)
+    filtered_prints = []
+    for p in prints:
+        if p.get("category") == "Latest Posts":
+            created = p.get("created_at")
+            if isinstance(created, str):
+                created = datetime.fromisoformat(created.replace('Z', '+00:00'))
+            if created and created >= thirty_days_ago:
+                filtered_prints.append(p)
+        else:
+            filtered_prints.append(p)
     
     # Get purchasable posts (published + available_for_purchase)
     post_query = {"status": "published", "available_for_purchase": True}
@@ -1499,6 +1535,7 @@ async def get_public_gallery(tag: Optional[str] = None):
                 "description": None,
                 "image_url": post["image_url"],
                 "tags": [],
+                "category": None,
                 "available_types": ["paper", "canvas", "metal"],
                 "featured": False,
                 "active": True,
@@ -1507,12 +1544,12 @@ async def get_public_gallery(tag: Optional[str] = None):
             })
     
     # Sort: featured first, then by sort_order
-    all_prints = prints + post_prints
+    all_prints = filtered_prints + post_prints
     all_prints.sort(key=lambda x: (not x.get("featured", False), x.get("sort_order", 999)))
     
     return all_prints
 
-# Public: Get all tags
+# Public: Get all tags and categories
 @api_router.get("/public/gallery/tags")
 async def get_gallery_tags():
     """Get all unique tags from prints."""
@@ -1521,6 +1558,16 @@ async def get_gallery_tags():
     for p in prints:
         all_tags.update(p.get("tags", []))
     return sorted(list(all_tags))
+
+@api_router.get("/public/gallery/categories")
+async def get_gallery_categories():
+    """Get all unique categories from prints."""
+    prints = await db.prints.find({"active": True}, {"category": 1, "_id": 0}).to_list(1000)
+    categories = set()
+    for p in prints:
+        if p.get("category"):
+            categories.add(p["category"])
+    return sorted(list(categories))
 
 # Print checkout
 @api_router.post("/prints/checkout")
