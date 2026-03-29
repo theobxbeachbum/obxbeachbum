@@ -113,6 +113,16 @@ A self-hosted newsletter system similar to Substack for a personal photography w
 - **Fixed syntax errors**: Previous agent's code was cut off mid-implementation, causing broken builds
 - **Tests**: 17/17 backend tests passed, 10/10 frontend tests passed (100%)
 
+### March 29, 2025 - Quick Buy Feature on Gallery Thumbnails
+- **Implemented hover quick-buy popup on gallery print cards**:
+  - Hovering over any print thumbnail reveals a quick purchase panel
+  - Shows 3 print type buttons (Paper/Canvas/Metal) with instant switching
+  - Displays first 3 sizes per type for quick selection
+  - "More sizes →" link opens full modal for complete options
+  - Lightning bolt "Quick Buy · $X" button for instant checkout
+  - Reduces purchase flow from 3 clicks to 2 for returning customers
+  - Smooth animations and hover state management
+
 ### March 26, 2025 - Two-Step Subscription Flow
 - **Implemented Substack-style subscription flow** matching user's mockups:
   - Step 1: Beautiful water ripple background with centered white card

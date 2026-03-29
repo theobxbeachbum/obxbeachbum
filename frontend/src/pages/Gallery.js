@@ -1,12 +1,257 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { createPortal } from 'react-dom';
 import axios from 'axios';
-import { Search, X, ShoppingCart } from 'lucide-react';
+import { Search, X, ShoppingCart, Zap } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
+
+// Quick Buy Card Component with hover popup
+function PrintCard({ print, pricing, typeNames, onOpenFullModal, onQuickCheckout }) {
+  const [showQuickBuy, setShowQuickBuy] = useState(false);
+  const [quickType, setQuickType] = useState('paper');
+  const [quickSize, setQuickSize] = useState('');
+  const [isCheckingOut, setIsCheckingOut] = useState(false);
+  const cardRef = useRef(null);
+  const timeoutRef = useRef(null);
+
+  // Popular sizes for quick buy (subset of full options)
+  const getQuickSizes = (type) => {
+    if (!pricing[type]) return [];
+    const allSizes = Object.entries(pricing[type]);
+    // Show first 3 most affordable sizes for quick selection
+    return allSizes.slice(0, 3);
+  };
+
+  const handleMouseEnter = () => {
+    if (timeoutRef.current) clearTimeout(timeoutRef.current);
+    timeoutRef.current = setTimeout(() => {
+      setShowQuickBuy(true);
+      // Auto-select first size when popup appears
+      if (pricing[quickType]) {
+        setQuickSize(Object.keys(pricing[quickType])[0]);
+      }
+    }, 300);
+  };
+
+  const handleMouseLeave = () => {
+    if (timeoutRef.current) clearTimeout(timeoutRef.current);
+    timeoutRef.current = setTimeout(() => {
+      setShowQuickBuy(false);
+    }, 200);
+  };
+
+  const handleQuickTypeChange = (type) => {
+    setQuickType(type);
+    if (pricing[type]) {
+      setQuickSize(Object.keys(pricing[type])[0]);
+    }
+  };
+
+  const handleQuickBuy = async (e) => {
+    e.stopPropagation();
+    if (!quickSize) return;
+    
+    setIsCheckingOut(true);
+    try {
+      await onQuickCheckout(print, quickType, quickSize, pricing[quickType][quickSize]);
+    } finally {
+      setIsCheckingOut(false);
+    }
+  };
+
+  const quickSizes = getQuickSizes(quickType);
+  const currentPrice = pricing[quickType]?.[quickSize] || 0;
+
+  return (
+    <div 
+      ref={cardRef}
+      id={`print-${print.id}`}
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
+      style={{
+        background: '#fff',
+        borderRadius: '8px',
+        overflow: 'visible',
+        boxShadow: showQuickBuy ? '0 8px 24px rgba(0,0,0,0.15)' : '0 2px 8px rgba(0,0,0,0.08)',
+        cursor: 'pointer',
+        position: 'relative',
+        transition: 'transform 0.2s, box-shadow 0.2s',
+        transform: showQuickBuy ? 'translateY(-4px)' : 'none',
+        zIndex: showQuickBuy ? 10 : 1
+      }}
+      data-testid={`print-card-${print.id}`}
+    >
+      {/* Featured Badge */}
+      {print.featured && (
+        <span style={{
+          position: 'absolute',
+          top: '8px',
+          left: '8px',
+          background: '#ffd700',
+          color: '#333',
+          padding: '3px 8px',
+          borderRadius: '10px',
+          fontSize: '11px',
+          fontWeight: '600',
+          zIndex: 2
+        }}>★ Featured</span>
+      )}
+      
+      {/* Image - clicks open full modal */}
+      <div onClick={() => onOpenFullModal(print)}>
+        <img 
+          src={print.image_url} 
+          alt={print.title} 
+          style={{ width: '100%', height: '160px', objectFit: 'cover', display: 'block', borderRadius: '8px 8px 0 0' }}
+        />
+      </div>
+      
+      {/* Title bar */}
+      <div 
+        onClick={() => onOpenFullModal(print)}
+        style={{ padding: '10px 12px', borderBottom: showQuickBuy ? '1px solid #eee' : 'none' }}
+      >
+        <h3 style={{ 
+          fontFamily: "'Playfair Display', Georgia, serif",
+          fontSize: '14px',
+          margin: '0 0 4px',
+          color: '#1a1a1a',
+          whiteSpace: 'nowrap',
+          overflow: 'hidden',
+          textOverflow: 'ellipsis'
+        }}>{print.title}</h3>
+        <span style={{ fontSize: '11px', color: '#888' }}>
+          {showQuickBuy ? 'Quick buy below ↓' : 'Hover for quick buy'}
+        </span>
+      </div>
+
+      {/* Quick Buy Popup */}
+      {showQuickBuy && (
+        <div 
+          style={{
+            padding: '12px',
+            background: '#fff',
+            borderRadius: '0 0 8px 8px',
+            animation: 'fadeIn 0.2s ease'
+          }}
+          onClick={(e) => e.stopPropagation()}
+          data-testid="quick-buy-popup"
+        >
+          {/* Quick Type Selector */}
+          <div style={{ marginBottom: '10px' }}>
+            <div style={{ fontSize: '11px', color: '#666', marginBottom: '6px', fontWeight: '600' }}>Type</div>
+            <div style={{ display: 'flex', gap: '4px' }}>
+              {['paper', 'canvas', 'metal'].map(type => (
+                <button
+                  key={type}
+                  onClick={() => handleQuickTypeChange(type)}
+                  style={{
+                    flex: 1,
+                    padding: '6px 4px',
+                    fontSize: '10px',
+                    fontWeight: '500',
+                    border: '1px solid',
+                    borderColor: quickType === type ? '#1a1a1a' : '#ddd',
+                    background: quickType === type ? '#1a1a1a' : '#fff',
+                    color: quickType === type ? '#fff' : '#666',
+                    borderRadius: '4px',
+                    cursor: 'pointer',
+                    transition: 'all 0.15s'
+                  }}
+                  data-testid={`quick-type-${type}`}
+                >
+                  {type === 'paper' ? 'Paper' : type === 'canvas' ? 'Canvas' : 'Metal'}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Quick Size Selector */}
+          <div style={{ marginBottom: '10px' }}>
+            <div style={{ fontSize: '11px', color: '#666', marginBottom: '6px', fontWeight: '600' }}>Size</div>
+            <div style={{ display: 'flex', gap: '4px' }}>
+              {quickSizes.map(([size, price]) => (
+                <button
+                  key={size}
+                  onClick={() => setQuickSize(size)}
+                  style={{
+                    flex: 1,
+                    padding: '6px 4px',
+                    fontSize: '10px',
+                    border: '1px solid',
+                    borderColor: quickSize === size ? '#1a1a1a' : '#ddd',
+                    background: quickSize === size ? '#1a1a1a' : '#fff',
+                    color: quickSize === size ? '#fff' : '#666',
+                    borderRadius: '4px',
+                    cursor: 'pointer',
+                    textAlign: 'center',
+                    transition: 'all 0.15s'
+                  }}
+                  data-testid={`quick-size-${size}`}
+                >
+                  <div style={{ fontWeight: '600' }}>{size}</div>
+                  <div style={{ opacity: 0.8 }}>${price}</div>
+                </button>
+              ))}
+            </div>
+            <button
+              onClick={() => onOpenFullModal(print)}
+              style={{
+                width: '100%',
+                marginTop: '6px',
+                padding: '4px',
+                fontSize: '10px',
+                color: '#666',
+                background: 'transparent',
+                border: 'none',
+                cursor: 'pointer',
+                textDecoration: 'underline'
+              }}
+            >
+              More sizes →
+            </button>
+          </div>
+
+          {/* Quick Buy Button */}
+          <button
+            onClick={handleQuickBuy}
+            disabled={isCheckingOut || !quickSize}
+            style={{
+              width: '100%',
+              padding: '10px',
+              fontSize: '13px',
+              fontWeight: '600',
+              background: isCheckingOut ? '#666' : '#1a1a1a',
+              color: '#fff',
+              border: 'none',
+              borderRadius: '6px',
+              cursor: isCheckingOut ? 'wait' : 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '6px',
+              transition: 'background 0.2s'
+            }}
+            data-testid="quick-buy-btn"
+          >
+            <Zap size={14} />
+            {isCheckingOut ? 'Processing...' : `Quick Buy · $${currentPrice}`}
+          </button>
+        </div>
+      )}
+
+      <style>{`
+        @keyframes fadeIn {
+          from { opacity: 0; transform: translateY(-4px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+      `}</style>
+    </div>
+  );
+}
 
 // Category display order
 const CATEGORY_ORDER = [
@@ -194,6 +439,28 @@ function Gallery() {
     }
   };
 
+  // Quick checkout handler for hover popup
+  const handleQuickCheckout = async (print, printType, size, price) => {
+    try {
+      const response = await axios.post(`${BACKEND_URL}/api/prints/checkout`, {
+        print_id: print.id,
+        print_title: print.title,
+        print_type: printType,
+        size: size,
+        price: price,
+        special_instructions: null,
+        origin_url: window.location.origin,
+        source: print.source || 'gallery'
+      });
+
+      if (response.data.checkout_url) {
+        window.location.href = response.data.checkout_url;
+      }
+    } catch (error) {
+      toast.error(error.response?.data?.detail || 'Quick checkout failed');
+    }
+  };
+
   return (
     <div className="substack-site">
       {/* Header */}
@@ -303,50 +570,14 @@ function Gallery() {
                     width: '100%'
                   }}>
                     {groups[category].map((print) => (
-                      <div 
-                        key={print.id} 
-                        id={`print-${print.id}`}
-                        onClick={() => openPrintModal(print)}
-                        style={{
-                          background: '#fff',
-                          borderRadius: '8px',
-                          overflow: 'hidden',
-                          boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
-                          cursor: 'pointer',
-                          position: 'relative',
-                          transition: 'transform 0.2s, box-shadow 0.2s'
-                        }}
-                      >
-                        {print.featured && <span style={{
-                          position: 'absolute',
-                          top: '8px',
-                          left: '8px',
-                          background: '#ffd700',
-                          color: '#333',
-                          padding: '3px 8px',
-                          borderRadius: '10px',
-                          fontSize: '11px',
-                          fontWeight: '600',
-                          zIndex: 1
-                        }}>★ Featured</span>}
-                        <img 
-                          src={print.image_url} 
-                          alt={print.title} 
-                          style={{ width: '100%', height: '160px', objectFit: 'cover', display: 'block' }}
-                        />
-                        <div style={{ padding: '10px 12px' }}>
-                          <h3 style={{ 
-                            fontFamily: "'Playfair Display', Georgia, serif",
-                            fontSize: '14px',
-                            margin: '0 0 4px',
-                            color: '#1a1a1a',
-                            whiteSpace: 'nowrap',
-                            overflow: 'hidden',
-                            textOverflow: 'ellipsis'
-                          }}>{print.title}</h3>
-                          <span style={{ fontSize: '11px', color: '#888' }}>View →</span>
-                        </div>
-                      </div>
+                      <PrintCard
+                        key={print.id}
+                        print={print}
+                        pricing={pricing}
+                        typeNames={typeNames}
+                        onOpenFullModal={openPrintModal}
+                        onQuickCheckout={handleQuickCheckout}
+                      />
                     ))}
                   </div>
                 </div>
