@@ -299,6 +299,7 @@ class TeesOrder(BaseModel):
 
 class SendNewsletterRequest(BaseModel):
     post_id: str
+    audience: str = "all"  # all, paid, free
 
 class SettingsUpdate(BaseModel):
     sendgrid_api_key: Optional[str] = None
@@ -819,11 +820,32 @@ async def send_newsletter(request: SendNewsletterRequest, http_request: Request,
     if not subscribers:
         raise HTTPException(400, "No active subscribers")
     
+    # Get supporters to determine plans
+    supporters = await db.supporters.find({}, {"email": 1, "plan": 1, "_id": 0}).to_list(10000)
+    supporter_plans = {s['email']: s.get('plan', 'supporter') for s in supporters}
+    
+    # Filter subscribers based on audience
+    filtered_subscribers = []
+    for sub in subscribers:
+        email = sub['email']
+        plan = supporter_plans.get(email, 'free')
+        
+        if request.audience == 'all':
+            filtered_subscribers.append(sub)
+        elif request.audience == 'paid' and plan in ['monthly', 'annual', 'supporter']:
+            filtered_subscribers.append(sub)
+        elif request.audience == 'free' and plan == 'free':
+            filtered_subscribers.append(sub)
+    
+    if not filtered_subscribers:
+        audience_label = {'all': 'any', 'paid': 'paid', 'free': 'free'}[request.audience]
+        raise HTTPException(400, f"No {audience_label} subscribers found")
+    
     # Get base URL from request
     base_url = str(http_request.base_url).rstrip('/')
     
     # Send emails in background
-    for sub_doc in subscribers:
+    for sub_doc in filtered_subscribers:
         if isinstance(sub_doc['subscribed_at'], str):
             sub_doc['subscribed_at'] = datetime.fromisoformat(sub_doc['subscribed_at'])
         subscriber = Subscriber(**sub_doc)
@@ -835,7 +857,8 @@ async def send_newsletter(request: SendNewsletterRequest, http_request: Request,
         {"$set": {"status": "published", "published_at": datetime.now(timezone.utc).isoformat()}}
     )
     
-    return {"success": True, "message": f"Newsletter queued for {len(subscribers)} subscribers"}
+    audience_label = {'all': 'all', 'paid': 'paid', 'free': 'free'}[request.audience]
+    return {"success": True, "message": f"Newsletter queued for {len(filtered_subscribers)} {audience_label} subscribers"}
 
 # Supporter endpoints
 # Subscription plan pricing

@@ -10,6 +10,9 @@ function Posts({ onLogout }) {
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showDialog, setShowDialog] = useState(false);
+  const [showSendDialog, setShowSendDialog] = useState(false);
+  const [sendingPostId, setSendingPostId] = useState(null);
+  const [sendAudience, setSendAudience] = useState('all');
   const [editingPost, setEditingPost] = useState(null);
   const [formData, setFormData] = useState({
     title: '',
@@ -92,17 +95,25 @@ function Posts({ onLogout }) {
   };
 
   const handleSendNewsletter = async (postId) => {
-    if (!window.confirm('Send this post to all subscribers? This action cannot be undone.')) return;
-    
-    setSending(postId);
+    setSendingPostId(postId);
+    setShowSendDialog(true);
+  };
+
+  const confirmSendNewsletter = async () => {
+    setSending(sendingPostId);
     try {
-      const response = await axios.post('/newsletter/send', { post_id: postId });
+      const response = await axios.post('/newsletter/send', { 
+        post_id: sendingPostId,
+        audience: sendAudience
+      });
       toast.success(response.data.message);
       fetchPosts();
+      setShowSendDialog(false);
     } catch (error) {
       toast.error(error.response?.data?.detail || 'Failed to send newsletter');
     } finally {
       setSending(null);
+      setSendingPostId(null);
     }
   };
 
@@ -487,6 +498,109 @@ function Posts({ onLogout }) {
             </table>
           </div>
         )}
+
+        {/* Send Newsletter Dialog */}
+        <Dialog open={showSendDialog} onOpenChange={setShowSendDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Send Newsletter</DialogTitle>
+            </DialogHeader>
+            <div style={{ padding: '10px 0' }}>
+              <p style={{ marginBottom: '20px', color: '#666' }}>
+                Choose who should receive this newsletter:
+              </p>
+              
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                <label style={{ 
+                  display: 'flex', 
+                  alignItems: 'center', 
+                  gap: '12px',
+                  padding: '15px',
+                  border: sendAudience === 'all' ? '2px solid #1a1a1a' : '1px solid #e0e0e0',
+                  borderRadius: '8px',
+                  cursor: 'pointer',
+                  background: sendAudience === 'all' ? '#f8f9fa' : '#fff'
+                }}>
+                  <input
+                    type="radio"
+                    name="audience"
+                    value="all"
+                    checked={sendAudience === 'all'}
+                    onChange={(e) => setSendAudience(e.target.value)}
+                    style={{ width: '18px', height: '18px' }}
+                  />
+                  <div>
+                    <strong>All Subscribers</strong>
+                    <p style={{ margin: '4px 0 0', fontSize: '13px', color: '#666' }}>
+                      Free + Monthly + Annual
+                    </p>
+                  </div>
+                </label>
+
+                <label style={{ 
+                  display: 'flex', 
+                  alignItems: 'center', 
+                  gap: '12px',
+                  padding: '15px',
+                  border: sendAudience === 'paid' ? '2px solid #1a1a1a' : '1px solid #e0e0e0',
+                  borderRadius: '8px',
+                  cursor: 'pointer',
+                  background: sendAudience === 'paid' ? '#f8f9fa' : '#fff'
+                }}>
+                  <input
+                    type="radio"
+                    name="audience"
+                    value="paid"
+                    checked={sendAudience === 'paid'}
+                    onChange={(e) => setSendAudience(e.target.value)}
+                    style={{ width: '18px', height: '18px' }}
+                  />
+                  <div>
+                    <strong>Paid Subscribers Only</strong>
+                    <p style={{ margin: '4px 0 0', fontSize: '13px', color: '#666' }}>
+                      Monthly + Annual supporters
+                    </p>
+                  </div>
+                </label>
+
+                <label style={{ 
+                  display: 'flex', 
+                  alignItems: 'center', 
+                  gap: '12px',
+                  padding: '15px',
+                  border: sendAudience === 'free' ? '2px solid #1a1a1a' : '1px solid #e0e0e0',
+                  borderRadius: '8px',
+                  cursor: 'pointer',
+                  background: sendAudience === 'free' ? '#f8f9fa' : '#fff'
+                }}>
+                  <input
+                    type="radio"
+                    name="audience"
+                    value="free"
+                    checked={sendAudience === 'free'}
+                    onChange={(e) => setSendAudience(e.target.value)}
+                    style={{ width: '18px', height: '18px' }}
+                  />
+                  <div>
+                    <strong>Free Subscribers Only</strong>
+                    <p style={{ margin: '4px 0 0', fontSize: '13px', color: '#666' }}>
+                      Non-paying subscribers
+                    </p>
+                  </div>
+                </label>
+              </div>
+
+              <div style={{ display: 'flex', gap: '10px', marginTop: '25px', justifyContent: 'flex-end' }}>
+                <Button variant="outline" onClick={() => setShowSendDialog(false)}>
+                  Cancel
+                </Button>
+                <Button onClick={confirmSendNewsletter} disabled={sending}>
+                  {sending ? 'Sending...' : 'Send Newsletter'}
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
       </div>
     </AdminLayout>
   );
