@@ -64,7 +64,12 @@ function PostView() {
     setSelectedImage(imageUrl);
     setSelectedImageTitle(imageTitle);
     setSelectedType('paper');
-    setSelectedSize('');
+    // Auto-select first available size for paper type
+    if (pricing['paper']) {
+      setSelectedSize(Object.keys(pricing['paper'])[0]);
+    } else {
+      setSelectedSize('');
+    }
     setShowPrintModal(true);
   };
 

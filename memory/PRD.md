@@ -102,6 +102,17 @@ A self-hosted newsletter system similar to Substack for a personal photography w
 
 ## Completed Tasks
 
+### March 29, 2025 - Print Selection Modal for Blog Posts
+- **Implemented Buy This Print feature in PostView.js**:
+  - Readers can now click "Buy This Print" on images inside blog posts
+  - Opens a modal with print type selection (Fine Art Paper, Canvas Wall Art, Metal Print)
+  - Shows all available sizes with dynamic pricing per type
+  - Price updates in real-time when selecting type/size
+  - Auto-selects first size for better UX
+  - Full Stripe checkout integration working end-to-end
+- **Fixed syntax errors**: Previous agent's code was cut off mid-implementation, causing broken builds
+- **Tests**: 17/17 backend tests passed, 10/10 frontend tests passed (100%)
+
 ### March 26, 2025 - Two-Step Subscription Flow
 - **Implemented Substack-style subscription flow** matching user's mockups:
   - Step 1: Beautiful water ripple background with centered white card
