@@ -48,7 +48,7 @@ function PostView() {
         print_id: `post-${post.id}-${Date.now()}`,
         print_title: imageTitle || post.title,
         print_type: 'paper',
-        size: '8x10',
+        size: '5x7',
         price: 25,
         image_url: imageUrl,
         origin_url: window.location.origin,
