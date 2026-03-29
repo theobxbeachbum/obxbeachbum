@@ -282,6 +282,37 @@ function Gallery() {
   const [selectedSize, setSelectedSize] = useState('');
   const [specialInstructions, setSpecialInstructions] = useState('');
   const [checkingOut, setCheckingOut] = useState(false);
+  const [recentlyViewed, setRecentlyViewed] = useState([]);
+
+  // Load recently viewed from localStorage on mount
+  useEffect(() => {
+    const stored = localStorage.getItem('recentlyViewedPrints');
+    if (stored) {
+      try {
+        const parsed = JSON.parse(stored);
+        setRecentlyViewed(parsed);
+      } catch (e) {
+        console.error('Failed to parse recently viewed:', e);
+      }
+    }
+  }, []);
+
+  // Helper to add a print to recently viewed
+  const addToRecentlyViewed = (print) => {
+    const MAX_RECENT = 6;
+    setRecentlyViewed(prev => {
+      // Remove if already exists (to move to front)
+      const filtered = prev.filter(p => p.id !== print.id);
+      // Add to front, limit to MAX_RECENT
+      const updated = [
+        { id: print.id, title: print.title, image_url: print.image_url },
+        ...filtered
+      ].slice(0, MAX_RECENT);
+      // Save to localStorage
+      localStorage.setItem('recentlyViewedPrints', JSON.stringify(updated));
+      return updated;
+    });
+  };
 
   useEffect(() => {
     fetchGallery();
@@ -390,6 +421,8 @@ function Gallery() {
       setSelectedSize(Object.keys(pricing[availableTypes[0]])[0]);
     }
     setSpecialInstructions('');
+    // Track in recently viewed
+    addToRecentlyViewed(print);
   };
 
   const closePrintModal = () => {
@@ -536,6 +569,117 @@ function Gallery() {
           </div>
         )}
       </div>
+
+      {/* Recently Viewed Section */}
+      {recentlyViewed.length > 0 && !loading && (
+        <div style={{ 
+          maxWidth: '1400px', 
+          margin: '0 auto', 
+          padding: '20px 20px 0',
+        }}>
+          <div style={{
+            background: 'linear-gradient(135deg, #f8f9fa 0%, #fff 100%)',
+            borderRadius: '12px',
+            padding: '20px 24px',
+            boxShadow: '0 2px 12px rgba(0,0,0,0.04)',
+            border: '1px solid #eee'
+          }}>
+            <div style={{ 
+              display: 'flex', 
+              alignItems: 'center', 
+              justifyContent: 'space-between',
+              marginBottom: '16px'
+            }}>
+              <h3 style={{
+                fontFamily: "'Playfair Display', Georgia, serif",
+                fontSize: '18px',
+                fontWeight: '600',
+                color: '#1a1a1a',
+                margin: 0,
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px'
+              }}>
+                <span style={{ fontSize: '20px' }}>◷</span>
+                Recently Viewed
+              </h3>
+              <button
+                onClick={() => {
+                  localStorage.removeItem('recentlyViewedPrints');
+                  setRecentlyViewed([]);
+                }}
+                style={{
+                  background: 'transparent',
+                  border: 'none',
+                  color: '#888',
+                  fontSize: '12px',
+                  cursor: 'pointer',
+                  padding: '4px 8px',
+                  borderRadius: '4px',
+                  transition: 'color 0.2s'
+                }}
+                data-testid="clear-recent-btn"
+              >
+                Clear
+              </button>
+            </div>
+            <div style={{ 
+              display: 'flex', 
+              gap: '12px',
+              overflowX: 'auto',
+              paddingBottom: '8px'
+            }}>
+              {recentlyViewed.map((item) => {
+                // Find full print data if available
+                const fullPrint = prints.find(p => p.id === item.id) || item;
+                return (
+                  <div
+                    key={item.id}
+                    onClick={() => openPrintModal(fullPrint)}
+                    style={{
+                      flex: '0 0 auto',
+                      width: '140px',
+                      cursor: 'pointer',
+                      borderRadius: '8px',
+                      overflow: 'hidden',
+                      background: '#fff',
+                      boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
+                      transition: 'transform 0.2s, box-shadow 0.2s'
+                    }}
+                    data-testid={`recent-item-${item.id}`}
+                  >
+                    <img 
+                      src={item.image_url} 
+                      alt={item.title}
+                      style={{
+                        width: '100%',
+                        height: '90px',
+                        objectFit: 'cover',
+                        display: 'block'
+                      }}
+                    />
+                    <div style={{ padding: '8px 10px' }}>
+                      <p style={{
+                        fontSize: '12px',
+                        fontWeight: '500',
+                        color: '#1a1a1a',
+                        margin: 0,
+                        whiteSpace: 'nowrap',
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis'
+                      }}>{item.title}</p>
+                      <span style={{ 
+                        fontSize: '10px', 
+                        color: '#666' 
+                      }}>View again →</span>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Gallery Grid */}
       <main className="gallery-main" style={{ maxWidth: '1400px', margin: '0 auto', padding: '20px' }}>

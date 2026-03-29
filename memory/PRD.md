@@ -123,6 +123,17 @@ A self-hosted newsletter system similar to Substack for a personal photography w
   - Reduces purchase flow from 3 clicks to 2 for returning customers
   - Smooth animations and hover state management
 
+### March 29, 2025 - Recently Viewed Section
+- **Implemented persistent "Recently Viewed" section on Gallery page**:
+  - Tracks prints users have viewed (stored in localStorage)
+  - Displays up to 6 most recent prints in a horizontal scrollable row
+  - Shows thumbnail, title, and "View again →" prompt
+  - Clicking a recently viewed item opens the full print modal
+  - "Clear" button to remove history
+  - Section only appears when user has view history
+  - Data persists across browser sessions
+  - Clean card design with subtle gradient background
+
 ### March 26, 2025 - Two-Step Subscription Flow
 - **Implemented Substack-style subscription flow** matching user's mockups:
   - Step 1: Beautiful water ripple background with centered white card
