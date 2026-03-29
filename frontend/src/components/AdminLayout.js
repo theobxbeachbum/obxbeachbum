@@ -1,8 +1,10 @@
+import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { LayoutDashboard, FileText, Users, Heart, Settings, LogOut, Image, Coffee, Mail, Shirt } from 'lucide-react';
+import { LayoutDashboard, FileText, Users, Heart, Settings, LogOut, Image, Coffee, Mail, Shirt, Menu, X } from 'lucide-react';
 
 function AdminLayout({ children, onLogout, currentPage }) {
   const location = useLocation();
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const navItems = [
     { path: '/admin/dashboard', label: 'Dashboard', icon: LayoutDashboard, id: 'dashboard' },
@@ -16,9 +18,35 @@ function AdminLayout({ children, onLogout, currentPage }) {
     { path: '/admin/settings', label: 'Settings', icon: Settings, id: 'settings' },
   ];
 
+  const handleNavClick = () => {
+    setMobileMenuOpen(false);
+  };
+
   return (
     <div className="admin-layout">
-      <aside className="admin-sidebar">
+      {/* Mobile Header */}
+      <header className="admin-mobile-header">
+        <h2>Admin Panel</h2>
+        <button 
+          className="mobile-menu-btn"
+          onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+          aria-label="Toggle menu"
+          data-testid="mobile-menu-btn"
+        >
+          {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+        </button>
+      </header>
+
+      {/* Mobile Menu Overlay */}
+      {mobileMenuOpen && (
+        <div 
+          className="mobile-menu-overlay" 
+          onClick={() => setMobileMenuOpen(false)}
+        />
+      )}
+
+      {/* Sidebar - shows on desktop, slides in on mobile */}
+      <aside className={`admin-sidebar ${mobileMenuOpen ? 'mobile-open' : ''}`}>
         <div className="admin-sidebar-header">
           <h2>Newsletter</h2>
           <p>Admin Panel</p>
@@ -33,6 +61,7 @@ function AdminLayout({ children, onLogout, currentPage }) {
                 key={item.path}
                 to={item.path}
                 className={isActive ? 'active' : ''}
+                onClick={handleNavClick}
                 data-testid={`nav-${item.id}`}
               >
                 <Icon className="w-5 h-5" />
