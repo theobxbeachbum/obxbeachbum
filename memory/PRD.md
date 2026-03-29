@@ -162,21 +162,23 @@ A self-hosted newsletter system similar to Substack for a personal photography w
 ## Pending Tasks
 
 ### P1 (High Priority)
-- Add logos to Beach Bum Tees and Mostly Good Notecards pages (awaiting user artwork)
-- Build Beach Bum Tees shop page (currently "Coming Soon" placeholder)
+- Build Beach Bum Tees shop page with products (currently "Coming Soon" placeholder)
 
 ### P2 (Medium Priority)
-- Security Vulnerabilities:
-  - Implement dynamic JWT tokens with expiration
-  - Add rate limiting to login endpoint
-  - Sanitize HTML output from Markdown (XSS mitigation)
 - Code Refactoring:
-  - Split `/app/backend/server.py` into router modules
-  - Break up `/app/frontend/src/App.css` into component-specific files
+  - Split `/app/backend/server.py` into router modules (2900+ lines)
+  - Break up `/app/frontend/src/App.css` into component-specific files (3000+ lines)
 
 ### Future/Backlog
 - Full e-commerce store integration per SPECIFICATION.md
 - Order management dashboard in admin
+
+## Completed Security & Infrastructure
+- ✅ JWT tokens with 24-hour expiration (replaced static admin tokens)
+- ✅ Rate limiting on login endpoint (5 attempts / 5 minutes)
+- ✅ HTML sanitization using `bleach` library (XSS mitigation)
+- ✅ Stripe live key stored in MongoDB settings (not in .env)
+- ✅ Logos added to Beach Bum Tees and Mostly Good Notecards pages
 
 ## Database Schema
 
