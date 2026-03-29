@@ -3,8 +3,10 @@ import { Link } from 'react-router-dom';
 import axios from 'axios';
 import { Mail, ShoppingCart } from 'lucide-react';
 import { Button } from '../components/ui/button';
+import RecentlyViewed, { addToRecentlyViewed } from '../components/RecentlyViewed';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
+const RECENTLY_VIEWED_KEY = 'recentlyViewedNotecards';
 
 // Pricing variants for all notecards
 const NOTECARD_VARIANTS = [
@@ -13,12 +15,22 @@ const NOTECARD_VARIANTS = [
   { id: 'ten-pak', label: 'Ten-Pak', price: 40 }
 ];
 
-function NotecardCard({ notecard }) {
+function NotecardCard({ notecard, onView }) {
   const [selectedVariant, setSelectedVariant] = useState(NOTECARD_VARIANTS[0]);
   const [specialInstructions, setSpecialInstructions] = useState('');
   const [isCheckingOut, setIsCheckingOut] = useState(false);
+  const [hasTrackedView, setHasTrackedView] = useState(false);
+
+  // Track view when user interacts with the card
+  const trackView = () => {
+    if (!hasTrackedView && onView) {
+      onView(notecard);
+      setHasTrackedView(true);
+    }
+  };
 
   const handleCheckout = async () => {
+    trackView(); // Track view on checkout attempt
     setIsCheckingOut(true);
     try {
       const orderData = {
@@ -107,10 +119,35 @@ function NotecardCard({ notecard }) {
 function Notecards() {
   const [notecards, setNotecards] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [recentlyViewed, setRecentlyViewed] = useState([]);
 
   useEffect(() => {
     fetchNotecards();
+    // Load recently viewed
+    const stored = localStorage.getItem(RECENTLY_VIEWED_KEY);
+    if (stored) {
+      try {
+        setRecentlyViewed(JSON.parse(stored));
+      } catch (e) {}
+    }
   }, []);
+
+  const handleProductView = (notecard) => {
+    const updated = addToRecentlyViewed(RECENTLY_VIEWED_KEY, notecard);
+    setRecentlyViewed(updated);
+  };
+
+  const handleRecentItemClick = (item) => {
+    // Scroll to the product
+    const element = document.querySelector(`[data-testid="notecard-${item.id}"]`);
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      element.style.boxShadow = '0 0 0 3px #1a1a1a';
+      setTimeout(() => {
+        element.style.boxShadow = '';
+      }, 2000);
+    }
+  };
 
   const fetchNotecards = async () => {
     try {
@@ -168,6 +205,15 @@ function Notecards() {
         </div>
       </section>
 
+      {/* Recently Viewed */}
+      {recentlyViewed.length > 0 && !loading && (
+        <RecentlyViewed 
+          storageKey={RECENTLY_VIEWED_KEY}
+          onItemClick={handleRecentItemClick}
+          title="Recently Viewed"
+        />
+      )}
+
       {/* Products Grid */}
       <main className="notecards-main">
         {loading ? (
@@ -183,7 +229,7 @@ function Notecards() {
         ) : (
           <div className="notecards-grid">
             {notecards.map(notecard => (
-              <NotecardCard key={notecard.id} notecard={notecard} />
+              <NotecardCard key={notecard.id} notecard={notecard} onView={handleProductView} />
             ))}
           </div>
         )}

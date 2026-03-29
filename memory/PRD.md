@@ -134,6 +134,15 @@ A self-hosted newsletter system similar to Substack for a personal photography w
   - Data persists across browser sessions
   - Clean card design with subtle gradient background
 
+### March 29, 2025 - Recently Viewed on All Shop Pages
+- **Extended Recently Viewed to BB Muggs, Notecards, and Tees shops**:
+  - Created reusable `RecentlyViewed` component at `/app/frontend/src/components/RecentlyViewed.js`
+  - Each shop tracks its own history using separate localStorage keys
+  - Products are tracked when users interact (click Buy, select options)
+  - Clicking a recently viewed item scrolls to and highlights that product
+  - Consistent design across all shop pages
+  - Supports products with prices displayed in the thumbnail
+
 ### March 26, 2025 - Two-Step Subscription Flow
 - **Implemented Substack-style subscription flow** matching user's mockups:
   - Step 1: Beautiful water ripple background with centered white card

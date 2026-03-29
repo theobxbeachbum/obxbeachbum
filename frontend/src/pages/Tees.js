@@ -4,8 +4,10 @@ import axios from 'axios';
 import { toast } from 'sonner';
 import { ShoppingBag } from 'lucide-react';
 import { Button } from '../components/ui/button';
+import RecentlyViewed, { addToRecentlyViewed } from '../components/RecentlyViewed';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
+const RECENTLY_VIEWED_KEY = 'recentlyViewedTees';
 
 // Separate logo and background images
 const HERO_BG = 'https://customer-assets.emergentagent.com/job_e79063ba-4cfe-4d19-91ab-648826687dcc/artifacts/idywq15b_bbteesbg.png';
@@ -15,10 +17,35 @@ function Tees() {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [checkoutLoading, setCheckoutLoading] = useState({});
+  const [recentlyViewed, setRecentlyViewed] = useState([]);
 
   useEffect(() => {
     fetchProducts();
+    // Load recently viewed
+    const stored = localStorage.getItem(RECENTLY_VIEWED_KEY);
+    if (stored) {
+      try {
+        setRecentlyViewed(JSON.parse(stored));
+      } catch (e) {}
+    }
   }, []);
+
+  const handleProductView = (product) => {
+    const updated = addToRecentlyViewed(RECENTLY_VIEWED_KEY, product);
+    setRecentlyViewed(updated);
+  };
+
+  const handleRecentItemClick = (item) => {
+    // Scroll to the product
+    const element = document.querySelector(`[data-testid="tee-${item.id}"]`);
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      element.style.boxShadow = '0 0 0 3px #1a1a1a';
+      setTimeout(() => {
+        element.style.boxShadow = '';
+      }, 2000);
+    }
+  };
 
   const fetchProducts = async () => {
     try {
@@ -115,6 +142,15 @@ function Tees() {
         />
       </section>
 
+      {/* Recently Viewed */}
+      {recentlyViewed.length > 0 && !loading && products.length > 0 && (
+        <RecentlyViewed 
+          storageKey={RECENTLY_VIEWED_KEY}
+          onItemClick={handleRecentItemClick}
+          title="Recently Viewed"
+        />
+      )}
+
       {/* Main Content */}
       <main className="tees-main" style={{ 
         maxWidth: '1200px', 
@@ -203,6 +239,7 @@ function Tees() {
                 key={product.id} 
                 product={product} 
                 onCheckout={handleCheckout}
+                onView={handleProductView}
                 loading={checkoutLoading[product.id]}
               />
             ))}
@@ -268,21 +305,43 @@ function Tees() {
 }
 
 // Product Card Component with size selection
-function ProductCard({ product, onCheckout, loading }) {
+function ProductCard({ product, onCheckout, onView, loading }) {
   const [selectedSize, setSelectedSize] = useState(
     (product.sizes && product.sizes.length > 0) ? product.sizes[0] : 'M'
   );
+  const [hasTrackedView, setHasTrackedView] = useState(false);
 
   const availableSizes = product.sizes || ['S', 'M', 'L', 'XL', '2XL'];
 
+  // Track view when user interacts with size selection
+  const trackView = () => {
+    if (!hasTrackedView && onView) {
+      onView(product);
+      setHasTrackedView(true);
+    }
+  };
+
+  const handleSizeChange = (size) => {
+    trackView();
+    setSelectedSize(size);
+  };
+
+  const handleCheckoutClick = () => {
+    trackView();
+    onCheckout(product, selectedSize);
+  };
+
   return (
-    <div style={{
-      background: '#fff',
-      border: '1px solid #e0e0e0',
-      borderRadius: '12px',
-      overflow: 'hidden',
-      transition: 'box-shadow 0.3s'
-    }}>
+    <div 
+      data-testid={`tee-${product.id}`}
+      style={{
+        background: '#fff',
+        border: '1px solid #e0e0e0',
+        borderRadius: '12px',
+        overflow: 'hidden',
+        transition: 'box-shadow 0.3s'
+      }}
+    >
       {/* Product Image */}
       <div style={{
         width: '100%',
@@ -347,7 +406,7 @@ function ProductCard({ product, onCheckout, loading }) {
               <button
                 key={size}
                 type="button"
-                onClick={() => setSelectedSize(size)}
+                onClick={() => handleSizeChange(size)}
                 style={{
                   padding: '8px 14px',
                   border: selectedSize === size ? '2px solid #1a1a1a' : '1px solid #d0d0d0',
@@ -378,7 +437,7 @@ function ProductCard({ product, onCheckout, loading }) {
         
         {/* Buy Button */}
         <Button
-          onClick={() => onCheckout(product, selectedSize)}
+          onClick={handleCheckoutClick}
           disabled={loading}
           style={{
             width: '100%',

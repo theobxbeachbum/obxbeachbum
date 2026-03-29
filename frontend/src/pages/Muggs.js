@@ -3,8 +3,10 @@ import { Link } from 'react-router-dom';
 import axios from 'axios';
 import { Coffee, ShoppingCart } from 'lucide-react';
 import { Button } from '../components/ui/button';
+import RecentlyViewed, { addToRecentlyViewed } from '../components/RecentlyViewed';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
+const RECENTLY_VIEWED_KEY = 'recentlyViewedMuggs';
 
 // Coaster variants pricing
 const COASTER_VARIANTS = [
@@ -13,18 +15,28 @@ const COASTER_VARIANTS = [
   { id: 'set-4', label: 'Set of 4', price: 21 }
 ];
 
-function ProductCard({ product }) {
+function ProductCard({ product, onView }) {
   const [selectedVariant, setSelectedVariant] = useState(
     product.has_variants ? COASTER_VARIANTS[0] : null
   );
   const [specialInstructions, setSpecialInstructions] = useState('');
   const [isCheckingOut, setIsCheckingOut] = useState(false);
+  const [hasTrackedView, setHasTrackedView] = useState(false);
 
   const currentPrice = product.has_variants 
     ? selectedVariant?.price 
     : product.price;
 
+  // Track view when user interacts with the card
+  const trackView = () => {
+    if (!hasTrackedView && onView) {
+      onView(product);
+      setHasTrackedView(true);
+    }
+  };
+
   const handleCheckout = async () => {
+    trackView(); // Track view on checkout attempt
     setIsCheckingOut(true);
     try {
       const orderData = {
@@ -119,10 +131,35 @@ function ProductCard({ product }) {
 function Muggs() {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [recentlyViewed, setRecentlyViewed] = useState([]);
 
   useEffect(() => {
     fetchProducts();
+    // Load recently viewed
+    const stored = localStorage.getItem(RECENTLY_VIEWED_KEY);
+    if (stored) {
+      try {
+        setRecentlyViewed(JSON.parse(stored));
+      } catch (e) {}
+    }
   }, []);
+
+  const handleProductView = (product) => {
+    const updated = addToRecentlyViewed(RECENTLY_VIEWED_KEY, product);
+    setRecentlyViewed(updated);
+  };
+
+  const handleRecentItemClick = (item) => {
+    // Scroll to the product
+    const element = document.querySelector(`[data-testid="product-${item.id}"]`);
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      element.style.boxShadow = '0 0 0 3px #1a1a1a';
+      setTimeout(() => {
+        element.style.boxShadow = '';
+      }, 2000);
+    }
+  };
 
   const fetchProducts = async () => {
     try {
@@ -181,6 +218,15 @@ function Muggs() {
         </div>
       </section>
 
+      {/* Recently Viewed */}
+      {recentlyViewed.length > 0 && !loading && (
+        <RecentlyViewed 
+          storageKey={RECENTLY_VIEWED_KEY}
+          onItemClick={handleRecentItemClick}
+          title="Recently Viewed"
+        />
+      )}
+
       {/* Products Grid */}
       <main className="muggs-main">
         {loading ? (
@@ -196,7 +242,7 @@ function Muggs() {
         ) : (
           <div className="products-grid">
             {products.map(product => (
-              <ProductCard key={product.id} product={product} />
+              <ProductCard key={product.id} product={product} onView={handleProductView} />
             ))}
           </div>
         )}
