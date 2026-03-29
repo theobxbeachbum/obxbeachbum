@@ -22,6 +22,9 @@ from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 import markdown
 import stripe
+import jwt
+import bleach
+from collections import defaultdict
 from emergentintegrations.payments.stripe.checkout import StripeCheckout, CheckoutSessionResponse, CheckoutStatusResponse, CheckoutSessionRequest
 
 ROOT_DIR = Path(__file__).parent
@@ -35,6 +38,71 @@ db = client[os.environ['DB_NAME']]
 # Create the main app
 app = FastAPI()
 api_router = APIRouter(prefix="/api")
+
+# ============================================
+# SECURITY CONFIGURATION
+# ============================================
+
+# JWT Configuration
+JWT_SECRET = os.environ.get('JWT_SECRET', secrets.token_hex(32))
+JWT_ALGORITHM = "HS256"
+JWT_EXPIRATION_HOURS = 24
+
+# Rate Limiting Configuration
+LOGIN_RATE_LIMIT = 5  # Max attempts
+LOGIN_RATE_WINDOW = 300  # 5 minutes in seconds
+login_attempts = defaultdict(list)  # IP -> list of timestamps
+
+# HTML Sanitization - allowed tags and attributes
+ALLOWED_TAGS = [
+    'p', 'br', 'strong', 'em', 'u', 'a', 'ul', 'ol', 'li', 
+    'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'blockquote', 'code', 'pre',
+    'img', 'figure', 'figcaption', 'hr', 'span', 'div'
+]
+ALLOWED_ATTRIBUTES = {
+    'a': ['href', 'title', 'target'],
+    'img': ['src', 'alt', 'title', 'width', 'height'],
+    '*': ['class', 'style']
+}
+
+def create_jwt_token(data: dict) -> str:
+    """Create a JWT token with expiration."""
+    expire = datetime.now(timezone.utc) + timedelta(hours=JWT_EXPIRATION_HOURS)
+    to_encode = data.copy()
+    to_encode.update({"exp": expire})
+    return jwt.encode(to_encode, JWT_SECRET, algorithm=JWT_ALGORITHM)
+
+def verify_jwt_token(token: str) -> dict:
+    """Verify a JWT token and return payload."""
+    try:
+        payload = jwt.decode(token, JWT_SECRET, algorithms=[JWT_ALGORITHM])
+        return payload
+    except jwt.ExpiredSignatureError:
+        raise HTTPException(401, "Token expired - please log in again")
+    except jwt.InvalidTokenError:
+        raise HTTPException(401, "Invalid token")
+
+def check_rate_limit(ip: str) -> bool:
+    """Check if IP is rate limited. Returns True if allowed, raises exception if blocked."""
+    now = datetime.now(timezone.utc).timestamp()
+    # Clean old attempts
+    login_attempts[ip] = [t for t in login_attempts[ip] if now - t < LOGIN_RATE_WINDOW]
+    
+    if len(login_attempts[ip]) >= LOGIN_RATE_LIMIT:
+        wait_time = int(LOGIN_RATE_WINDOW - (now - login_attempts[ip][0]))
+        raise HTTPException(429, f"Too many login attempts. Try again in {wait_time} seconds.")
+    
+    return True
+
+def record_login_attempt(ip: str):
+    """Record a failed login attempt."""
+    login_attempts[ip].append(datetime.now(timezone.utc).timestamp())
+
+def sanitize_html(content: str) -> str:
+    """Sanitize HTML content to prevent XSS attacks."""
+    if not content:
+        return content
+    return bleach.clean(content, tags=ALLOWED_TAGS, attributes=ALLOWED_ATTRIBUTES, strip=True)
 
 # Models
 class AdminLogin(BaseModel):
@@ -398,7 +466,20 @@ async def verify_admin_token(authorization: Optional[str] = Header(None)):
     if not authorization or not authorization.startswith("Bearer "):
         raise HTTPException(401, "Not authenticated")
     token = authorization.replace("Bearer ", "")
-    if token != "admin_session_token":
+    
+    # Verify JWT token
+    payload = verify_jwt_token(token)
+    if payload.get("role") != "admin":
+        raise HTTPException(401, "Invalid token")
+    return True
+
+# Backward compatible verify_token for routes using Header
+def verify_token(authorization: Optional[str] = None):
+    if not authorization or not authorization.startswith("Bearer "):
+        raise HTTPException(401, "Not authenticated")
+    token = authorization.replace("Bearer ", "")
+    payload = verify_jwt_token(token)
+    if payload.get("role") != "admin":
         raise HTTPException(401, "Invalid token")
     return True
 
@@ -406,7 +487,9 @@ def convert_markdown_to_html(content: str) -> str:
     """Convert Markdown content to HTML with image and text formatting support."""
     # Use markdown library with common extensions
     md = markdown.Markdown(extensions=['nl2br', 'fenced_code', 'tables'])
-    return md.convert(content)
+    html_content = md.convert(content)
+    # Sanitize the output
+    return sanitize_html(html_content)
 
 
 def strip_markdown_for_plain_text(content: str) -> str:
@@ -542,13 +625,26 @@ async def send_email_to_subscriber(subscriber: Subscriber, post: Post, settings:
 
 # Admin endpoints
 @api_router.post("/admin/login", response_model=AdminResponse)
-async def admin_login(login_data: AdminLogin):
+async def admin_login(login_data: AdminLogin, request: Request):
+    # Get client IP for rate limiting
+    client_ip = request.client.host if request.client else "unknown"
+    
+    # Check rate limit
+    check_rate_limit(client_ip)
+    
     settings = await get_settings()
     if not settings.admin_password_hash:
         raise HTTPException(400, "Admin password not set")
     
     if verify_password(login_data.password, settings.admin_password_hash):
-        return AdminResponse(success=True, token="admin_session_token")
+        # Clear failed attempts on successful login
+        login_attempts.pop(client_ip, None)
+        # Create JWT token
+        token = create_jwt_token({"role": "admin", "ip": client_ip})
+        return AdminResponse(success=True, token=token)
+    
+    # Record failed attempt
+    record_login_attempt(client_ip)
     raise HTTPException(401, "Invalid password")
 
 @api_router.get("/admin/verify")
@@ -707,6 +803,12 @@ async def create_post(post_data: PostCreate, authorization: Optional[str] = Head
     post_dict = post_data.model_dump()
     post_dict['slug'] = slug
     
+    # Sanitize content to prevent XSS
+    if post_dict.get('content'):
+        post_dict['content'] = sanitize_html(post_dict['content'])
+    if post_dict.get('title'):
+        post_dict['title'] = bleach.clean(post_dict['title'], tags=[], strip=True)
+    
     post = Post(**post_dict)
     doc = post.model_dump()
     doc['created_at'] = doc['created_at'].isoformat()
@@ -743,9 +845,17 @@ async def get_post(post_id: str, authorization: Optional[str] = Header(None)):
 @api_router.put("/posts/{post_id}")
 async def update_post(post_id: str, post_data: PostCreate, authorization: Optional[str] = Header(None)):
     await verify_admin_token(authorization)
+    
+    # Sanitize content to prevent XSS
+    update_data = post_data.model_dump()
+    if update_data.get('content'):
+        update_data['content'] = sanitize_html(update_data['content'])
+    if update_data.get('title'):
+        update_data['title'] = bleach.clean(update_data['title'], tags=[], strip=True)
+    
     await db.posts.update_one(
         {"id": post_id},
-        {"$set": post_data.model_dump()}
+        {"$set": update_data}
     )
     return {"success": True}
 
