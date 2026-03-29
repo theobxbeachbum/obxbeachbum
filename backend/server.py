@@ -374,6 +374,7 @@ class SettingsUpdate(BaseModel):
     sender_email: Optional[str] = None
     admin_password: Optional[str] = None
     stripe_enabled: Optional[bool] = None
+    stripe_api_key: Optional[str] = None
     stripe_price_id: Optional[str] = None
     support_amount: Optional[float] = None
     bunny_storage_api_key: Optional[str] = None
@@ -392,6 +393,7 @@ class Settings(BaseModel):
     sender_email: Optional[str] = None
     admin_password_hash: Optional[str] = None
     stripe_enabled: bool = False
+    stripe_api_key: Optional[str] = None
     stripe_price_id: Optional[str] = None
     support_amount: Optional[float] = 5.0
     bunny_storage_api_key: Optional[str] = None
