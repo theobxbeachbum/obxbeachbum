@@ -21,8 +21,25 @@ function Subscribers({ onLogout }) {
 
   const fetchSubscribers = async () => {
     try {
-      const response = await axios.get('/subscribers');
-      setSubscribers(response.data);
+      // Fetch both subscribers and supporters
+      const [subscribersRes, supportersRes] = await Promise.all([
+        axios.get('/subscribers'),
+        axios.get('/supporters')
+      ]);
+      
+      // Create a map of supporter emails to their plans
+      const supporterPlans = {};
+      supportersRes.data.forEach(s => {
+        supporterPlans[s.email] = s.plan || 'supporter';
+      });
+      
+      // Merge plan info into subscribers
+      const mergedSubscribers = subscribersRes.data.map(sub => ({
+        ...sub,
+        plan: supporterPlans[sub.email] || 'free'
+      }));
+      
+      setSubscribers(mergedSubscribers);
     } catch (error) {
       toast.error('Failed to fetch subscribers');
     } finally {
@@ -252,6 +269,7 @@ function Subscribers({ onLogout }) {
                 <tr>
                   <th>Email</th>
                   <th>Name</th>
+                  <th>Plan</th>
                   <th>Subscribed At</th>
                   <th>Actions</th>
                 </tr>
@@ -264,6 +282,25 @@ function Subscribers({ onLogout }) {
                       {subscriber.first_name || subscriber.last_name 
                         ? `${subscriber.first_name || ''} ${subscriber.last_name || ''}`.trim()
                         : '—'}
+                    </td>
+                    <td>
+                      <span style={{
+                        display: 'inline-block',
+                        padding: '3px 10px',
+                        borderRadius: '12px',
+                        fontSize: '12px',
+                        fontWeight: '500',
+                        background: subscriber.plan === 'annual' ? '#fef3c7' : 
+                                   subscriber.plan === 'monthly' ? '#dbeafe' : 
+                                   '#f3f4f6',
+                        color: subscriber.plan === 'annual' ? '#92400e' : 
+                               subscriber.plan === 'monthly' ? '#1e40af' : 
+                               '#6b7280'
+                      }}>
+                        {subscriber.plan === 'annual' ? 'Annual' : 
+                         subscriber.plan === 'monthly' ? 'Monthly' : 
+                         'Free'}
+                      </span>
                     </td>
                     <td>{new Date(subscriber.subscribed_at).toLocaleDateString()}</td>
                     <td>
