@@ -55,10 +55,14 @@ function PostView() {
         source: 'post'
       });
       
-      if (response.data.checkout_url) {
-        window.location.href = response.data.checkout_url;
+      const checkoutUrl = response.data.checkout_url || response.data.url;
+      if (checkoutUrl) {
+        window.location.href = checkoutUrl;
+      } else {
+        toast.error('Failed to get checkout URL');
       }
     } catch (error) {
+      console.error('Checkout error:', error);
       toast.error('Failed to start checkout. Please try again.');
     } finally {
       setCheckoutLoading(prev => ({ ...prev, [imageKey]: false }));
