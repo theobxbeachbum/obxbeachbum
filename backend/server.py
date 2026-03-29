@@ -462,6 +462,13 @@ async def get_settings() -> Settings:
         return default_settings
     return Settings(**settings_doc)
 
+async def get_stripe_key():
+    """Get Stripe API key from database settings, fallback to environment."""
+    settings = await get_settings()
+    if settings.stripe_api_key:
+        return settings.stripe_api_key
+    return os.environ.get('STRIPE_API_KEY')
+
 async def verify_admin_token(authorization: Optional[str] = Header(None)):
     if not authorization or not authorization.startswith("Bearer "):
         raise HTTPException(401, "Not authenticated")
@@ -986,12 +993,12 @@ async def create_supporter_checkout(request: SupporterCheckoutRequest, http_requ
     plan = SUBSCRIPTION_PLANS[request.plan]
     
     # Get Stripe API key from environment
-    stripe_api_key = os.getenv('STRIPE_API_KEY')
+    stripe_api_key = await get_stripe_key()
     if not stripe_api_key:
         raise HTTPException(500, "Stripe not configured")
     
     stripe.api_key = stripe_api_key
-    if "sk_test_emergent" in stripe_api_key:
+    if stripe_api_key and "sk_test_emergent" in stripe_api_key:
         stripe.api_base = "https://integrations.emergentagent.com/stripe"
     
     host_url = request.origin_url.rstrip('/')
@@ -1049,12 +1056,12 @@ async def create_donation_checkout(request: DonationCheckoutRequest, http_reques
         raise HTTPException(400, "Minimum donation is $1")
     
     # Get Stripe API key from environment
-    stripe_api_key = os.getenv('STRIPE_API_KEY')
+    stripe_api_key = await get_stripe_key()
     if not stripe_api_key:
         raise HTTPException(500, "Stripe not configured")
     
     stripe.api_key = stripe_api_key
-    if "sk_test_emergent" in stripe_api_key:
+    if stripe_api_key and "sk_test_emergent" in stripe_api_key:
         stripe.api_base = "https://integrations.emergentagent.com/stripe"
     
     host_url = request.origin_url.rstrip('/')
@@ -1115,7 +1122,7 @@ async def get_checkout_status(session_id: str, http_request: Request):
         return {"status": "complete", "payment_status": "paid"}
     
     # Get Stripe status
-    stripe_api_key = os.getenv('STRIPE_API_KEY')
+    stripe_api_key = await get_stripe_key()
     webhook_url = f"{str(http_request.base_url).rstrip('/')}/api/webhook/stripe"
     stripe_checkout = StripeCheckout(api_key=stripe_api_key, webhook_url=webhook_url)
     
@@ -1231,7 +1238,7 @@ async def stripe_webhook(request: Request):
     body = await request.body()
     signature = request.headers.get("Stripe-Signature")
     
-    stripe_api_key = os.getenv('STRIPE_API_KEY')
+    stripe_api_key = await get_stripe_key()
     webhook_url = f"{str(request.base_url).rstrip('/')}/api/webhook/stripe"
     stripe_checkout = StripeCheckout(api_key=stripe_api_key, webhook_url=webhook_url)
     
@@ -1736,13 +1743,13 @@ async def create_print_checkout(order: PrintOrderCreate, authorization: str = He
     await db.print_orders.insert_one(print_order.model_dump())
     
     # Create Stripe checkout using Stripe SDK directly (for custom line items with shipping)
-    stripe_api_key = os.environ.get('STRIPE_API_KEY')
+    stripe_api_key = await get_stripe_key()
     if not stripe_api_key:
         raise HTTPException(500, "Stripe not configured")
     
     stripe.api_key = stripe_api_key
     # Use Emergent proxy if using test key
-    if "sk_test_emergent" in stripe_api_key:
+    if stripe_api_key and "sk_test_emergent" in stripe_api_key:
         stripe.api_base = "https://integrations.emergentagent.com/stripe"
     
     type_name = PRINT_TYPE_NAMES.get(order.print_type, order.print_type)
@@ -1802,12 +1809,12 @@ async def create_print_checkout(order: PrintOrderCreate, authorization: str = He
 @api_router.get("/prints/checkout/status/{session_id}")
 async def get_print_checkout_status(session_id: str, background_tasks: BackgroundTasks):
     """Check print order payment status and return order details."""
-    stripe_api_key = os.environ.get('STRIPE_API_KEY')
+    stripe_api_key = await get_stripe_key()
     if not stripe_api_key:
         raise HTTPException(500, "Stripe not configured")
     
     stripe.api_key = stripe_api_key
-    if "sk_test_emergent" in stripe_api_key:
+    if stripe_api_key and "sk_test_emergent" in stripe_api_key:
         stripe.api_base = "https://integrations.emergentagent.com/stripe"
     
     # Get order from database
@@ -1912,7 +1919,7 @@ async def send_print_order_notification(session_id: str):
         return
     
     # Get Stripe session for shipping address
-    stripe_api_key = os.environ.get('STRIPE_API_KEY')
+    stripe_api_key = await get_stripe_key()
     stripe_checkout = StripeCheckout(api_key=stripe_api_key)
     
     try:
@@ -2009,7 +2016,7 @@ async def send_customer_order_confirmation(session_id: str):
         return
     
     # Get shipping details from Stripe
-    stripe_api_key = os.environ.get('STRIPE_API_KEY')
+    stripe_api_key = await get_stripe_key()
     try:
         import stripe
         stripe.api_key = stripe_api_key
@@ -2142,12 +2149,12 @@ async def create_muggs_checkout(order: MuggsOrderCreate):
     await db.muggs_orders.insert_one(muggs_order.model_dump())
     
     # Create Stripe checkout
-    stripe_api_key = os.environ.get('STRIPE_API_KEY')
+    stripe_api_key = await get_stripe_key()
     if not stripe_api_key:
         raise HTTPException(500, "Stripe not configured")
     
     stripe.api_key = stripe_api_key
-    if "sk_test_emergent" in stripe_api_key:
+    if stripe_api_key and "sk_test_emergent" in stripe_api_key:
         stripe.api_base = "https://integrations.emergentagent.com/stripe"
     
     # Build product name
@@ -2199,12 +2206,12 @@ async def create_muggs_checkout(order: MuggsOrderCreate):
 @api_router.get("/muggs/checkout/status/{session_id}")
 async def get_muggs_checkout_status(session_id: str, background_tasks: BackgroundTasks):
     """Check muggs order payment status and return order details."""
-    stripe_api_key = os.environ.get('STRIPE_API_KEY')
+    stripe_api_key = await get_stripe_key()
     if not stripe_api_key:
         raise HTTPException(500, "Stripe not configured")
     
     stripe.api_key = stripe_api_key
-    if "sk_test_emergent" in stripe_api_key:
+    if stripe_api_key and "sk_test_emergent" in stripe_api_key:
         stripe.api_base = "https://integrations.emergentagent.com/stripe"
     
     # Get order from database
@@ -2413,12 +2420,12 @@ async def create_notecards_checkout(order: NotecardsOrderCreate):
     await db.notecards_orders.insert_one(notecards_order.model_dump())
     
     # Create Stripe checkout
-    stripe_api_key = os.environ.get('STRIPE_API_KEY')
+    stripe_api_key = await get_stripe_key()
     if not stripe_api_key:
         raise HTTPException(500, "Stripe not configured")
     
     stripe.api_key = stripe_api_key
-    if "sk_test_emergent" in stripe_api_key:
+    if stripe_api_key and "sk_test_emergent" in stripe_api_key:
         stripe.api_base = "https://integrations.emergentagent.com/stripe"
     
     # Build product name
@@ -2467,12 +2474,12 @@ async def create_notecards_checkout(order: NotecardsOrderCreate):
 @api_router.get("/notecards/checkout/status/{session_id}")
 async def get_notecards_checkout_status(session_id: str, background_tasks: BackgroundTasks):
     """Check notecards order payment status and return order details."""
-    stripe_api_key = os.environ.get('STRIPE_API_KEY')
+    stripe_api_key = await get_stripe_key()
     if not stripe_api_key:
         raise HTTPException(500, "Stripe not configured")
     
     stripe.api_key = stripe_api_key
-    if "sk_test_emergent" in stripe_api_key:
+    if stripe_api_key and "sk_test_emergent" in stripe_api_key:
         stripe.api_base = "https://integrations.emergentagent.com/stripe"
     
     # Get order from database
@@ -2669,12 +2676,12 @@ async def create_tees_checkout(order: TeesOrderCreate):
     await db.tees_orders.insert_one(tees_order.model_dump())
     
     # Create Stripe checkout
-    stripe_api_key = os.environ.get('STRIPE_API_KEY')
+    stripe_api_key = await get_stripe_key()
     if not stripe_api_key:
         raise HTTPException(500, "Stripe not configured")
     
     stripe.api_key = stripe_api_key
-    if "sk_test_emergent" in stripe_api_key:
+    if stripe_api_key and "sk_test_emergent" in stripe_api_key:
         stripe.api_base = "https://integrations.emergentagent.com/stripe"
     
     # Build product name
@@ -2724,12 +2731,12 @@ async def create_tees_checkout(order: TeesOrderCreate):
 @api_router.get("/tees/checkout/status/{session_id}")
 async def get_tees_checkout_status(session_id: str, background_tasks: BackgroundTasks):
     """Check tees order payment status and return order details."""
-    stripe_api_key = os.environ.get('STRIPE_API_KEY')
+    stripe_api_key = await get_stripe_key()
     if not stripe_api_key:
         raise HTTPException(500, "Stripe not configured")
     
     stripe.api_key = stripe_api_key
-    if "sk_test_emergent" in stripe_api_key:
+    if stripe_api_key and "sk_test_emergent" in stripe_api_key:
         stripe.api_base = "https://integrations.emergentagent.com/stripe"
     
     # Get order from database
