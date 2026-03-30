@@ -1,3 +1,8 @@
+import About from "./pages/About";
+import Privacy from "./pages/Privacy";
+import Shipping from "./pages/Shipping";
+import Returns from "./pages/Returns";
+import Copyright from "./pages/Copyright";
 import { useState, useEffect } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import axios from 'axios';
