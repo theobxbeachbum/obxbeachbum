@@ -110,6 +110,13 @@ function App() {
           <Route path="/tees-success" element={<TeesSuccess />} />
           <Route path="/shop/notecards" element={<Notecards />} />
           <Route path="/notecards-success" element={<NotecardsSuccess />} />
+        
+          {/* NEW PAGES */}
+          <Route path="/about" element={<About />} />
+          <Route path="/privacy" element={<Privacy />} />
+          <Route path="/shipping" element={<Shipping />} />
+          <Route path="/returns" element={<Returns />} />
+          <Route path="/copyright" element={<Copyright />} />
           
           {/* Admin routes */}
           <Route
