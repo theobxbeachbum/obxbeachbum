@@ -1242,29 +1242,7 @@ async def upload_image(file: UploadFile = File(...), authorization: Optional[str
 
 @api_router.post("/webhook/stripe")
 async def stripe_webhook(request: Request):
-    body = await request.body()
-    signature = request.headers.get("Stripe-Signature")
-    
-    stripe_api_key = await get_stripe_key()
-    webhook_url = f"{str(request.base_url).rstrip('/')}/api/webhook/stripe"
-    stripe_checkout = StripeCheckout(api_key=stripe_api_key, webhook_url=webhook_url)
-    
-    try:
-        webhook_response = await stripe_checkout.handle_webhook(body, signature)
-        
-        # Update transaction
-        await db.payment_transactions.update_one(
-            {"session_id": webhook_response.session_id},
-            {"$set": {
-                "payment_status": webhook_response.payment_status,
-                "updated_at": datetime.now(timezone.utc).isoformat()
-            }}
-        )
-        
-        return {"success": True}
-    except Exception as e:
-        logging.error(f"Webhook error: {str(e)}")
-        raise HTTPException(400, "Webhook processing failed")
+    return {"success": True, "message": "Webhook temporarily disabled in Railway deployment"}
 
 # Public embed form endpoint
 @api_router.get("/embed/subscribe", response_class=HTMLResponse)
