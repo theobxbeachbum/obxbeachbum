@@ -64,6 +64,9 @@
     "build": "craco build",
     "test": "craco test"
   },
+  "resolutions": {
+  "lodash": "^4.17.21"
+  },
   "browserslist": {
     "production": [
       ">0.2%",
