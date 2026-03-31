@@ -1113,46 +1113,52 @@ async def create_donation_checkout(request: DonationCheckoutRequest, http_reques
 
 @api_router.get("/supporters/checkout/status/{session_id}")
 async def get_checkout_status(session_id: str, http_request: Request):
-    # Get transaction
     transaction = await db.payment_transactions.find_one({"session_id": session_id}, {"_id": 0})
     if not transaction:
         raise HTTPException(404, "Transaction not found")
-    
-    # If already processed, return cached status
-    if transaction['payment_status'] == 'paid':
+
+    if transaction["payment_status"] == "paid":
         return {"status": "complete", "payment_status": "paid"}
-    
-    # Get Stripe status
+
     stripe_api_key = await get_stripe_key()
-    webhook_url = f"{str(http_request.base_url).rstrip('/')}/api/webhook/stripe"
-    stripe_checkout = StripeCheckout(api_key=stripe_api_key, webhook_url=webhook_url)
-    
-    checkout_status = await stripe_checkout.get_checkout_status(session_id)
-    
-    # Update transaction
-    await db.payment_transactions.update_one(
-        {"session_id": session_id},
-        {"$set": {
-            "payment_status": checkout_status.payment_status,
-            "updated_at": datetime.now(timezone.utc).isoformat()
-        }}
-    )
-    
-    # If paid, create supporter record
-    if checkout_status.payment_status == 'paid' and transaction['payment_status'] != 'paid':
-        supporter = SupporterSubscription(
-            email=transaction['email'],
-            amount=transaction['amount'],
-            status="active"
+    if not stripe_api_key:
+        raise HTTPException(500, "Stripe not configured")
+
+    stripe.api_key = stripe_api_key
+    if stripe_api_key and "sk_test_emergent" in stripe_api_key:
+        stripe.api_base = "https://integrations.emergentagent.com/stripe"
+
+    try:
+        session = stripe.checkout.Session.retrieve(session_id)
+        payment_status = session.payment_status
+        status = "complete" if payment_status == "paid" else getattr(session, "status", "open")
+
+        await db.payment_transactions.update_one(
+            {"session_id": session_id},
+            {"$set": {
+                "payment_status": payment_status,
+                "updated_at": datetime.now(timezone.utc).isoformat()
+            }}
         )
-        doc = supporter.model_dump()
-        doc['created_at'] = doc['created_at'].isoformat()
-        await db.supporters.insert_one(doc)
-    
-    return {
-        "status": checkout_status.status,
-        "payment_status": checkout_status.payment_status
-    }
+
+        if payment_status == "paid" and transaction["payment_status"] != "paid":
+            supporter = SupporterSubscription(
+                email=transaction["email"],
+                amount=transaction["amount"],
+                status="active"
+            )
+            doc = supporter.model_dump()
+            doc["created_at"] = doc["created_at"].isoformat()
+            await db.supporters.insert_one(doc)
+
+        return {
+            "status": status,
+            "payment_status": payment_status
+        }
+
+    except Exception as e:
+        logging.error(f"Supporter checkout status error: {str(e)}")
+        raise HTTPException(500, f"Payment status error: {str(e)}")
 
 @api_router.get("/supporters", response_model=List[SupporterSubscription])
 async def list_supporters(authorization: Optional[str] = Header(None)):
