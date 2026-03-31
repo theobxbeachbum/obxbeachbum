@@ -65,7 +65,8 @@
     "test": "craco test"
   },
   "resolutions": {
-  "lodash": "^4.17.21"
+  "lodash": "4.17.21",
+  "html-webpack-plugin": "5.5.0"
   },
   "browserslist": {
     "production": [
