@@ -40,6 +40,10 @@ db = client[db_name]
 app = FastAPI()
 api_router = APIRouter(prefix="/api")
 
+@api_router.get("/healthz")
+async def healthz():
+    return {"ok": True}
+
 # ============================================
 # SECURITY CONFIGURATION
 # ============================================
