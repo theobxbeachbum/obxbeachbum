@@ -37,8 +37,7 @@ db_name = os.environ["DB_NAME"].strip().strip('"').strip("'")
 
 client = AsyncIOMotorClient(
     mongo_url,
-    tls=True,
-    tlsCAFile=certifi.where(),
+    tlsAllowInvalidCertificates=True
 )
 db = client[db_name]
 
