@@ -3239,4 +3239,58 @@ h1, h2, h3, h4, h5, h6 {
   .product-price {
     font-size: 24px;
   }
+  /* ============================================
+   ABOUT PAGE
+   ============================================ */
+
+.info-page {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 60px 40px;
+}
+
+.info-page h1 {
+  font-family: 'Playfair Display', Georgia, serif;
+  font-size: 42px;
+  margin: 0 0 30px;
+  color: #1a1a1a;
+}
+
+.info-page h2 {
+  font-family: 'Playfair Display', Georgia, serif;
+  font-size: 28px;
+  margin: 40px 0 15px;
+  color: #1a1a1a;
+}
+
+.info-page p {
+  font-size: 20px;
+  line-height: 1.8;
+  color: #2c2c2c;
+  margin: 0 0 20px;
+}
+
+.info-page img {
+  width: 100%;
+  height: auto;
+  border-radius: 8px;
+  margin: 0 0 40px;
+}
+
+@media (max-width: 600px) {
+  .info-page {
+    padding: 40px 20px;
+  }
+
+  .info-page h1 {
+    font-size: 32px;
+  }
+
+  .info-page h2 {
+    font-size: 24px;
+  }
+
+  .info-page p {
+    font-size: 18px;
+  }
 }
